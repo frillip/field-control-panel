@@ -8,10 +8,10 @@ Eventually this will also be able to provide information such as battery voltage
 
 Returns data from a BME280 in JSON format.
 
-## megaio_get_data.py
+### get_bme_data
 Returns temperature, pressure and humidiy data as JSON from the BME280.
 
-## megaio_get_data
+## megaio_get_data.py
 
 Returns data from the MegaIO hat.
 
