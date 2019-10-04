@@ -39,16 +39,20 @@ def get_relay_data():
 def get_batt_data():
     global megaio_stack_id
     batt_data = {}
-    batt_v_adc_channel = 3
-    batt_v_adc_scale = 0.4
-    batt_c_adc_channel = 4
-    batt_c_adc_scale = 0.1
+    batt_v_adc_channel = 1
+    batt_v_adc_scale = 11.05 # r47k + r4k7 + z3v3 + c10n
+    batt_v_adc_offset = 0.0  # no offset!
+
+    batt_c_adc_channel = 2
+    batt_c_adc_scale = 14.7 # r2k2 + r4k7 + z3v3 + c10n  10A/V
+    batt_c_adc_offset = 25.0 # ACS712 has a 25A (2.5V) offset
+
     try:
         batt_v_adc_volt=megaio.get_adc_volt(megaio_stack_id, batt_v_adc_channel)
-        batt_v = batt_v_adc_volt * batt_v_adc_scale
+        batt_v = (batt_v_adc_volt * batt_v_adc_scale) - batt_v_adc_offset 
         batt_data['v'] = round(batt_v,2)
         batt_c_adc_volt=megaio.get_adc_volt(megaio_stack_id, batt_c_adc_channel)
-        batt_c = batt_c_adc_volt * batt_c_adc_scale
+        batt_c = (batt_c_adc_volt * batt_c_adc_scale) - batt_c_adc_offset
         batt_data['c'] = round(batt_c,2)
         batt_data['e'] = False
     except:
@@ -59,15 +63,19 @@ def get_pv_data():
     global megaio_stack_id
     pv_data = {}
     pv_v_adc_channel = 3
-    pv_v_adc_scale = 0.2
+    pv_v_adc_scale = 11.05 # r47k + r4k7 + z3v3 + c10n
+    pv_v_adc_offset = 0.0 # no offset!
+
     pv_c_adc_channel = 4
-    pv_c_adc_scale = 0.1
+    pv_c_adc_scale = 14.7 # r2k2 + r4k7 + z3v3 + c10n  10A/V
+    pv_c_adc_offset = 25.0  # ACS712 has a 25A (2.5V) offset
+
     try:
         pv_v_adc_volt=megaio.get_adc_volt(megaio_stack_id, pv_v_adc_channel)
-        pv_v = pv_v_adc_volt * pv_v_adc_scale
+        pv_v = (pv_v_adc_volt * pv_v_adc_scale) - pv_v_adc_scale
         pv_data['v'] = round(pv_v,2)
         pv_c_adc_volt=megaio.get_adc_volt(megaio_stack_id, pv_c_adc_channel)
-        pv_c = pv_c_adc_volt * pv_c_adc_scale
+        pv_c = (pv_c_adc_volt * pv_c_adc_scale) - pv_c_adc_offset
         pv_data['c'] = round(pv_c,2)
         pv_data['e'] = False
     except:
