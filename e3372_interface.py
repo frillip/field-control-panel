@@ -54,7 +54,6 @@ def get_modem_data():
         return False
 
     modem_data["name"] = dev_info["DeviceName"]
-    modem_data["network_type"] = dev_info["workmode"]
 
     if "ServiceStatus" in mon_stat_resp.text:
         mon_stat = xmltodict.parse(mon_stat_resp.content)['response']
@@ -63,6 +62,41 @@ def get_modem_data():
 
     modem_data["signal_strength"] = int(mon_stat["SignalIcon"])
     modem_data["wan_ip"] = mon_stat["WanIPAddress"]
+
+    net_type_ex=int(mon_stat["CurrentNetworkTypeEx"])
+    if net_type_ex == 0:
+        modem_data["network_type"] = "No Service"
+    elif net_type_ex == 1:
+        modem_data["network_type"] = "GSM"
+    elif net_type_ex == 2:
+        modem_data["network_type"] = "GPRS"
+    elif net_type_ex == 3:
+        modem_data["network_type"] = "EDGE"
+    elif net_type_ex == 41:
+        modem_data["network_type"] = "WCDMA"
+    elif net_type_ex == 42:
+        modem_data["network_type"] = "HSDPA"
+    elif net_type_ex == 43:
+        modem_data["network_type"] = "HSUPA"
+    elif net_type_ex == 44:
+        modem_data["network_type"] = "HSPA"
+    elif net_type_ex == 45:
+        modem_data["network_type"] = "HSPA+"
+    elif net_type_ex == 46:
+        modem_data["network_type"] = "HSPA+"
+    elif net_type_ex == 62:
+        modem_data["network_type"] = "HSDPA"
+    elif net_type_ex == 63:
+        modem_data["network_type"] = "HSUPA"
+    elif net_type_ex == 64:
+        modem_data["network_type"] = "HSPA"
+    elif net_type_ex == 65:
+        modem_data["network_type"] = "HSPA+"
+    elif net_type_ex == 101:
+        modem_data["network_type"] = "LTE"
+    else:
+        modem_data["network_type"] = "Unknown"
+
     if mon_stat["ServiceStatus"]:
         modem_data["connected"] = True
     else:
