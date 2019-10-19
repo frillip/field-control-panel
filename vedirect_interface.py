@@ -78,7 +78,7 @@ def get_mppt_data():
     ser.flushInput()
     block_start = False
     while not block_start:
-        ve_string = str(ser.readline(),'utf-8').rstrip("\r\n")
+        ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
         if "PID" in ve_string:
             mppt_raw_data[ve_string.split("\t")[0]] = ve_string.split("\t")[1]
             block_start = True
@@ -86,7 +86,7 @@ def get_mppt_data():
     block_complete = False
 
     while not block_complete:
-        ve_string = str(ser.readline(),'utf-8').rstrip("\r\n")
+        ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
         if ve_string.split("\t")[0] == "Checksum":
             block_complete = True
         else:
