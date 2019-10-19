@@ -10,23 +10,23 @@ def get_relay_data():
         relay_1_data = {}
         relay_1_data['name'] = "fence"
         relay_1_data
-        relay_1_data['real_state'] = bool(relay_byte & 0x01)
+        relay_1_data['raw_state'] = bool(relay_byte & 0x01)
         relay_1_data['invert'] = True
-        relay_1_data['state'] = relay_1_data['real_state'] ^ relay_1_data['invert']
+        relay_1_data['state'] = relay_1_data['raw_state'] ^ relay_1_data['invert']
         relay_data['1'] = relay_1_data
 
         relay_2_data = {}
         relay_2_data['name'] = "cameras"
-        relay_2_data['real_state'] = bool(relay_byte & 0x02)
+        relay_2_data['raw_state'] = bool(relay_byte & 0x02)
         relay_2_data['invert'] = False
-        relay_2_data['state'] = relay_2_data['real_state'] ^ relay_2_data['invert']
+        relay_2_data['state'] = relay_2_data['raw_state'] ^ relay_2_data['invert']
         relay_data['2'] = relay_2_data
 
         relay_3_data = {}
         relay_3_data['name'] = "lighting"
-        relay_3_data['real_state'] = bool(relay_byte & 0x04)
+        relay_3_data['raw_state'] = bool(relay_byte & 0x04)
         relay_3_data['invert'] = False
-        relay_3_data['state'] = relay_3_data['real_state'] ^ relay_3_data['invert']
+        relay_3_data['state'] = relay_3_data['raw_state'] ^ relay_3_data['invert']
         relay_data['3'] = relay_3_data
 
         relay_data['e'] = False
