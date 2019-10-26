@@ -175,11 +175,8 @@ def send_sms(dest,message):
 <Date>-1</Date></request>"""
 
     send_sms_resp = requests.post(send_sms_api_url, data=xml_data, headers=headers)
-    send_sms_xml = ElementTree.fromstring(send_sms_resp.content)
 
-    print(send_sms_xml)
-
-    if send_sms_xml.text == "OK":
+    if "OK" in send_sms_resp.text:
         return True
     else:
         return False
