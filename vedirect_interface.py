@@ -1,8 +1,8 @@
 import time
 import serial
 
-tty_dev = '/dev/ttyUSB0',
-baudrate = 19200,
+tty_dev = '/dev/ttyUSB0'
+baudrate = 19200
 
 off_text = {
 0x001: 'No input power',
@@ -77,6 +77,8 @@ def get_mppt_data():
 
     try:
         ser = serial.Serial()
+        ser.port = tty_dev
+        ser.baudrate = baudrate
         ser.parity = serial.PARITY_NONE
         ser.stopbits = serial.STOPBITS_ONE
         ser.bytesize = serial.EIGHTBITS
