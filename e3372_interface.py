@@ -31,6 +31,41 @@ def construct_auth_headers(auth_data):
 
     return headers
 
+def send_connection_req():
+
+    global dongle_ip
+
+    req_connection_api_url="http://" + dongle_ip + "/api/dialup/dial"
+    connection_req_xml = '<?xml version="1.0" encoding="UTF-8"?><request><Action>1</Action></request>'
+    auth_data=get_auth_data()
+    if auth_data:
+        headers = construct_auth_headers(auth_data)
+
+    post_req = requests.post(req_connection_api_url, headers=headers, data=connection_req_xml)
+
+    if "OK" in post_req.text:
+        return True
+    else:
+        return False
+
+def send_reboot_req():
+
+    global dongle_ip
+
+    req_reboot_api_url="http://" + dongle_ip + "/api/device/control"
+    reboot_req_xml = '<?xml version="1.0" encoding="UTF-8"?><request><Control>1</Control></request>'
+    auth_data=get_auth_data()
+    if auth_data:
+        headers = construct_auth_headers(auth_data)
+
+    post_req = requests.post(req_reboot_api_url, headers=headers, data=reboot_req_xml)
+
+    if "OK" in post_req.text:
+        return True
+    else:
+        return False
+
+
 def get_modem_data():
 
     global dongle_ip
