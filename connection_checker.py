@@ -3,7 +3,7 @@ from time import sleep
 
 while True:
     modem_data = get_modem_data()
-    if modem_data["connected"]:
+    if modem_data["connected"] and modem_data["connected_time"]:
         print("Already connected, doing nothing for 5s...")
     else:
         print("Not connected. Sending connection request...")
