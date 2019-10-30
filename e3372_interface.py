@@ -90,7 +90,7 @@ def get_modem_data():
 
     modem_data["name"] = dev_info["DeviceName"]
 
-    if "ServiceStatus" in mon_stat_resp.text:
+    if "ConnectionStatus" in mon_stat_resp.text:
         mon_stat = xmltodict.parse(mon_stat_resp.content)['response']
     else:
         return False
@@ -132,7 +132,7 @@ def get_modem_data():
     else:
         modem_data["network_type"] = "Unknown"
 
-    if mon_stat["ServiceStatus"]:
+    if mon_stat["ConnectionStatus"] == "901":
         modem_data["connected"] = True
     else:
         modem_data["connected"] = False
