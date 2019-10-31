@@ -147,3 +147,8 @@ def get_mppt_data():
     global_vars.mppt_data = mppt_data
 
     pass
+
+def mppt_loop():
+    while True:
+        get_mppt_data()
+    pass

@@ -165,7 +165,7 @@ def get_modem_data():
 
     global_vars.modem_data = modem_data
 
-    return True
+    pass
 
 
 def send_sms(dest,message):
@@ -193,9 +193,7 @@ def send_sms(dest,message):
 #def read_sms(message_no) # future function to read SMS from device for balance notification and other useful things
 
 def connection_checker():
-    if global_vars.modem_data["connected"] and global_vars.modem_data["connected_time"]:
-        #print("Already connected, doing nothing...")
-    else:
+    if not global_vars.modem_data["connected"] and not global_vars.modem_data["connected_time"]:
         print("Not connected. Sending connection request...")
         if send_connection_req():
             print("Done!")
