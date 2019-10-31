@@ -1,5 +1,6 @@
 import time
 import serial
+import global_vars
 
 tty_dev = '/dev/ttyUSB0'
 baudrate = 19200
@@ -138,10 +139,11 @@ def get_mppt_data():
 
         mppt_data["e"] = False # e is a flag that shows if the function succeeded or not, not the overall error state of the mppt
 
-        return mppt_data
-
     except:
         if ser.isOpen():
             ser.close()
         mppt_data["e"] = True
-        return mppt_data
+
+    global_vars.mppt_data = mppt_data
+
+    pass

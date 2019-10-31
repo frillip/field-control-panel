@@ -1,8 +1,10 @@
 import megaio
+import global_vars
 megaio_stack_id = 0
 
 def get_relay_data():
     global megaio_stack_id
+
     relay_data = {}
     try:
         relay_byte=megaio.get_relays(megaio_stack_id)
@@ -34,8 +36,12 @@ def get_relay_data():
     except:
         relay_data['e'] = True
 
-    return relay_data
+    global_vars.relay_data = relay_data
 
+    pass
+
+"""
+# These don't do anything any more!
 def get_batt_data():
     global megaio_stack_id
     batt_data = {}
@@ -81,3 +87,4 @@ def get_pv_data():
     except:
         pv_data['e'] = True
     return pv_data
+"""
