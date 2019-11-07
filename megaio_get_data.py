@@ -1,4 +1,5 @@
 import megaio
+from datetime import datetime
 import global_vars
 megaio_stack_id = 0
 
@@ -11,25 +12,45 @@ def get_relay_data():
 
         relay_1_data = {}
         relay_1_data['name'] = "fence"
-        relay_1_data
         relay_1_data['raw_state'] = bool(relay_byte & 0x01)
         relay_1_data['invert'] = True
         relay_1_data['state'] = relay_1_data['raw_state'] ^ relay_1_data['invert']
-        relay_data['1'] = relay_1_data
+        relay_1_data['auto_on'] = False
+        relay_1_data['auto_off'] = False
+        relay_1_data['auto_timeout'] = 0
+        try:
+            relay_1_data['last_state_change'] = global_vars.relay_data[1]['last_state_change']
+        except:
+            relay_1_data['last_state_change'] = datetime.now().replace(microsecond=0).isoformat()
+        relay_data[1] = relay_1_data
 
         relay_2_data = {}
         relay_2_data['name'] = "cameras"
         relay_2_data['raw_state'] = bool(relay_byte & 0x02)
         relay_2_data['invert'] = False
         relay_2_data['state'] = relay_2_data['raw_state'] ^ relay_2_data['invert']
-        relay_data['2'] = relay_2_data
+        relay_2_data['auto_on'] = False
+        relay_2_data['auto_off'] = True
+        relay_2_data['auto_timeout'] = 120
+        try:
+            relay_2_data['last_state_change'] = global_vars.relay_data[2]['last_state_change']
+        except:
+            relay_2_data['last_state_change'] = datetime.now().replace(microsecond=0).isoformat()
+        relay_data[2] = relay_2_data
 
         relay_3_data = {}
         relay_3_data['name'] = "lighting"
         relay_3_data['raw_state'] = bool(relay_byte & 0x04)
         relay_3_data['invert'] = False
         relay_3_data['state'] = relay_3_data['raw_state'] ^ relay_3_data['invert']
-        relay_data['3'] = relay_3_data
+        relay_3_data['auto_on'] = False
+        relay_3_data['auto_off'] = False
+        relay_3_data['auto_timeout'] = 0
+        try:
+            relay_3_data['last_state_change'] = global_vars.relay_data[3]['last_state_change']
+        except:
+            relay_3_data['last_state_change'] = datetime.now().replace(microsecond=0).isoformat()
+        relay_data[3] = relay_3_data
 
         relay_data['e'] = False
 
