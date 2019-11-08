@@ -61,7 +61,6 @@ def relay_auto_timeout():
                     global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
 
         except:
-            global_vars.relay_data["e"] = True
             global_vars.relay_timeout[relay_id] = 0
 
     global_vars.relay_data["e"] = False
