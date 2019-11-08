@@ -6,58 +6,27 @@ megaio_stack_id = 0
 def get_relay_data():
     global megaio_stack_id
 
-    relay_data = {}
+    relay_mask = { 1 : 0x01,
+                   2 : 0x02,
+                   3 : 0x04,
+                   4 : 0x08,
+                   5 : 0x10,
+                   6 : 0x20,
+                   7 : 0x40,
+                   8 : 0x80 }
+
     try:
         relay_byte=megaio.get_relays(megaio_stack_id)
+        relay_data = global_vars.relay_data
+        relay_data.pop("e", None)
+        for relay in global_vars.relay_data:
+            global_vars.relay_data[relay]['raw_state'] = bool(relay_byte & relay_mask[relay])
+            global_vars.relay_data[relay]['state'] = global_vars.relay_data[relay]['raw_state'] ^ global_vars.relay_data[relay]['invert']
 
-        relay_1_data = {}
-        relay_1_data['name'] = "fence"
-        relay_1_data['raw_state'] = bool(relay_byte & 0x01)
-        relay_1_data['invert'] = True
-        relay_1_data['state'] = relay_1_data['raw_state'] ^ relay_1_data['invert']
-        relay_1_data['auto_on'] = False
-        relay_1_data['auto_off'] = False
-        relay_1_data['auto_timeout'] = 0
-        try:
-            relay_1_data['last_state_change'] = global_vars.relay_data[1]['last_state_change']
-        except:
-            relay_1_data['last_state_change'] = datetime.now().replace(microsecond=0).isoformat()
-        relay_data[1] = relay_1_data
-
-        relay_2_data = {}
-        relay_2_data['name'] = "cameras"
-        relay_2_data['raw_state'] = bool(relay_byte & 0x02)
-        relay_2_data['invert'] = False
-        relay_2_data['state'] = relay_2_data['raw_state'] ^ relay_2_data['invert']
-        relay_2_data['auto_on'] = False
-        relay_2_data['auto_off'] = True
-        relay_2_data['auto_timeout'] = 120
-        try:
-            relay_2_data['last_state_change'] = global_vars.relay_data[2]['last_state_change']
-        except:
-            relay_2_data['last_state_change'] = datetime.now().replace(microsecond=0).isoformat()
-        relay_data[2] = relay_2_data
-
-        relay_3_data = {}
-        relay_3_data['name'] = "lighting"
-        relay_3_data['raw_state'] = bool(relay_byte & 0x04)
-        relay_3_data['invert'] = False
-        relay_3_data['state'] = relay_3_data['raw_state'] ^ relay_3_data['invert']
-        relay_3_data['auto_on'] = False
-        relay_3_data['auto_off'] = False
-        relay_3_data['auto_timeout'] = 0
-        try:
-            relay_3_data['last_state_change'] = global_vars.relay_data[3]['last_state_change']
-        except:
-            relay_3_data['last_state_change'] = datetime.now().replace(microsecond=0).isoformat()
-        relay_data[3] = relay_3_data
-
-        relay_data['e'] = False
+        global_vars.relay_data['e'] = False
 
     except:
-        relay_data['e'] = True
-
-    global_vars.relay_data = relay_data
+        global_vars.relay_data['e'] = True
 
     pass
 
