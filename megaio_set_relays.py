@@ -50,19 +50,19 @@ def relay_auto_timeout():
                 if global_vars.relay_data[relay_id]['auto_off'] and global_vars.relay_data[relay_id]['state']:
                     print(now_iso_stamp + ": Auto " + global_vars.relay_data[relay_id]['name'] + " off")
                     new_raw_state = False ^ global_vars.relay_data[relay_id]['invert']
-                    megaio.set_relay(megaio_stack_id,relay,new_raw_state)
+                    megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
                     global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
 
 # Turn on a relay if it is off and the timout has expired
                 if global_vars.relay_data[relay_id]['auto_on'] and not global_vars.relay_data[relay_id]['state']:
                     print(now_iso_stamp + ": Auto " + global_vars.relay_data[relay_id]['name'] + " on")
                     new_raw_state = True ^ global_vars.relay_data[relay_id]['invert']
-                    megaio.set_relay(megaio_stack_id,relay,new_raw_state)
+                    megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
                     global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
 
         except:
             global_vars.relay_timeout[relay_id] = 0
 
-    global_vars.relay_data["e"] = False
+    
 
     pass
