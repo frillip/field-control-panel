@@ -18,9 +18,9 @@ def get_relay_data():
     try:
         relay_byte=megaio.get_relays(megaio_stack_id)
         global_vars.relay_data.pop("e", None)
-        for relay in global_vars.relay_data:
-            global_vars.relay_data[relay]['raw_state'] = bool(relay_byte & relay_mask[relay])
-            global_vars.relay_data[relay]['state'] = global_vars.relay_data[relay]['raw_state'] ^ global_vars.relay_data[relay]['invert']
+        for relay_id in global_vars.relay_data:
+            global_vars.relay_data[relay_id]['raw_state'] = bool(relay_byte & relay_mask[relay_id])
+            global_vars.relay_data[relay_id]['state'] = global_vars.relay_data[relay_id]['raw_state'] ^ global_vars.relay_data[relay_id]['invert']
 
         global_vars.relay_data['e'] = False
 
