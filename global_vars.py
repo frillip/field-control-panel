@@ -1,8 +1,10 @@
+from datetime import datetime
+
 bme_data = {}
 mppt_data = {}
 modem_data = {}
 
-relay_map = { "fence" : 1 , "cameras" : , "lighting" : 3 }
+relay_map = { "fence" : 1 , "cameras" : 2, "lighting" : 3 }
 
 relay_timeout = { 1 : 0 , 2: 0 , 3 : 0}
 
