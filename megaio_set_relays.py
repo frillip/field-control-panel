@@ -17,7 +17,7 @@ def set_relay_state(request):
 
             if request[relay] == "on":
                 print(now_iso_stamp + ": Manual " + relay + " on")
-                new_raw_state = False ^ global_vars.relay_data[relay_id]['invert']
+                new_raw_state = True ^ global_vars.relay_data[relay_id]['invert']
                 megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
                 global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
                 global_vars.relay_timeout[relay_id] = global_vars.relay_data[relay_id]['auto_timeout']
@@ -25,7 +25,7 @@ def set_relay_state(request):
 
             elif request[relay] == "off":
                 print(now_iso_stamp + ": Manual " + relay + " off")
-                new_raw_state = True ^ global_vars.relay_data[relay_id]['invert']
+                new_raw_state = False ^ global_vars.relay_data[relay_id]['invert']
                 megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
                 global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
                 global_vars.relay_timeout[relay_id] = global_vars.relay_data[relay_id]['auto_timeout']
@@ -63,6 +63,6 @@ def relay_auto_timeout():
         except:
             global_vars.relay_timeout[relay_id] = 0
 
-    
+    global_vars.relay_data["e"] = False
 
     pass
