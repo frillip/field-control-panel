@@ -29,7 +29,7 @@ def send_sms(dest_list, message_str):
             return True
         else:
             for number in dest_list:
-                logger.warning("Failed to send SMS to: " + number)
+                logger.error("Failed to send SMS to: " + number)
             return False
 
     except Exception as e:
