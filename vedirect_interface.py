@@ -1,6 +1,7 @@
 import time
 import serial
 import global_vars
+import logging
 
 tty_dev = '/dev/ttyUSB0'
 baudrate = 19200
@@ -73,6 +74,8 @@ def get_mppt_data():
     global cs_text
     global mppt_text
 
+    logger = logging.getLogger("mppt data task")
+
     mppt_raw_data = {}
     mppt_data = {}
 
@@ -139,9 +142,10 @@ def get_mppt_data():
 
         mppt_data["e"] = False # e is a flag that shows if the function succeeded or not, not the overall error state of the mppt
 
-    except:
+    except Exception as e:
         if ser.isOpen():
             ser.close()
+        logger.error("mppt data task failed: " + str(e))
         mppt_data["e"] = True
 
     global_vars.mppt_data = mppt_data
@@ -149,6 +153,8 @@ def get_mppt_data():
     pass
 
 def mppt_loop():
+    logger = logging.getLogger("mppt data loop")
+    logger.info("Starting MPPT data loop from VE.Direct interface")
     while True:
         get_mppt_data()
     pass

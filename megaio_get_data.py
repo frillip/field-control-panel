@@ -1,10 +1,14 @@
 import megaio
 from datetime import datetime
 import global_vars
+import logging
+
 megaio_stack_id = 0
 
 def get_relay_data():
+
     global megaio_stack_id
+    logger = logging.getLogger("relay data task")
 
     relay_mask = { 1 : 0x01,
                    2 : 0x02,
@@ -24,7 +28,9 @@ def get_relay_data():
 
         global_vars.relay_data['e'] = False
 
-    except:
+
+    except Exception as e:
+        logger.error("Relay data task failed: " + str(e))
         global_vars.relay_data['e'] = True
 
     pass

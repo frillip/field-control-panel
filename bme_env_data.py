@@ -1,6 +1,7 @@
 import smbus2
 import bme280
 import global_vars
+import logging
 
 bme_port = 1 # Yes
 bme_address = 0x76 # Cheap BME280s are 0x76, Adafruit is 0x77
@@ -9,6 +10,7 @@ bme_bus = smbus2.SMBus(bme_port)
 def get_bme_data():
     global bme_bus
     global bme_address
+    logger = logging.getLogger("bme280")
 
     bme_data = {}
     try:
@@ -19,7 +21,9 @@ def get_bme_data():
         bme_data['p'] = round(bme_raw_data.pressure)
         bme_data['t'] = round(bme_raw_data.temperature,1)
         bme_data['e'] = False
-    except:
+
+    except Exception as e:
+        logger.error("Failed to get data from BME280: " + str(e))
         bme_data['e'] = True
 
     global_vars.bme_data = bme_data

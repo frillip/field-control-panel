@@ -2,27 +2,35 @@ import requests
 import xmltodict
 from time import sleep
 import global_vars
+import logging
 
 dongle_ip = "192.168.8.1"
 
 def get_auth_data():
 
     global dongle_ip
+    logger = logging.getLogger("modem auth")
+
     token_info_api_url="http://" + dongle_ip + "/api/webserver/SesTokInfo"
 
-    token_resp = requests.get(token_info_api_url)
-    if "SessionID" in token_resp.text:
+    try:
+        token_resp = requests.get(token_info_api_url)
+        if "SessionID" in token_resp.text:
 
-        token=xmltodict.parse(token_resp.content)['response']
+            token=xmltodict.parse(token_resp.content)['response']
 
-        token_secret=token["TokInfo"]
-        session_id=token["SesInfo"]
+            token_secret=token["TokInfo"]
+            session_id=token["SesInfo"]
 
-        auth_data = { "session_id": session_id, "token_secret": token_secret }
-        return auth_data
+            auth_data = { "session_id": session_id, "token_secret": token_secret }
+            return auth_data
 
-    else:
-        return False
+        else:
+            logger.error("Modem auth data request failed: " + token_resp.text)
+            return False
+
+    except Exception as e:
+        logger.error("Modem auth data request failed: " + str(e))
 
 
 def construct_auth_headers(auth_data):
@@ -36,41 +44,60 @@ def construct_auth_headers(auth_data):
 def send_connection_req():
 
     global dongle_ip
+    logger = logging.getLogger("modem connection req")
 
     req_connection_api_url="http://" + dongle_ip + "/api/dialup/dial"
     connection_req_xml = '<?xml version="1.0" encoding="UTF-8"?><request><Action>1</Action></request>'
-    auth_data=get_auth_data()
-    if auth_data:
-        headers = construct_auth_headers(auth_data)
 
-    post_req = requests.post(req_connection_api_url, headers=headers, data=connection_req_xml)
+    try:
+        logger.warning("Sending connection request to modem")
+        auth_data=get_auth_data()
+        if auth_data:
+            headers = construct_auth_headers(auth_data)
 
-    if "OK" in post_req.text:
-        return True
-    else:
-        return False
+        post_req = requests.post(req_connection_api_url, headers=headers, data=connection_req_xml)
+
+        if "OK" in post_req.text:
+            logger.warning("Connection request made OK!")
+            return True
+        else:
+            logger.error("Modem connection request failed: " + post_req.text)
+            return False
+
+    except Exception as e:
+        logger.error("Modem connection request failed: " + str(e))
 
 def send_reboot_req():
 
     global dongle_ip
+    logger = logging.getLogger("modem reboot req")
 
     req_reboot_api_url="http://" + dongle_ip + "/api/device/control"
     reboot_req_xml = '<?xml version="1.0" encoding="UTF-8"?><request><Control>1</Control></request>'
-    auth_data=get_auth_data()
-    if auth_data:
-        headers = construct_auth_headers(auth_data)
 
-    post_req = requests.post(req_reboot_api_url, headers=headers, data=reboot_req_xml)
+    try:
+        logger.warning("Sending reboot request to modem")
+        auth_data=get_auth_data()
+        if auth_data:
+            headers = construct_auth_headers(auth_data)
 
-    if "OK" in post_req.text:
-        return True
-    else:
-        return False
+        post_req = requests.post(req_reboot_api_url, headers=headers, data=reboot_req_xml)
+
+        if "OK" in post_req.text:
+            logger.warning("Modem rebooting!")
+            return True
+        else:
+            logger.error("Modem reboot request failed: " + post_req.text)
+            return False
+
+    except Exception as e:
+        logger.error("Modem reboot request failed: " + str(e))
 
 
 def get_modem_data():
 
     global dongle_ip
+    logger = logging.getLogger("modem data task")
 
     get_dev_info_api_url="http://" + dongle_ip + "/api/device/information"
     get_mon_stat_api_url="http://" + dongle_ip + "/api/monitoring/status"
@@ -78,25 +105,26 @@ def get_modem_data():
 
     modem_data = {}
 
-    auth_data=get_auth_data()
-    if auth_data:
-        headers = construct_auth_headers(auth_data)
-
-    dev_info_resp = requests.get(get_dev_info_api_url, headers=headers)
-
     try:
+        auth_data=get_auth_data()
+        if auth_data:
+             headers = construct_auth_headers(auth_data)
+
+        dev_info_resp = requests.get(get_dev_info_api_url, headers=headers)
+
         if "DeviceName" in dev_info_resp.text:
             dev_info = xmltodict.parse(dev_info_resp.content)['response']
 
             modem_data["name"] = dev_info["DeviceName"]
         else:
+            logger.error("Modem task failed: could not retrieve " + get_dev_info_api_url)
             modem_data["e"]=True
 
         mon_stat_resp = requests.get(get_mon_stat_api_url, headers=headers)
 
         if "ConnectionStatus" in mon_stat_resp.text:
             mon_stat = xmltodict.parse(mon_stat_resp.content)['response']
-            
+
             modem_data["signal_strength"] = int(mon_stat["SignalIcon"])
             modem_data["wan_ip"] = mon_stat["WanIPAddress"]
             net_type_ex=int(mon_stat["CurrentNetworkTypeEx"])
@@ -138,6 +166,7 @@ def get_modem_data():
             else:
                 modem_data["connected"] = False
         else:
+            logger.error("Modem task failed: could not retrieve " + get_mon_stat_api_url)
             modem_data["e"]=True
 
         mon_traf_resp = requests.get(get_mon_traf_api_url, headers=headers)
@@ -157,10 +186,13 @@ def get_modem_data():
             modem_data["connected_time"] = int(mon_traf["CurrentConnectTime"])
             modem_data["connected_total_time"] = int(mon_traf["TotalConnectTime"])
         else:
+            logger.error("Modem task failed: could not retrieve " + get_mon_traf_api_url)
             modem_data["e"]=True
 
         modem_data["e"]=False
-    except:
+
+    except Exception as e:
+        logger.error("Modem task failed: " + str(e))
         modem_data["e"]=True
 
     global_vars.modem_data = modem_data
@@ -171,24 +203,34 @@ def get_modem_data():
 def send_sms(dest,message):
 
     global dongle_ip
+    logger = logging.getLogger("modem send sms")
+
     send_sms_api_url="http://" + dongle_ip + "/api/sms/send-sms"
 
-    auth_data=get_auth_data()
-    if auth_data:
-        headers = construct_auth_headers(auth_data)
+    try:
+        auth_data=get_auth_data()
+        if auth_data:
+            headers = construct_auth_headers(auth_data)
 
-    xml_data = """<?xml version='1.0' encoding='UTF-8'?>
+        xml_data = """<?xml version='1.0' encoding='UTF-8'?>
 <request><Index>-1</Index><Phones><Phone>""" + dest + \
 """</Phone></Phones><Sca></Sca><Content>""" + message + \
 """</Content><Length>-1</Length><Reserved>1</Reserved>
 <Date>-1</Date></request>"""
 
-    send_sms_resp = requests.post(send_sms_api_url, data=xml_data, headers=headers)
+        send_sms_resp = requests.post(send_sms_api_url, data=xml_data, headers=headers)
 
-    if "OK" in send_sms_resp.text:
-        return True
-    else:
+        if "OK" in send_sms_resp.text:
+            logger.warning("SMS sent to " + dest)
+            return True
+        else:
+            logger.error("SMS send failed: " + send_sms_resp.text)
+            return False
+
+    except Exception as e:
+        logger.error("SMS send failed: " + str(e))
         return False
+
 
 #def read_sms(message_no) # future function to read SMS from device for balance notification and other useful things
 
@@ -199,10 +241,9 @@ def net_connected():
        return False
 
 def connection_checker():
+    logger = logging.getLogger("connection checker task")
+
     if not net_connected():
-        print("Not connected. Sending connection request...")
-        if send_connection_req():
-            print("Done!")
-        else:
-            print("Something went wrong!")
+        logger.warning("Modem is not connected!")
+        send_connection_req()
     pass

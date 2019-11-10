@@ -3,20 +3,27 @@ from aiohttp import web
 import json
 from megaio_set_relays import set_relay_state
 import global_vars
+import logging
 
 def run_server(runner):
+    logger = logging.getLogger("aiohttp server")
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(runner.setup())
+    logger.info("Starting webapp server")
     site = web.TCPSite(runner, 'localhost', 8080)
     loop.run_until_complete(site.start())
     loop.run_forever()
 
 def run_web_app():
+    logger = logging.getLogger("aiohttp server")
+
     async def indexresp(request):
+        logger.info("Index page requested")
         return web.FileResponse('./static/index.html')
 
     async def buttonhandler(request):
+        logger.info("Relay state change requested")
         data = await request.post()
         resp=set_relay_state(data)
         return web.Response(text=resp)
@@ -54,5 +61,5 @@ def run_web_app():
                     web.get('/bme.json', bme_json),
                     web.get('/mppt.json', mppt_json),
                     web.get('/modem.json', modem_json)])
-    runner = web.AppRunner(app)
+    runner = web.AppRunner(app, access_log=None)
     return runner
