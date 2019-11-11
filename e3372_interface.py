@@ -3,13 +3,20 @@ import xmltodict
 from time import sleep
 import global_vars
 import logging
+import colorlog
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(global_vars.log_format)
+logger = colorlog.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 
 dongle_ip = "192.168.8.1"
 
 def get_auth_data():
 
     global dongle_ip
-    logger = logging.getLogger("modem auth")
 
     token_info_api_url="http://" + dongle_ip + "/api/webserver/SesTokInfo"
 
@@ -44,7 +51,6 @@ def construct_auth_headers(auth_data):
 def send_connection_req():
 
     global dongle_ip
-    logger = logging.getLogger("modem connection req")
 
     req_connection_api_url="http://" + dongle_ip + "/api/dialup/dial"
     connection_req_xml = '<?xml version="1.0" encoding="UTF-8"?><request><Action>1</Action></request>'
@@ -70,7 +76,6 @@ def send_connection_req():
 def send_reboot_req():
 
     global dongle_ip
-    logger = logging.getLogger("modem reboot req")
 
     req_reboot_api_url="http://" + dongle_ip + "/api/device/control"
     reboot_req_xml = '<?xml version="1.0" encoding="UTF-8"?><request><Control>1</Control></request>'
@@ -97,7 +102,6 @@ def send_reboot_req():
 def get_modem_data():
 
     global dongle_ip
-    logger = logging.getLogger("modem data task")
 
     get_dev_info_api_url="http://" + dongle_ip + "/api/device/information"
     get_mon_stat_api_url="http://" + dongle_ip + "/api/monitoring/status"
@@ -203,7 +207,6 @@ def get_modem_data():
 def send_sms(dest,message):
 
     global dongle_ip
-    logger = logging.getLogger("modem send sms")
 
     send_sms_api_url="http://" + dongle_ip + "/api/sms/send-sms"
 
@@ -241,8 +244,6 @@ def net_connected():
        return False
 
 def connection_checker():
-    logger = logging.getLogger("connection checker task")
-
     if not net_connected():
         logger.warning("Modem is not connected!")
         send_connection_req()

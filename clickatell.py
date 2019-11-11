@@ -1,14 +1,21 @@
 import requests
 import time
+import global_vars
 import user_data
 import logging
+import colorlog
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(global_vars.log_format)
+logger = colorlog.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 api_url = "https://api.clickatell.com/rest/message"
 
 def send_sms(dest_list, message_str):
 
     global api_url
-    logger = logging.getLogger("clicktall sms")
 
     headers = {}
     headers["content-type"] = "application/json"

@@ -4,9 +4,16 @@ import json
 from megaio_set_relays import set_relay_state
 import global_vars
 import logging
+import colorlog
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(global_vars.log_format)
+logger = colorlog.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 
 def run_server(runner):
-    logger = logging.getLogger("aiohttp server")
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(runner.setup())
@@ -16,8 +23,6 @@ def run_server(runner):
     loop.run_forever()
 
 def run_web_app():
-    logger = logging.getLogger("aiohttp server")
-
     async def indexresp(request):
         logger.info("Index page requested")
         return web.FileResponse('./static/index.html')

@@ -1,4 +1,16 @@
 from datetime import datetime
+from colorlog import ColoredFormatter
+
+log_format = ColoredFormatter(
+        "%(asctime)s %(log_color)s[%(levelname)s]%(reset)s %(name)s: %(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S",
+        log_colors={
+        'DEBUG': 'cyan',
+        'INFO': 'green',
+        'WARNING': 'yellow',
+        'ERROR': 'red',
+        'CRITICAL': 'red,bg_white',
+        })
 
 bme_data = {}
 mppt_data = {}

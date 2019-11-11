@@ -2,15 +2,21 @@ import smbus2
 import bme280
 import global_vars
 import logging
+import colorlog
 
 bme_port = 1 # Yes
 bme_address = 0x76 # Cheap BME280s are 0x76, Adafruit is 0x77
 bme_bus = smbus2.SMBus(bme_port)
 
+handler = colorlog.StreamHandler()
+handler.setFormatter(global_vars.log_format)
+logger = colorlog.getLogger("bme280")
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 def get_bme_data():
     global bme_bus
     global bme_address
-    logger = logging.getLogger("bme280")
 
     bme_data = {}
     try:

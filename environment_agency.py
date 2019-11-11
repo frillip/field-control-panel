@@ -7,13 +7,19 @@ import user_data
 import clickatell
 
 import logging
+import colorlog
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(global_vars.log_format)
+logger = colorlog.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 
 env_agency_api_url = "https://environment.data.gov.uk/flood-monitoring/id/measures/4195-level-stage-i-15_min-mASD"
 river_warning_sent = False
 river_high = 0.95
 river_high_warn = 1.1
-
-logger = logging.getLogger("river")
 
 def check_river():
 
@@ -21,8 +27,6 @@ def check_river():
     global river_warning_sent
     global river_high
     global river_high_warn
-
-    global logger
 
     try:
         resp = requests.get(env_agency_api_url)

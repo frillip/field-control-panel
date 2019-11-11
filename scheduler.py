@@ -5,10 +5,17 @@ from megaio_set_relays import relay_auto_timeout
 from e3372_interface import get_modem_data,connection_checker
 from bme_env_data import get_bme_data
 from environment_agency import check_river
+import global_vars
 import logging
+import colorlog
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(global_vars.log_format)
+logger = colorlog.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 def setup_scheduler():
-    logger = logging.getLogger("scheduler setup")
     logger.info("Starting modem task")
     schedule.every().second.do(get_modem_data)
     logger.info("Starting bme280 task")
@@ -30,7 +37,6 @@ def setup_scheduler():
 
 def loop_scheduler():
     logging.getLogger('schedule').setLevel(logging.WARNING)
-    logger = logging.getLogger("scheduler")
     logger.info("Starting scheduler")
     setup_scheduler()
     while True:

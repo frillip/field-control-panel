@@ -2,13 +2,20 @@ import megaio
 from datetime import datetime
 import global_vars
 import logging
+import colorlog
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(global_vars.log_format)
+logger = colorlog.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 
 megaio_stack_id = 0
 
 def get_relay_data():
 
     global megaio_stack_id
-    logger = logging.getLogger("relay data task")
 
     relay_mask = { 1 : 0x01,
                    2 : 0x02,

@@ -2,13 +2,21 @@ import megaio
 from datetime import datetime
 import global_vars
 import logging
+import colorlog
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(global_vars.log_format)
+logger = colorlog.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 
 megaio_stack_id = 0
 
 def set_relay_state(request):
 
     global megaio_stack_id
-    logger = logging.getLogger("set relay state")
+
     now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
     try:
         for relay in request:
@@ -40,7 +48,6 @@ def set_relay_state(request):
 def relay_auto_timeout():
 
     global megaio_stack_id
-    logger = logging.getLogger("relay auto timeout task")
     now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
 
     global_vars.relay_data.pop("e", None)

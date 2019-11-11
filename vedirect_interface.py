@@ -2,6 +2,14 @@ import time
 import serial
 import global_vars
 import logging
+import colorlog
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(global_vars.log_format)
+logger = colorlog.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 
 tty_dev = '/dev/ttyUSB0'
 baudrate = 19200
@@ -73,8 +81,6 @@ def get_mppt_data():
     global err_text
     global cs_text
     global mppt_text
-
-    logger = logging.getLogger("mppt data task")
 
     mppt_raw_data = {}
     mppt_data = {}
@@ -153,7 +159,6 @@ def get_mppt_data():
     pass
 
 def mppt_loop():
-    logger = logging.getLogger("mppt data loop")
     logger.info("Starting MPPT data loop from VE.Direct interface")
     while True:
         get_mppt_data()
