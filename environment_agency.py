@@ -1,11 +1,9 @@
 import requests
-import e3372_interface
 import global_vars
 from datetime import datetime
 
 import user_data
-import clickatell
-
+from sms_sender import send_sms
 import logging
 import colorlog
 
@@ -57,11 +55,3 @@ def check_river():
     except Exception as e:
         logger.error("River task failed: " + str(e))
         pass
-
-def send_sms(dest_list, sms_text):
-    if e3372_interface.net_connected():
-        clickatell.send_sms(dest_list, sms_text)
-    else:
-        for dest in dest_list:
-            e3372_interface.send_sms(dest, sms_text)
-
