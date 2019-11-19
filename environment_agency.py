@@ -18,6 +18,7 @@ logger.setLevel(logging.INFO)
 
 env_agency_api_url = "https://environment.data.gov.uk/flood-monitoring/id/measures/4195-level-stage-i-15_min-mASD"
 river_warning_sent = False
+river_level_sent = 0.0
 river_high = 0.95
 river_high_warn = 1.1
 
@@ -25,30 +26,42 @@ def check_river():
 
     global env_agency_api_url
     global river_warning_sent
+    global river_level_sent
     global river_high
     global river_high_warn
 
     try:
         resp = requests.get(env_agency_api_url)
         river_level = resp.json()["items"]["latestReading"]["value"]
-        if river_level > river_high_warn and not river_warning_sent:
-            logger.critical("River level at "+str(river_level)+"m! Sending alert SMS!")
-            human_datetime = datetime.now().strftime("%d/%m/%Y %H:%M")
-            warn_sms_text = human_datetime + ": River level at "+str(river_level)+"m!"
-            if e3372_interface.net_connected():
-                clickatell.send_sms(user_data.river_warn_sms_list, warn_sms_text)
-            else:
-                for dest in user_data.river_warn_sms_list:
-                    e3372_interface.send_sms(dest, warn_sms_text)
-            logger.critical("Alerts sent")
-            river_warning_sent = True
+        human_datetime = datetime.now().strftime("%d/%m/%Y %H:%M")
+        if river_level > river_high_warn:
+            if not river_warning_sent or ( river_warning_sent and river_level > ( river_level_sent + 0.1) ):
+                if not river_warning_sent:
+                    logger.critical("River level high! "+str(river_level)+"m. Sending alert SMS!")
+                    warn_sms_text = human_datetime + ": River level high! "+str(river_level)+"m"
+                else:
+                    logger.critical("River level rising! "+str(river_level)+"m. Sending alert SMS!")
+                    warn_sms_text = human_datetime + ": River level rising! "+str(river_level)+"m"
+                send_sms(user_data.river_warn_sms_list, warn_sms_text)
+                logger.critical("Alerts sent")
+                river_level_sent = river_level
+                river_warning_sent = True
 
         if river_warning_sent and river_level < river_high:
             logger.warning("River returned to normal levels")
+            normal_sms_text = human_datetime + ": River level returned to normal. "+str(river_level)+"m"
+            send_sms(user_data.river_warn_sms_list, normal_sms_text)
             river_warning_sent = False
-
         pass
 
     except Exception as e:
         logger.error("River task failed: " + str(e))
         pass
+
+def send_sms(dest_list, sms_text):
+    if e3372_interface.net_connected():
+        clickatell.send_sms(dest_list, sms_text)
+    else:
+        for dest in dest_list:
+            e3372_interface.send_sms(dest, sms_text)
+
