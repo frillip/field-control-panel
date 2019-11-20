@@ -5,12 +5,17 @@ import panel_web_app
 import vedirect_interface
 import logging
 import colorlog
-import ascii_logo
 
 def main():
     print("*******************************************************************************************\n\n\n\n\n")
     print("Welcome...")
-    print(ascii_logo.logo)
+    try:
+        f = open('ascii_logo.txt','r')
+        ascii_logo = f.read()
+        f.close()
+        print(ascii_logo)
+    except:
+        pass
     print("... to Jurassic Park\n\n\n\n\n")
     print("*******************************************************************************************")
     handler = colorlog.StreamHandler()
