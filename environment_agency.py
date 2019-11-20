@@ -21,11 +21,10 @@ def init_river():
     try:
         logger.info("Initialising river data from Environment Agency")
         resp = requests.get(env_agency_api_station_url)
+        global_vars.river_data["id"] = resp.json()["items"]["stationReference"]
+        global_vars.river_data["name"] = resp.json()["items"]["riverName"]
         global_vars.river_data["level"] = resp.json()["items"]["measures"]["latestReading"]["value"]
         global_vars.river_data["last_reading"] = resp.json()["items"]["measures"]["latestReading"]["dateTime"][:-1]
-        global_vars.river_data["name"] = resp.json()["items"]["riverName"]
-        global_vars.river_data["id"] = resp.json()["items"]["stationReference"]
-        global_vars.river_data["warning_active"] = False
         global_vars.river_data["last_high_level"] = 0.0
         global_vars.river_data["high"] = 0.95
         global_vars.river_data["high_warn"] = 1.1
@@ -33,6 +32,8 @@ def init_river():
         now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
         global_vars.river_data["last_high"] = now_iso_stamp
         global_vars.river_data["last_warn"] = now_iso_stamp
+
+        global_vars.river_data["warning_active"] = False
 
         check_river()
 

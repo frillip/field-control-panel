@@ -40,24 +40,22 @@ def run_web_app():
         status_data['mppt'] = global_vars.mppt_data
         status_data['modem'] = global_vars.modem_data
         status_data['river'] = global_vars.river_data
-        resp_json = json.dumps(status_data)
-        return web.Response(text=resp_json,content_type='application/json')
+        return web.json_response(status_data)
 
     async def relay_json(request):
-        resp_json = json.dumps(global_vars.relay_data)
-        return web.Response(text=resp_json,content_type='application/json')
+        return web.json_response(global_vars.relay_data)
 
     async def bme_json(request):
-        resp_json = json.dumps(global_vars.bme_data)
-        return web.Response(text=resp_json,content_type='application/json')
+        return web.json_response(global_vars.bme_data)
 
     async def mppt_json(request):
-        resp_json = json.dumps(global_vars.mppt_data)
-        return web.Response(text=resp_json,content_type='application/json')
+        return web.json_response(global_vars.mppt_data)
 
     async def modem_json(request):
-        resp_json = json.dumps(global_vars.modem_data)
-        return web.Response(text=resp_json,content_type='application/json')
+        return web.json_response(global_vars.modem_data)
+
+    async def river_json(request):
+        return web.json_response(global_vars.river_data)
 
     app = web.Application()
     app.add_routes([web.get('/', indexresp),
@@ -66,6 +64,7 @@ def run_web_app():
                     web.get('/relay.json', relay_json),
                     web.get('/bme.json', bme_json),
                     web.get('/mppt.json', mppt_json),
-                    web.get('/modem.json', modem_json)])
+                    web.get('/modem.json', modem_json),
+                    web.get('/river.json', river_json)])
     runner = web.AppRunner(app, access_log=None)
     return runner
