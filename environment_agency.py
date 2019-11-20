@@ -13,43 +13,70 @@ logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-
 env_agency_api_url = "https://environment.data.gov.uk/flood-monitoring/id/measures/4195-level-stage-i-15_min-mASD"
-river_warning_sent = False
+env_agency_api_station_url = "https://environment.data.gov.uk/flood-monitoring/id/stations/4195"
 river_level_sent = 0.0
-river_high = 0.95
-river_high_warn = 1.1
+
+def init_river():
+    try:
+        logger.info("Initialising river data from Environment Agency")
+        resp = requests.get(env_agency_api_station_url)
+        global_vars.river_data["level"] = resp.json()["items"]["measures"]["latestReading"]["value"]
+        global_vars.river_data["last_reading"] = resp.json()["items"]["measures"]["latestReading"]["dateTime"][:-1]
+        global_vars.river_data["name"] = resp.json()["items"]["riverName"]
+        global_vars.river_data["id"] = resp.json()["items"]["stationReference"]
+        global_vars.river_data["warning_active"] = False
+        global_vars.river_data["last_high_level"] = 0.0
+        global_vars.river_data["high"] = 0.95
+        global_vars.river_data["high_warn"] = 1.1
+
+        now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
+        global_vars.river_data["last_high"] = now_iso_stamp
+        global_vars.river_data["last_warn"] = now_iso_stamp
+
+        check_river()
+
+        pass
+
+    except Exception as e:
+        logger.error("River init failed: " + str(e))
+        pass
+
 
 def check_river():
 
     global env_agency_api_url
-    global river_warning_sent
     global river_level_sent
-    global river_high
-    global river_high_warn
 
     try:
         resp = requests.get(env_agency_api_url)
-        river_level = resp.json()["items"]["latestReading"]["value"]
+        global_vars.river_data["level"] = resp.json()["items"]["latestReading"]["value"]
+        global_vars.river_data["last_reading"] = resp.json()["items"]["latestReading"]["dateTime"][:-1]
         human_datetime = datetime.now().strftime("%d/%m/%Y %H:%M")
-        if river_level > river_high_warn:
-            if not river_warning_sent or ( river_warning_sent and river_level > ( river_level_sent + 0.1) ):
-                if not river_warning_sent:
-                    logger.critical("River level high! "+str(river_level)+"m. Sending alert SMS!")
-                    warn_sms_text = human_datetime + ": River level high! "+str(river_level)+"m"
+        now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
+        if global_vars.river_data["level"] > global_vars.river_data["last_high_level"]:
+            global_vars.river_data["last_high_level"] = global_vars.river_data["level"]
+            global_vars.river_data["last_high"] = now_iso_stamp
+        if global_vars.river_data["level"] > global_vars.river_data["high_warn"]:
+            if not global_vars.river_data["warning_active"] or ( global_vars.river_data["warning_active"] and global_vars.river_data["level"] > ( river_level_sent + 0.1) ):
+                if not global_vars.river_data["warning_active"]:
+                    logger.critical("River level high! "+str(global_vars.river_data["level"])+"m. Sending alert SMS!")
+                    warn_sms_text = human_datetime + ": River level high! "+str(global_vars.river_data["level"])+"m"
                 else:
-                    logger.critical("River level rising! "+str(river_level)+"m. Sending alert SMS!")
-                    warn_sms_text = human_datetime + ": River level rising! "+str(river_level)+"m"
+                    logger.critical("River level rising! "+str(global_vars.river_data["level"])+"m. Sending alert SMS!")
+                    warn_sms_text = human_datetime + ": River level rising! "+str(global_vars.river_data["level"])+"m"
                 send_sms(user_data.river_warn_sms_list, warn_sms_text)
                 logger.critical("Alerts sent")
-                river_level_sent = river_level
-                river_warning_sent = True
+                river_level_sent = global_vars.river_data["level"]
+                global_vars.river_data["last_high_level"] = global_vars.river_data["level"]
+                global_vars.river_data["warning_active"] = True
+                global_vars.river_data["last_warn"] = now_iso_stamp
 
-        if river_warning_sent and river_level < river_high:
+        if global_vars.river_data["warning_active"] and global_vars.river_data["level"] < global_vars.river_data["high"]:
             logger.warning("River returned to normal levels")
-            normal_sms_text = human_datetime + ": River level returned to normal. "+str(river_level)+"m"
+            normal_sms_text = human_datetime + ": River level returned to normal. "+str(global_vars.river_data["level"])+"m"
             send_sms(user_data.river_warn_sms_list, normal_sms_text)
-            river_warning_sent = False
+            global_vars.river_data["warning_active"] = False
         pass
 
     except Exception as e:

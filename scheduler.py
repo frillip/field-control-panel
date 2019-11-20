@@ -4,7 +4,7 @@ from megaio_get_data import get_relay_data
 from megaio_set_relays import relay_auto_timeout
 from e3372_interface import get_modem_data,connection_checker
 from bme_env_data import get_bme_data
-from environment_agency import check_river
+from environment_agency import init_river,check_river
 import global_vars
 import logging
 import colorlog
@@ -27,6 +27,7 @@ def setup_scheduler():
     logger.info("Starting connection checker task")
     schedule.every(5).seconds.do(connection_checker)
     logger.info("Starting river checking tasks")
+    init_river()
     schedule.every().hour.at(':01').do(check_river)
     schedule.every().hour.at(':16').do(check_river)
     schedule.every().hour.at(':31').do(check_river)

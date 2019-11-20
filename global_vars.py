@@ -15,6 +15,7 @@ log_format = ColoredFormatter(
 bme_data = {}
 mppt_data = {}
 modem_data = {}
+river_data = {}
 
 relay_map = { "fence" : 1 , "cameras" : 2, "lighting" : 3 }
 

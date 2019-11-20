@@ -39,6 +39,7 @@ def run_web_app():
         status_data['bme'] = global_vars.bme_data
         status_data['mppt'] = global_vars.mppt_data
         status_data['modem'] = global_vars.modem_data
+        status_data['river'] = global_vars.river_data
         resp_json = json.dumps(status_data)
         return web.Response(text=resp_json,content_type='application/json')
 
