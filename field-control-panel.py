@@ -1,6 +1,8 @@
 from threading import Thread
 from time import sleep
+import global_vars
 import scheduler
+from e3372_interface import get_modem_data,send_connection_req,net_connected
 import panel_web_app
 import vedirect_interface
 import logging
@@ -32,7 +34,16 @@ def main():
     logger = colorlog.getLogger("main")
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
-    logger.info("Starting Jurassic Park Control System...")
+    logger.info("Starting Jurassic Park Control System")
+
+    logger.info("Connecting to LTE")
+    get_modem_data()
+    while not net_connected():
+        send_connection_req()
+        sleep(1)
+        get_modem_data()
+
+    logger.info("Connected!")
 
     t1 = Thread(target=vedirect_interface.mppt_loop)
     t2 = Thread(target=scheduler.loop_scheduler)
