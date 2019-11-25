@@ -14,6 +14,10 @@ log_format = ColoredFormatter(
 
 bme_data = {}
 mppt_data = {}
+mppt_data["batt"] = {}
+mppt_data["load"] = {}
+mppt_data["pv"] = {}
+
 modem_data = {}
 river_data = {}
 
