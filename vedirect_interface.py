@@ -118,12 +118,12 @@ def get_mppt_data():
         global_vars.mppt_data["pid"] = mppt_raw_data["PID"]
         global_vars.mppt_data["name"] = "SmartSolar MPPT 100|20"
         global_vars.mppt_data["err"] = int(mppt_raw_data["ERR"])
-        global_vars.mppt_data["err_text"] = err_text[mppt_data["err"]]
+        global_vars.mppt_data["err_text"] = err_text[global_vars.mppt_data["err"]]
         global_vars.mppt_data["fw"] = mppt_raw_data["FW"]
 
         global_vars.mppt_data["load"]["v"] = int(mppt_raw_data["V"]) / 1000.0
         global_vars.mppt_data["load"]["i"] = int(mppt_raw_data["IL"]) / 1000.0
-        global_vars.mppt_data["load"]["p"] = round(mppt_load_data["v"] * global_vars.mppt_data["load"]["i"],2)
+        global_vars.mppt_data["load"]["p"] = round(global_vars.mppt_data["load"]["v"] * global_vars.mppt_data["load"]["i"],2)
         if mppt_raw_data["LOAD"] == "ON":
             global_vars.mppt_data["load"]["state"] = True
         else:
@@ -131,15 +131,15 @@ def get_mppt_data():
 
         global_vars.mppt_data["batt"]["v"] = int(mppt_raw_data["V"]) / 1000.0
         global_vars.mppt_data["batt"]["i"] = int(mppt_raw_data["I"]) / 1000.0
-        global_vars.mppt_data["batt"]["p"] = round(mppt_batt_data["v"] * global_vars.mppt_data["batt"]["i"],2)
+        global_vars.mppt_data["batt"]["p"] = round(global_vars.mppt_data["batt"]["v"] * global_vars.mppt_data["batt"]["i"],2)
         global_vars.mppt_data["batt"]["cs"] = int(mppt_raw_data["CS"])
-        global_vars.mppt_data["batt"]["cs_text"] = cs_text[mppt_batt_data["cs"]]
+        global_vars.mppt_data["batt"]["cs_text"] = cs_text[global_vars.mppt_data["batt"]["cs"]]
 
         global_vars.mppt_data["pv"]["v"] = int(mppt_raw_data["VPV"]) / 1000.0
         global_vars.mppt_data["pv"]["p"] = int(mppt_raw_data["PPV"])
-        global_vars.mppt_data["pv"]["i"] = round(mppt_pv_data["p"] / global_vars.mppt_data["pv"]["v"],2)
+        global_vars.mppt_data["pv"]["i"] = round(global_vars.mppt_data["pv"]["p"] / global_vars.mppt_data["pv"]["v"],2)
         global_vars.mppt_data["pv"]["mppt"] = int(mppt_raw_data["MPPT"])
-        global_vars.mppt_data["pv"]["mppt_text"] = mppt_text[mppt_pv_data["mppt"]]
+        global_vars.mppt_data["pv"]["mppt_text"] = mppt_text[global_vars.mppt_data["pv"]["mppt"]]
 
     except Exception as e:
         if ser.isOpen():
@@ -156,6 +156,13 @@ batt_voltage_sent = 0.0
 batt_warning_sent = False
 batt_warning_sent_time = 0
 batt_warning_stage = 0
+batt_warning_stage_text = {
+0: 'Normal',
+1: 'Low',
+2: 'Very low',
+3: 'Critical',
+4: 'Disconnected'
+}
 batt_warning_interval = 900
 batt_state = True
 batt_state_sent_time = 0
@@ -224,31 +231,37 @@ def check_batt_voltage():
                 logger.info(warn_sms_text)
 
             if warn_sms_text and ( unix_time_int > batt_warning_sent_time + batt_warning_interval ):
-                if ( last_batt_voltage_sent - 0.1 global_vars.mppt_data["batt"]["v"] ) or ( last_batt_voltage_sent + 0.1 > global_vars.mppt_data["batt"]["v"] ):
+                if ( last_batt_voltage_sent - 0.1 < global_vars.mppt_data["batt"]["v"] ) or ( last_batt_voltage_sent + 0.1 > global_vars.mppt_data["batt"]["v"] ):
                     last_batt_voltage_sent = global_vars.mppt_data["batt"]["v"]
                     batt_warning_sent_time = unix_time_int
                     send_sms(user_data.voltage_warn_sms_list, warn_sms_text)
-            pass
+            global_vars.mppt_data["batt"]["state"] = batt_warning_stage
+            global_vars.mppt_data["batt"]["state_text"] = batt_warning_stage_text[batt_warning_stage]
+
 # Battery disconnected?
         else:
             batt_state = False
-            if batt_state != last_batt_state:
-                if batt_state:
-                    warn_sms_text = human_datetime + ": Battery now reconnected. Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
-                    logger.warning("Battery now reconnected. Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-                else:
-                    warn_sms_text = human_datetime + ": Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
-                    logger.critical("Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-                battstate_sent_time = unix_time_int
-                send_sms(user_data.voltage_warn_sms_list, warn_sms_text)
 
-            if not batt_state and ( unix_time_int > last_batt_state_time + batt_warning_interval ):
+            if not batt_state and ( unix_time_int > batt_state_sent_time + batt_warning_interval ):
                 warn_sms_text = human_datetime + ": Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
                 logger.critical("Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
                 batt_state_sent_time = unix_time_int
                 send_sms(user_data.voltage_warn_sms_list, warn_sms_text)
 
-            pass
+            global_vars.mppt_data["batt"]["state"] = 4
+            global_vars.mppt_data["batt"]["state_text"] = batt_warning_stage_text[batt_warning_stage]
+
+        if batt_state != last_batt_state:
+            if batt_state:
+                warn_sms_text = human_datetime + ": Battery now reconnected. Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
+                logger.warning("Battery now reconnected. Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
+            else:
+                warn_sms_text = human_datetime + ": Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
+                logger.critical("Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
+            batt_state_sent_time = unix_time_int
+            send_sms(user_data.voltage_warn_sms_list, warn_sms_text)
+
+        pass
 
     except Exception as e:
         logger.error("MPPT battery voltage check failed: " + str(e))
@@ -286,6 +299,7 @@ def check_load_state():
             send_sms(user_data.voltage_warn_sms_list, warn_sms_text)
 
         last_load_state = global_vars.mppt_data["load"]["state"]
+        pass
 
     except Exception as e:
         logger.error("MPPT load state check failed: " + str(e))
@@ -297,4 +311,5 @@ def mppt_loop():
         get_mppt_data()
         check_load_state()
         check_batt_voltage()
+        time.sleep(1)
     pass
