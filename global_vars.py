@@ -24,6 +24,7 @@ river_data = {}
 relay_map = { "fence" : 1 , "cameras" : 2, "lighting" : 3 }
 
 relay_timeout = { 1 : 0 , 2: 0 , 3 : 0}
+relay_timestamp = { 1 : 0 , 2: 0 , 3 : 0}
 
 relay_data = {}
 
