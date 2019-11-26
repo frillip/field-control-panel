@@ -148,6 +148,7 @@ def get_mppt_data():
 
     pass
 
+batt_voltage_overvoltage = 15.9
 batt_voltage_normal = 12.2
 batt_voltage_low = 11.8
 batt_voltage_very_low = 11.5
@@ -157,6 +158,7 @@ batt_warning_sent = False
 batt_warning_sent_time = 0
 batt_warning_stage = 0
 batt_warning_stage_text = {
+-1: 'Overvoltage',
 0: 'Normal',
 1: 'Low',
 2: 'Very low',
@@ -176,7 +178,6 @@ def check_batt_voltage():
     global batt_state_sent_time
 
     last_batt_warning_stage = batt_warning_stage
-    new_batt_warning_stage = 0
     human_datetime = datetime.now().strftime("%d/%m/%Y %H:%M")
     now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
     unix_time_int = int(time.time())
@@ -203,7 +204,9 @@ def check_batt_voltage():
                     batt_warning_stage = new_batt_warning_stage
 
             else:
-                if global_vars.mppt_data["batt"]["v"] > batt_voltage_normal:
+                if global_vars.mppt_data["batt"]["v"] > batt_voltage_overvoltage:
+                    new_batt_warning_stage = -1
+                elif global_vars.mppt_data["batt"]["v"] > batt_voltage_normal:
                     new_batt_warning_stage = 0
                 elif global_vars.mppt_data["batt"]["v"] > batt_voltage_low:
                     new_batt_warning_stage = 1
@@ -212,11 +215,11 @@ def check_batt_voltage():
                 else:
                     new_batt_warning_stage = 3
 
-                # Latch downwards when charging
-                if new_batt_warning_stage < last_batt_warning_stage:
+                # Latch downwards when charging, or battery returns to normal
+                if new_batt_warning_stage < last_batt_warning_stage or new_batt_warning_stage == 0:
                     batt_warning_stage = new_batt_warning_stage
 
-            if batt_warning_stage > last_batt_warning_stage:
+            if batt_warning_stage > last_batt_warning_stage and batt_warning_stage > 0:
                 if batt_warning_stage == 1:
                     warn_sms_text = human_datetime + ": Battery voltage low! "+str(global_vars.mppt_data["batt"]["v"])+"V"
                     logger.warning("Battery voltage low! Current voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
@@ -226,13 +229,19 @@ def check_batt_voltage():
                 elif batt_warning_stage == 3:
                     warn_sms_text = human_datetime + ": Battery voltage CRITICAL! "+str(global_vars.mppt_data["batt"]["v"])+"V"
                     logger.critical("Battery voltage critical! Current voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-            elif ( batt_warning_stage < last_batt_warning_stage ) and batt_warning_stage == 0:
-                warn_sms_text = "Battery voltage returning to normal: " + global_vars.mppt_data["batt"]["v"] + "V"
-                logger.info(warn_sms_text)
+            elif batt_warning_stage < last_batt_warning_stage and batt_warning_stage > 0:
+                warn_sms_text = human_datetime + ": Battery recharging: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
+                logger.info("Battery recharging: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending notification SMS")
+            elif ( batt_warning_stage != last_batt_warning_stage ) and batt_warning_stage == 0:
+                warn_sms_text = human_datetime + ": Battery voltage returning to normal: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
+                logger.info("Battery voltage returning to normal: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending notification SMS")
+            elif ( batt_warning_stage != last_batt_warning_stage ) and batt_warning_stage == -1:
+                warn_sms_text = human_datetime + ": Battery in overvoltage condition! Current voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
+                logger.warning("Battery in overvoltage condition! Current voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
 
-            if warn_sms_text and ( unix_time_int > batt_warning_sent_time + batt_warning_interval ):
-                if ( last_batt_voltage_sent - 0.1 < global_vars.mppt_data["batt"]["v"] ) or ( last_batt_voltage_sent + 0.1 > global_vars.mppt_data["batt"]["v"] ):
-                    last_batt_voltage_sent = global_vars.mppt_data["batt"]["v"]
+            if (warn_sms_text and ( unix_time_int > batt_warning_sent_time + batt_warning_interval )) or (warn_sms_text and batt_warning_stage == 0):
+                if ( batt_voltage_sent - 0.1 < global_vars.mppt_data["batt"]["v"] ) or ( batt_voltage_sent + 0.1 > global_vars.mppt_data["batt"]["v"] ) or batt_warning_stage == 0:
+                    batt_voltage_sent = global_vars.mppt_data["batt"]["v"]
                     batt_warning_sent_time = unix_time_int
                     send_sms(user_data.voltage_warn_sms_list, warn_sms_text)
             global_vars.mppt_data["batt"]["state"] = batt_warning_stage
@@ -245,13 +254,11 @@ def check_batt_voltage():
             if not batt_state and ( unix_time_int > batt_state_sent_time + batt_warning_interval ):
                 warn_sms_text = human_datetime + ": Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
                 logger.critical("Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-                batt_state_sent_time = unix_time_int
-                send_sms(user_data.voltage_warn_sms_list, warn_sms_text)
 
             global_vars.mppt_data["batt"]["state"] = 4
             global_vars.mppt_data["batt"]["state_text"] = batt_warning_stage_text[batt_warning_stage]
 
-        if batt_state != last_batt_state:
+        if batt_state != last_batt_state or ( warn_sms_text and not batt_state ):
             if batt_state:
                 warn_sms_text = human_datetime + ": Battery now reconnected. Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
                 logger.warning("Battery now reconnected. Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
