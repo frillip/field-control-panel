@@ -24,7 +24,7 @@ def get_bme_data():
 
         bme_raw_data = bme280.sample(bme_bus,bme_address)
         bme_data['h'] = round(bme_raw_data.humidity,1)
-        bme_data['p'] = round(bme_raw_data.pressure)
+        bme_data['p'] = round(bme_raw_data.pressure,1)
         bme_data['t'] = round(bme_raw_data.temperature,1)
         bme_data['e'] = False
 
