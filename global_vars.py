@@ -45,7 +45,7 @@ relay_data[2]['invert'] = False
 relay_data[2]['state'] = relay_data[2]['raw_state'] ^ relay_data[2]['invert']
 relay_data[2]['auto_on'] = False
 relay_data[2]['auto_off'] = True
-relay_data[2]['auto_timeout'] = 120
+relay_data[2]['auto_timeout'] = 300
 relay_data[2]['last_state_change'] = datetime.now().replace(microsecond=0).isoformat()
 
 relay_data[3] = {}

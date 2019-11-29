@@ -140,6 +140,7 @@ def get_mppt_data():
         global_vars.mppt_data["pv"]["i"] = round(global_vars.mppt_data["pv"]["p"] / global_vars.mppt_data["pv"]["v"],2)
         global_vars.mppt_data["pv"]["mppt"] = int(mppt_raw_data["MPPT"])
         global_vars.mppt_data["pv"]["mppt_text"] = mppt_text[global_vars.mppt_data["pv"]["mppt"]]
+        global_vars.mppt_data["pv"]["yield"] = int(mppt_raw_data["H20"]) * 10
 
     except Exception as e:
         if ser.isOpen():
@@ -149,7 +150,7 @@ def get_mppt_data():
     pass
 
 batt_voltage_overvoltage = 15.9
-batt_voltage_normal = 12.2
+batt_voltage_normal = 12.8
 batt_voltage_low = 11.8
 batt_voltage_very_low = 11.5
 batt_voltage_critical = 11.3
@@ -189,7 +190,8 @@ def check_batt_voltage():
         if global_vars.mppt_data["batt"]["v"] > 1.0 :
             batt_state = True
             # Is the battery charging or discharging?
-            if global_vars.mppt_data["batt"]["i"] < 0:
+            if global_vars.mppt_data["batt"]["cs"] == 0:
+                # cs = 0 means the battery is not being charged
                 if global_vars.mppt_data["batt"]["v"] < batt_voltage_critical:
                     new_batt_warning_stage = 3
                 elif global_vars.mppt_data["batt"]["v"] < batt_voltage_very_low:
