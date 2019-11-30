@@ -21,6 +21,7 @@ mppt_data["pv"] = {}
 
 bmv_data = {}
 bmv_data["batt"] = {}
+bmv_data["stats"] = {}
 
 modem_data = {}
 river_data = {}
