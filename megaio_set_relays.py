@@ -29,7 +29,6 @@ def set_relay_state(request):
                     new_raw_state = True ^ global_vars.relay_data[relay_id]['invert']
                     megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
                     global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
-                    global_vars.relay_timeout[relay_id] = global_vars.relay_data[relay_id]['auto_timeout']
                     global_vars.relay_timestamp[relay_id] = unix_time_int
                     return relay+" now ON"
 
@@ -38,7 +37,6 @@ def set_relay_state(request):
                     new_raw_state = False ^ global_vars.relay_data[relay_id]['invert']
                     megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
                     global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
-                    global_vars.relay_timeout[relay_id] = global_vars.relay_data[relay_id]['auto_timeout']
                     global_vars.relay_timestamp[relay_id] = unix_time_int
                     return relay+" now OFF"
 
@@ -54,13 +52,9 @@ def relay_auto_timeout():
     unix_time_int = int(time.time())
     now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
 
-    global_vars.relay_data.pop("e", None)
-    for relay_id in global_vars.relay_data:
+    for relay_id in global_vars.relay_timestamp:
         try:
-            if global_vars.relay_timeout[relay_id]:
-                global_vars.relay_timeout[relay_id] -= 1
-
-            if global_vars.relay_data[relay_id]['auto_timeout'] and ( unix_time_int >= global_vars.relay_timestamp[relay_id] + global_vars.relay_data[relay_id]['auto_timeout'] ):
+            if global_vars.relay_timestamp[relay_id] and global_vars.relay_data[relay_id]['auto_timeout'] and ( unix_time_int >= global_vars.relay_timestamp[relay_id] + global_vars.relay_data[relay_id]['auto_timeout'] ):
 
 # Turn off a relay if it is on and the timout has expired
                 if global_vars.relay_data[relay_id]['auto_off'] and global_vars.relay_data[relay_id]['state']:
@@ -76,10 +70,9 @@ def relay_auto_timeout():
                     megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
                     global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
 
+                global_vars.relay_timestamp[relay_id] = 0
+
         except Exception as e:
             logger.error("Failed to auto switch " + global_vars.relay_data[relay_id]['name'] + "relay: " + str(e))
-            global_vars.relay_timeout[relay_id] = 0
-
-    global_vars.relay_data["e"] = False
 
     pass
