@@ -38,7 +38,7 @@ def run_web_app():
         status_data['relay'] = global_vars.relay_data
         status_data['bme'] = global_vars.bme_data
         status_data['mppt'] = global_vars.mppt_data
-        status_data['bmv'] = global_vars.mppt_data
+        status_data['bmv'] = global_vars.bmv_data
         status_data['modem'] = global_vars.modem_data
         status_data['river'] = global_vars.river_data
         return web.json_response(status_data)
