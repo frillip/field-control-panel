@@ -9,7 +9,7 @@ import logging
 import colorlog
 
 def main():
-    print("*******************************************************************************************\n\n\n\n\n")
+    print("*******************************************************************************************\n\n\n")
     print("Welcome...")
     try:
         f = open('ascii_logo.txt','r')
@@ -18,7 +18,7 @@ def main():
         print(ascii_logo)
     except:
         pass
-    print("... to Jurassic Park\n\n\n\n\n")
+    print("... to Jurassic Park\n\n\n")
     print("*******************************************************************************************")
     handler = colorlog.StreamHandler()
     handler.setFormatter(colorlog.ColoredFormatter(
@@ -46,11 +46,13 @@ def main():
     logger.info("Connected!")
 
     t1 = Thread(target=vedirect_interface.mppt_loop)
-    t2 = Thread(target=scheduler.loop_scheduler)
-    t3 = Thread(target=panel_web_app.run_server, args=(panel_web_app.run_web_app(),))
+    t2 = Thread(target=vedirect_interface.bmv_loop)
+    t3 = Thread(target=scheduler.loop_scheduler)
+    t4 = Thread(target=panel_web_app.run_server, args=(panel_web_app.run_web_app(),))
     t1.start()
     t2.start()
     t3.start()
+    t4.start()
 
 
 if __name__ == '__main__':

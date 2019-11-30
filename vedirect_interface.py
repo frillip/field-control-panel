@@ -3,9 +3,7 @@ import serial
 import global_vars
 import logging
 import colorlog
-import user_data
-from datetime import datetime
-from sms_sender import send_sms
+from system_status import check_batt_voltage,check_load_state
 
 handler = colorlog.StreamHandler()
 handler.setFormatter(global_vars.log_format)
@@ -13,20 +11,37 @@ logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-
 mppt_tty_dev = '/dev/ttyUSB0'
+bmv_tty_dev = '/dev/ttyUSB1'
 baudrate = 19200
+
+alarm_text = {
+0x0001: 'Low voltage',
+0x0002: 'High voltage',
+0x0004: 'Low SOC',
+0x0008: 'Low Starter Voltage',
+0x0010: 'High Starter Voltage',
+0x0020: 'Low Temperature',
+0x0040: 'High Temperature',
+0x0080: 'Mid Voltage',
+0x0100: 'Overload',
+0x0200: 'DC-ripple',
+0x0400: 'Low V AC out',
+0x0800: 'High V AC out',
+0x1000: 'Short circuit',
+0x2000: 'BMS Lockout'
+}
 
 off_text = {
 0x001: 'No input power',
-0x002: 'Switched off (power switch)',
-0x004: 'Switched off (register)',
-0x008: 'Remote input',
-0x010: 'Protection active',
-0x020: 'Paygo',
-0x040: 'BMS',
-0x080: 'Engine shutdown detection',
-0x100: 'Analysing input voltage'
+0x0002: 'Switched off (power switch)',
+0x0004: 'Switched off (register)',
+0x0008: 'Remote input',
+0x0010: 'Protection active',
+0x0020: 'Paygo',
+0x0040: 'BMS',
+0x0080: 'Engine shutdown detection',
+0x0100: 'Analysing input voltage'
 }
 
 cs_text = {
@@ -78,12 +93,6 @@ mppt_text = {
 }
 
 def get_mppt_data():
-
-    global tty_dev
-    global baudrate
-    global err_text
-    global cs_text
-    global mppt_text
 
     mppt_raw_data = {}
 
@@ -149,170 +158,80 @@ def get_mppt_data():
 
     pass
 
-batt_voltage_overvoltage = 15.9
-batt_voltage_normal = 12.8
-batt_voltage_low = 11.8
-batt_voltage_very_low = 11.5
-batt_voltage_critical = 11.3
-batt_voltage_sent = 0.0
-batt_warning_sent = False
-batt_warning_sent_time = 0
-batt_warning_stage = 0
-batt_warning_stage_text = {
--1: 'Overvoltage',
-0: 'Normal',
-1: 'Low',
-2: 'Very low',
-3: 'Critical',
-4: 'Disconnected'
-}
-batt_warning_interval = 900
-batt_state = True
-batt_state_sent_time = 0
 
-def check_batt_voltage():
-    global batt_warning_stage
-    global batt_warning_sent
-    global batt_warning_sent_time
-    global batt_voltage_sent
-    global batt_state
-    global batt_state_sent_time
+def get_bmv_data():
 
-    last_batt_warning_stage = batt_warning_stage
-    human_datetime = datetime.now().strftime("%d/%m/%Y %H:%M")
-    now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
-    unix_time_int = int(time.time())
-    warn_sms_text = ""
-    last_batt_state = batt_state
+    bmv_raw_data = {}
 
     try:
-        # First, a plausibility check...
-        if global_vars.mppt_data["batt"]["v"] > 1.0 :
-            batt_state = True
-            # Is the battery charging or discharging?
-            if global_vars.mppt_data["batt"]["cs"] == 0:
-                # cs = 0 means the battery is not being charged
-                if global_vars.mppt_data["batt"]["v"] < batt_voltage_critical:
-                    new_batt_warning_stage = 3
-                elif global_vars.mppt_data["batt"]["v"] < batt_voltage_very_low:
-                    new_batt_warning_stage = 2
-                elif global_vars.mppt_data["batt"]["v"] < batt_voltage_low:
-                    new_batt_warning_stage = 1
-                else:
-                    new_batt_warning_stage = 0
+        ser = serial.Serial()
+        ser.port = bmv_tty_dev
+        ser.baudrate = baudrate
+        ser.parity = serial.PARITY_NONE
+        ser.stopbits = serial.STOPBITS_ONE
+        ser.bytesize = serial.EIGHTBITS
+        ser.timeout = 1
 
-                # Battery warning states should 'latch' upwards when discharging
-                if new_batt_warning_stage > last_batt_warning_stage:
-                    batt_warning_stage = new_batt_warning_stage
+        ser.open()
+        ser.flushInput()
+        block_start = False
+        while not block_start:
+            ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
+# Data from the BMV comes in 2 blocks
+            if "PID" in ve_string or "H1" in ve_string:
+                if "PID" in ve_string:
+                    block_id = 1
+                elif "H1" in ve_string:
+                    block_id = 2
+                bmv_raw_data[ve_string.split("\t")[0]] = ve_string.split("\t")[1]
+                block_start = True
 
+        block_complete = False
+
+        while not block_complete:
+            ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
+            if ve_string.split("\t")[0] == "Checksum":
+                block_complete = True
+                ser.close()
             else:
-                if global_vars.mppt_data["batt"]["v"] > batt_voltage_overvoltage:
-                    new_batt_warning_stage = -1
-                elif global_vars.mppt_data["batt"]["v"] > batt_voltage_normal:
-                    new_batt_warning_stage = 0
-                elif global_vars.mppt_data["batt"]["v"] > batt_voltage_low:
-                    new_batt_warning_stage = 1
-                elif global_vars.mppt_data["batt"]["v"] > batt_voltage_very_low:
-                    new_batt_warning_stage = 2
-                else:
-                    new_batt_warning_stage = 3
+                bmv_raw_data[ve_string.split("\t")[0]] = ve_string.split("\t")[1]
 
-                # Latch downwards when charging, or battery returns to normal
-                if new_batt_warning_stage < last_batt_warning_stage or new_batt_warning_stage == 0:
-                    batt_warning_stage = new_batt_warning_stage
-
-            if batt_warning_stage > last_batt_warning_stage and batt_warning_stage > 0:
-                if batt_warning_stage == 1:
-                    warn_sms_text = human_datetime + ": Battery voltage low! "+str(global_vars.mppt_data["batt"]["v"])+"V"
-                    logger.warning("Battery voltage low! Current voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-                elif batt_warning_stage == 2:
-                    warn_sms_text = human_datetime + ": Battery voltage very low! "+str(global_vars.mppt_data["batt"]["v"])+"V"
-                    logger.warning("Battery voltage very low! Current voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-                elif batt_warning_stage == 3:
-                    warn_sms_text = human_datetime + ": Battery voltage CRITICAL! "+str(global_vars.mppt_data["batt"]["v"])+"V"
-                    logger.critical("Battery voltage critical! Current voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-            elif batt_warning_stage < last_batt_warning_stage and batt_warning_stage > 0:
-                warn_sms_text = human_datetime + ": Battery recharging: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
-                logger.info("Battery recharging: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending notification SMS")
-            elif ( batt_warning_stage != last_batt_warning_stage ) and batt_warning_stage == 0:
-                warn_sms_text = human_datetime + ": Battery voltage returning to normal: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
-                logger.info("Battery voltage returning to normal: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending notification SMS")
-            elif ( batt_warning_stage != last_batt_warning_stage ) and batt_warning_stage == -1:
-                warn_sms_text = human_datetime + ": Battery in overvoltage condition! Current voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
-                logger.warning("Battery in overvoltage condition! Current voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-
-            if (warn_sms_text and ( unix_time_int > batt_warning_sent_time + batt_warning_interval )) or (warn_sms_text and batt_warning_stage == 0):
-                if ( batt_voltage_sent - 0.1 < global_vars.mppt_data["batt"]["v"] ) or ( batt_voltage_sent + 0.1 > global_vars.mppt_data["batt"]["v"] ) or batt_warning_stage == 0:
-                    batt_voltage_sent = global_vars.mppt_data["batt"]["v"]
-                    batt_warning_sent_time = unix_time_int
-                    send_sms(user_data.voltage_warn_sms_list, warn_sms_text)
-            global_vars.mppt_data["batt"]["state"] = batt_warning_stage
-            global_vars.mppt_data["batt"]["state_text"] = batt_warning_stage_text[batt_warning_stage]
-
-# Battery disconnected?
-        else:
-            batt_state = False
-
-            if not batt_state and ( unix_time_int > batt_state_sent_time + batt_warning_interval ):
-                warn_sms_text = human_datetime + ": Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
-                logger.critical("Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-
-            global_vars.mppt_data["batt"]["state"] = 4
-            global_vars.mppt_data["batt"]["state_text"] = batt_warning_stage_text[batt_warning_stage]
-
-        if batt_state != last_batt_state or ( warn_sms_text and not batt_state ):
-            if batt_state:
-                warn_sms_text = human_datetime + ": Battery now reconnected. Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
-                logger.warning("Battery now reconnected. Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-            else:
-                warn_sms_text = human_datetime + ": Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
-                logger.critical("Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-            batt_state_sent_time = unix_time_int
-            send_sms(user_data.voltage_warn_sms_list, warn_sms_text)
-
-        pass
+        if block_id == 1:
+            global_vars.bmv_data["pid"] = bmv_raw_data["PID"]
+            global_vars.bmv_data["name"] = "BMV-712 Smart"
+            global_vars.bmv_data["fw"] = bmv_raw_data["FW"]
+            global_vars.bmv_data["batt"]["v"] = int(bmv_raw_data["V"]) / 1000.0
+            global_vars.bmv_data["batt"]["t"] = int(bmv_raw_data["T"])
+            global_vars.bmv_data["batt"]["i"] = int(bmv_raw_data["I"]) / 1000.0
+            global_vars.bmv_data["batt"]["p"] = int(bmv_raw_data["P"])
+            global_vars.bmv_data["stats"]["charge_consumed"] = int(bmv_raw_data["CE"])
+            global_vars.bmv_data["batt"]["soc"] = int(bmv_raw_data["SOC"]) / 10.0
+            global_vars.bmv_data["batt"]["ttg"] = int(bmv_raw_data["TTG"])
+# Needs bitmasking done as multiple alarms can be present
+            global_vars.bmv_data["alarm"] = int(bmv_raw_data["Alarm"])
+#            global_vars.bmv_data["alarm_text"] = alarm_text[global_vars.bmv_data["AR"]]
+        elif block_id == 2:
+            global_vars.bmv_data["stats"]["deepest_discharge"] = int(bmv_raw_data["H1"]) / 1000.0
+            global_vars.bmv_data["stats"]["last_discharge"] = int(bmv_raw_data["H2"]) / 1000.0
+            global_vars.bmv_data["stats"]["average_discharge"] = int(bmv_raw_data["H3"]) / 1000.0
+            global_vars.bmv_data["stats"]["cycles"] = int(bmv_raw_data["H4"])
+            global_vars.bmv_data["stats"]["full_discharges"] = int(bmv_raw_data["H5"])
+            global_vars.bmv_data["stats"]["total_consumed"] = int(bmv_raw_data["H6"]) / 1000.0
+            global_vars.bmv_data["stats"]["min_voltage"] = int(bmv_raw_data["H7"]) / 1000.0
+            global_vars.bmv_data["stats"]["max_voltage"] = int(bmv_raw_data["H8"]) / 1000.0
+            global_vars.bmv_data["stats"]["sync_count"] = int(bmv_raw_data["H10"])
+            global_vars.bmv_data["stats"]["lv_alarm_count"] = int(bmv_raw_data["H11"])
+            global_vars.bmv_data["stats"]["hv_alarm_count"] = int(bmv_raw_data["H12"])
+            global_vars.bmv_data["batt"]["discharge_time"] = int(bmv_raw_data["H9"])
+            global_vars.bmv_data["batt"]["energy_charged"] = int(bmv_raw_data["H17"]) * 10
+            global_vars.bmv_data["batt"]["energy_discharged"] = int(bmv_raw_data["H18"]) * 10
 
     except Exception as e:
-        logger.error("MPPT battery voltage check failed: " + str(e))
-        pass
+        if ser.isOpen():
+            ser.close()
+        logger.error("bmv data task failed: " + str(e))
 
-last_load_state = True
-last_load_state_time = 0
-load_warning_interval = 900
-
-
-# If the load is off warn, will only be triggered if Pi is moved onto a UPS of course...
-def check_load_state():
-    global last_load_state
-    global last_load_state_time
-
-    try:
-        human_datetime = datetime.now().strftime("%d/%m/%Y %H:%M")
-        now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
-        unix_time_int = int(time.time())
-        warn_sms_text = ""
-        if global_vars.mppt_data["load"]["state"] != last_load_state:
-            if global_vars.mppt_data["load"]["state"]:
-                warn_sms_text = human_datetime + ": Load now reconnected. Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
-                logger.warning("Load now reconnected. Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-            else:
-                warn_sms_text = human_datetime + ": Load disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
-                logger.critical("Load disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-            load_state_sent_time = unix_time_int
-            send_sms(user_data.voltage_warn_sms_list, warn_sms_text)
-
-        if not global_vars.mppt_data["load"]["state"] and ( unix_time_int > last_load_state_time + load_warning_interval ):
-            warn_sms_text = human_datetime + ": Load disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
-            logger.critical("Load disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-            load_state_sent_time = unix_time_int
-            send_sms(user_data.voltage_warn_sms_list, warn_sms_text)
-
-        last_load_state = global_vars.mppt_data["load"]["state"]
-        pass
-
-    except Exception as e:
-        logger.error("MPPT load state check failed: " + str(e))
-        pass
+    pass
 
 def mppt_loop():
     logger.info("Starting MPPT data loop from VE.Direct interface")
@@ -320,5 +239,15 @@ def mppt_loop():
         get_mppt_data()
         check_load_state()
         check_batt_voltage()
-        time.sleep(1)
+        time.sleep(0.5)
+    pass
+
+def bmv_loop():
+    logger.info("Starting BMV data loop from VE.Direct interface")
+    while True:
+# Need to install BMV712 first!
+#        get_bmv_data()
+# Needs rewrite first
+#        check_batt_voltage()
+        time.sleep(0.5)
     pass

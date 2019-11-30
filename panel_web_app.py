@@ -38,6 +38,7 @@ def run_web_app():
         status_data['relay'] = global_vars.relay_data
         status_data['bme'] = global_vars.bme_data
         status_data['mppt'] = global_vars.mppt_data
+        status_data['bmv'] = global_vars.mppt_data
         status_data['modem'] = global_vars.modem_data
         status_data['river'] = global_vars.river_data
         return web.json_response(status_data)
@@ -50,6 +51,9 @@ def run_web_app():
 
     async def mppt_json(request):
         return web.json_response(global_vars.mppt_data)
+
+    async def bmv_json(request):
+        return web.json_response(global_vars.bmv_data)
 
     async def modem_json(request):
         return web.json_response(global_vars.modem_data)
@@ -64,6 +68,7 @@ def run_web_app():
                     web.get('/relay.json', relay_json),
                     web.get('/bme.json', bme_json),
                     web.get('/mppt.json', mppt_json),
+                    web.get('/bmv.json', bmv_json),
                     web.get('/modem.json', modem_json),
                     web.get('/river.json', river_json)])
     runner = web.AppRunner(app, access_log=None)
