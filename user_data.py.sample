@@ -1,0 +1,3 @@
+river_warn_sms_list = ["",""]
+voltage_warn_sms_list = ["",""]
+sms_api_key = ""
