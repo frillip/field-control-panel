@@ -54,7 +54,7 @@ def relay_auto_timeout():
 
     for relay_id in global_vars.relay_timestamp:
         try:
-            if global_vars.relay_timestamp[relay_id] and global_vars.relay_data[relay_id]['auto_timeout'] and ( unix_time_int >= global_vars.relay_timestamp[relay_id] + global_vars.relay_data[relay_id]['auto_timeout'] ):
+            if ( unix_time_int >= global_vars.relay_timestamp[relay_id] + global_vars.relay_data[relay_id]['auto_timeout'] ):
 
 # Turn off a relay if it is on and the timout has expired
                 if global_vars.relay_data[relay_id]['auto_off'] and global_vars.relay_data[relay_id]['state']:
