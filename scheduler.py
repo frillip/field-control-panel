@@ -41,6 +41,9 @@ def loop_scheduler():
     logger.info("Starting scheduler")
     setup_scheduler()
     while True:
-        schedule.run_pending()
+        try:
+            schedule.run_pending()
+        except Exception as e:
+            logger.error("Scheduled task failed: " + str(e))
         time.sleep(0.1)
     pass # Should never get here...

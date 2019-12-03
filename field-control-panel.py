@@ -21,16 +21,7 @@ def main():
     print("... to Jurassic Park\n\n\n")
     print("*******************************************************************************************")
     handler = colorlog.StreamHandler()
-    handler.setFormatter(colorlog.ColoredFormatter(
-        "%(asctime)s %(log_color)s[%(levelname)s]%(reset)s %(name)s: %(message)s",
-        datefmt="%Y-%m-%dT%H:%M:%S",
-        log_colors={
-        'DEBUG': 'cyan',
-        'INFO': 'green',
-        'WARNING': 'yellow',
-        'ERROR': 'red',
-        'CRITICAL': 'red,bg_white',
-        }))
+    handler.setFormatter(global_vars.log_format)
     logger = colorlog.getLogger("main")
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
