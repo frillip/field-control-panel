@@ -11,8 +11,8 @@ logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-mppt_tty_dev = '/dev/ttyUSB0'
-bmv_tty_dev = '/dev/ttyUSB1'
+mppt_tty_dev = '/dev/ttyUSB1'
+bmv_tty_dev = '/dev/ttyUSB0'
 baudrate = 19200
 
 alarm_text = {
@@ -178,7 +178,7 @@ def get_bmv_data():
         while not block_start:
             ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
 # Data from the BMV comes in 2 blocks
-            if "PID" in ve_string or "H1" in ve_string:
+            if "PID" in ve_string or "H1\t" in ve_string:
                 if "PID" in ve_string:
                     block_id = 1
                 elif "H1" in ve_string:
@@ -204,27 +204,34 @@ def get_bmv_data():
             global_vars.bmv_data["batt"]["t"] = int(bmv_raw_data["T"])
             global_vars.bmv_data["batt"]["i"] = int(bmv_raw_data["I"]) / 1000.0
             global_vars.bmv_data["batt"]["p"] = int(bmv_raw_data["P"])
-            global_vars.bmv_data["stats"]["charge_consumed"] = int(bmv_raw_data["CE"])
             global_vars.bmv_data["batt"]["soc"] = int(bmv_raw_data["SOC"]) / 10.0
             global_vars.bmv_data["batt"]["ttg"] = int(bmv_raw_data["TTG"])
+            global_vars.bmv_data["batt"]["charge_consumed"] = int(bmv_raw_data["CE"]) / 1000.0
+            if bmv_raw_data["Alarm"] == "ON":
+                global_vars.bmv_data["alarm"] = True
+            else:
+                global_vars.bmv_data["alarm"] = False
 # Needs bitmasking done as multiple alarms can be present
-            global_vars.bmv_data["alarm"] = int(bmv_raw_data["Alarm"])
 #            global_vars.bmv_data["alarm_text"] = alarm_text[global_vars.bmv_data["AR"]]
+            if bmv_raw_data["Relay"] == "ON":
+                global_vars.bmv_data["relay"] = True
+            else:
+                global_vars.bmv_data["relay"] = False
         elif block_id == 2:
             global_vars.bmv_data["stats"]["deepest_discharge"] = int(bmv_raw_data["H1"]) / 1000.0
             global_vars.bmv_data["stats"]["last_discharge"] = int(bmv_raw_data["H2"]) / 1000.0
             global_vars.bmv_data["stats"]["average_discharge"] = int(bmv_raw_data["H3"]) / 1000.0
             global_vars.bmv_data["stats"]["cycles"] = int(bmv_raw_data["H4"])
             global_vars.bmv_data["stats"]["full_discharges"] = int(bmv_raw_data["H5"])
-            global_vars.bmv_data["stats"]["total_consumed"] = int(bmv_raw_data["H6"]) / 1000.0
+            global_vars.bmv_data["stats"]["total_charge_consumed"] = int(bmv_raw_data["H6"]) / 1000.0
             global_vars.bmv_data["stats"]["min_voltage"] = int(bmv_raw_data["H7"]) / 1000.0
             global_vars.bmv_data["stats"]["max_voltage"] = int(bmv_raw_data["H8"]) / 1000.0
             global_vars.bmv_data["stats"]["sync_count"] = int(bmv_raw_data["H10"])
             global_vars.bmv_data["stats"]["lv_alarm_count"] = int(bmv_raw_data["H11"])
             global_vars.bmv_data["stats"]["hv_alarm_count"] = int(bmv_raw_data["H12"])
             global_vars.bmv_data["batt"]["discharge_time"] = int(bmv_raw_data["H9"])
-            global_vars.bmv_data["batt"]["energy_charged"] = int(bmv_raw_data["H17"]) * 10
-            global_vars.bmv_data["batt"]["energy_discharged"] = int(bmv_raw_data["H18"]) * 10
+            global_vars.bmv_data["batt"]["energy_discharged"] = int(bmv_raw_data["H17"]) * 10
+            global_vars.bmv_data["batt"]["energy_charged"] = int(bmv_raw_data["H18"]) * 10
 
     except Exception as e:
         if ser.isOpen():
@@ -246,7 +253,7 @@ def bmv_loop():
     logger.info("Starting BMV data loop from VE.Direct interface")
     while True:
 # Need to install BMV712 first!
-#        get_bmv_data()
+        get_bmv_data()
 # Needs rewrite first
 #        check_batt_voltage()
         time.sleep(0.5)
