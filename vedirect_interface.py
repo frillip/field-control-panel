@@ -107,49 +107,62 @@ def get_mppt_data():
 
         ser.open()
         ser.flushInput()
-        block_start = False
-        while not block_start:
+        while True:
             ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
-            if "PID" in ve_string:
-                mppt_raw_data[ve_string.split("\t")[0]] = ve_string.split("\t")[1]
-                block_start = True
+            field["label"] = ve_string.split("\t")[0]
+            field["data"] = ve_string.split("\t")[1]
 
-        block_complete = False
-
-        while not block_complete:
-            ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
-            if ve_string.split("\t")[0] == "Checksum":
-                block_complete = True
-                ser.close()
-            else:
-                mppt_raw_data[ve_string.split("\t")[0]] = ve_string.split("\t")[1]
-
-        global_vars.mppt_data["pid"] = mppt_raw_data["PID"]
-        global_vars.mppt_data["name"] = "SmartSolar MPPT 100|20"
-        global_vars.mppt_data["err"] = int(mppt_raw_data["ERR"])
-        global_vars.mppt_data["err_text"] = err_text[global_vars.mppt_data["err"]]
-        global_vars.mppt_data["fw"] = mppt_raw_data["FW"]
-
-        global_vars.mppt_data["load"]["v"] = int(mppt_raw_data["V"]) / 1000.0
-        global_vars.mppt_data["load"]["i"] = int(mppt_raw_data["IL"]) / 1000.0
-        global_vars.mppt_data["load"]["p"] = round(global_vars.mppt_data["load"]["v"] * global_vars.mppt_data["load"]["i"],2)
-        if mppt_raw_data["LOAD"] == "ON":
-            global_vars.mppt_data["load"]["state"] = True
-        else:
-            global_vars.mppt_data["load"]["state"] = False
-
-        global_vars.mppt_data["batt"]["v"] = int(mppt_raw_data["V"]) / 1000.0
-        global_vars.mppt_data["batt"]["i"] = int(mppt_raw_data["I"]) / 1000.0
-        global_vars.mppt_data["batt"]["p"] = round(global_vars.mppt_data["batt"]["v"] * global_vars.mppt_data["batt"]["i"],2)
-        global_vars.mppt_data["batt"]["cs"] = int(mppt_raw_data["CS"])
-        global_vars.mppt_data["batt"]["cs_text"] = cs_text[global_vars.mppt_data["batt"]["cs"]]
-
-        global_vars.mppt_data["pv"]["v"] = int(mppt_raw_data["VPV"]) / 1000.0
-        global_vars.mppt_data["pv"]["p"] = int(mppt_raw_data["PPV"])
-        global_vars.mppt_data["pv"]["i"] = round(global_vars.mppt_data["pv"]["p"] / global_vars.mppt_data["pv"]["v"],2)
-        global_vars.mppt_data["pv"]["mppt"] = int(mppt_raw_data["MPPT"])
-        global_vars.mppt_data["pv"]["mppt_text"] = mppt_text[global_vars.mppt_data["pv"]["mppt"]]
-        global_vars.mppt_data["pv"]["yield"] = int(mppt_raw_data["H20"]) * 10
+            if field["label"] == "PID":
+                # Product ID
+                global_vars.mppt_data["pid"] = field["data"]
+                # Could look this up from a table based on PID, but there's no point unless I combine this and the BMV function...
+                global_vars.mppt_data["name"] = "SmartSolar MPPT 100|20"
+            elif field["label"] == "ERR":
+                # Error value and meaning
+                global_vars.mppt_data["err"] = int(field["data"])
+                global_vars.mppt_data["err_text"] = err_text[global_vars.mppt_data["err"]]
+            elif field["label"] == "FW":
+                # Firmware version
+                global_vars.mppt_data["fw"] = field["data"]
+            elif field["label"] == "V":
+                # Battery voltage
+                global_vars.mppt_data["batt"]["v"] = int(field["data"]) / 1000.0
+                global_vars.mppt_data["load"]["v"] = int(field["data"]) / 1000.0
+            elif field["label"] == "IL":
+                # Load current
+                global_vars.mppt_data["load"]["i"] = int(field["data"]) / 1000.0
+            elif field["label"] == "LOAD":
+                # Load status
+                if field["data"] == "ON":
+                    global_vars.mppt_data["load"]["state"] = True
+                else:
+                    global_vars.mppt_data["load"]["state"] = False
+            elif field["label"] == "I":
+                # Battery current
+                global_vars.mppt_data["batt"]["i"] = int(field["data"]) / 1000.0
+            elif field["label"] == "CS":
+                # Battery charging status and meaning
+                global_vars.mppt_data["batt"]["cs"] = int(field["data"])
+                global_vars.mppt_data["batt"]["cs_text"] = cs_text[global_vars.mppt_data["batt"]["cs"]]
+            elif field["label"] == "VPV":
+                # PV array voltage
+                global_vars.mppt_data["pv"]["v"] = int(field["data"]) / 1000.0
+            elif field["label"] == "PPV":
+                # PV array power
+                global_vars.mppt_data["pv"]["p"] = int(field["data"])
+            elif field["label"] == "MPPT":
+                # MPPT status and meaning
+                global_vars.mppt_data["pv"]["mppt"] = int(field["data"])
+                global_vars.mppt_data["pv"]["mppt_text"] = mppt_text[global_vars.mppt_data["pv"]["mppt"]]
+            elif field["label"] == "H20":
+                # Today's total yield in Wh
+                global_vars.mppt_data["pv"]["yield"] = int(field["data"]) * 10
+            elif field["label"] == "Checksum":
+                # We've reached the end of the block, so presumably everything has been read
+                # These are computed here, rather than being read from the MPPT
+                global_vars.mppt_data["load"]["p"] = round(global_vars.mppt_data["load"]["v"] * global_vars.mppt_data["load"]["i"],2)
+                global_vars.mppt_data["batt"]["p"] = round(global_vars.mppt_data["batt"]["v"] * global_vars.mppt_data["batt"]["i"],2)
+                global_vars.mppt_data["pv"]["i"] = round(global_vars.mppt_data["pv"]["p"] / global_vars.mppt_data["pv"]["v"],2)
 
     except Exception as e:
         if ser.isOpen():
@@ -174,64 +187,98 @@ def get_bmv_data():
 
         ser.open()
         ser.flushInput()
-        block_start = False
-        while not block_start:
+        while True:
             ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
-# Data from the BMV comes in 2 blocks
-            if "PID" in ve_string or "H1\t" in ve_string:
-                if "PID" in ve_string:
-                    block_id = 1
-                elif "H1" in ve_string:
-                    block_id = 2
-                bmv_raw_data[ve_string.split("\t")[0]] = ve_string.split("\t")[1]
-                block_start = True
+            field["label"] = ve_string.split("\t")[0]
+            field["data"] = ve_string.split("\t")[1]
 
-        block_complete = False
+            if field["label"] == "PID":
+                # Product ID
+                global_vars.bmv_data["pid"] = field["data"]
+                # Could look this up from a table based on PID, but there's no point unless I combine this and the MPPT function...
+                global_vars.bmv_data["name"] = "BMV-712 Smart"
+            elif field["label"] == "FW":
+                # FIrmware version
+                global_vars.bmv_data["fw"] = field["data"]
+            elif field["label"] == "V":
+                 # Battery voltage, V
+                global_vars.bmv_data["batt"]["v"] = int(field["data"]) / 1000.0
+            elif field["label"] == "I":
+                # Battery current, A, negative indicates discharge, positive indicates charge
+                global_vars.bmv_data["batt"]["i"] = int(field["data"]) / 1000.0
+            elif field["label"] == "P":
+                # Battery power, W, negative indicates discharge, positive indicates charge
+                global_vars.bmv_data["batt"]["p"] = int(field["data"])
+            elif field["label"] == "T":
+                # Battery temperature, degC, may be replaced with midpoint voltage in the future
+                # in which case BME280 temperature can be used as an estimate
+                global_vars.bmv_data["batt"]["t"] = int(field["data"])
+            elif field["label"] == "SOC":
+                # State of charge ,%
+                global_vars.bmv_data["batt"]["soc"] = int(field["data"]) / 10.0
+            elif field["label"] == "TTG":
+                # Time left on battery power, s
+                global_vars.bmv_data["batt"]["ttg"] = int(field["data"])
+            elif field["label"] == "CE":
+                # Amount of charge consumed, Ah
+                global_vars.bmv_data["batt"]["charge_consumed"] = int(field["data"]) / 1000.0
+            elif field["label"] == "Alarm":
+                # Alarm condition
+                if field["data"] == "ON":
+                    global_vars.bmv_data["alarm"] = True
+                else:
+                    global_vars.bmv_data["alarm"] = False
+                # Needs bitmasking done as multiple alarms can be present
+                #global_vars.bmv_data["alarm_text"] = alarm_text[global_vars.bmv_data["AR"]]
+            elif field["label"] == "Relay":
+                # Relay state
+                if field["data"] == "ON":
+                    global_vars.bmv_data["relay"] = True
+                else:
+                    global_vars.bmv_data["relay"] = False
 
-        while not block_complete:
-            ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
-            if ve_string.split("\t")[0] == "Checksum":
-                block_complete = True
-                ser.close()
-            else:
-                bmv_raw_data[ve_string.split("\t")[0]] = ve_string.split("\t")[1]
-
-        if block_id == 1:
-            global_vars.bmv_data["pid"] = bmv_raw_data["PID"]
-            global_vars.bmv_data["name"] = "BMV-712 Smart"
-            global_vars.bmv_data["fw"] = bmv_raw_data["FW"]
-            global_vars.bmv_data["batt"]["v"] = int(bmv_raw_data["V"]) / 1000.0
-            global_vars.bmv_data["batt"]["t"] = int(bmv_raw_data["T"])
-            global_vars.bmv_data["batt"]["i"] = int(bmv_raw_data["I"]) / 1000.0
-            global_vars.bmv_data["batt"]["p"] = int(bmv_raw_data["P"])
-            global_vars.bmv_data["batt"]["soc"] = int(bmv_raw_data["SOC"]) / 10.0
-            global_vars.bmv_data["batt"]["ttg"] = int(bmv_raw_data["TTG"])
-            global_vars.bmv_data["batt"]["charge_consumed"] = int(bmv_raw_data["CE"]) / 1000.0
-            if bmv_raw_data["Alarm"] == "ON":
-                global_vars.bmv_data["alarm"] = True
-            else:
-                global_vars.bmv_data["alarm"] = False
-# Needs bitmasking done as multiple alarms can be present
-#            global_vars.bmv_data["alarm_text"] = alarm_text[global_vars.bmv_data["AR"]]
-            if bmv_raw_data["Relay"] == "ON":
-                global_vars.bmv_data["relay"] = True
-            else:
-                global_vars.bmv_data["relay"] = False
-        elif block_id == 2:
-            global_vars.bmv_data["stats"]["deepest_discharge"] = int(bmv_raw_data["H1"]) / 1000.0
-            global_vars.bmv_data["stats"]["last_discharge"] = int(bmv_raw_data["H2"]) / 1000.0
-            global_vars.bmv_data["stats"]["average_discharge"] = int(bmv_raw_data["H3"]) / 1000.0
-            global_vars.bmv_data["stats"]["cycles"] = int(bmv_raw_data["H4"])
-            global_vars.bmv_data["stats"]["full_discharges"] = int(bmv_raw_data["H5"])
-            global_vars.bmv_data["stats"]["total_charge_consumed"] = int(bmv_raw_data["H6"]) / 1000.0
-            global_vars.bmv_data["stats"]["min_voltage"] = int(bmv_raw_data["H7"]) / 1000.0
-            global_vars.bmv_data["stats"]["max_voltage"] = int(bmv_raw_data["H8"]) / 1000.0
-            global_vars.bmv_data["stats"]["sync_count"] = int(bmv_raw_data["H10"])
-            global_vars.bmv_data["stats"]["lv_alarm_count"] = int(bmv_raw_data["H11"])
-            global_vars.bmv_data["stats"]["hv_alarm_count"] = int(bmv_raw_data["H12"])
-            global_vars.bmv_data["batt"]["discharge_time"] = int(bmv_raw_data["H9"])
-            global_vars.bmv_data["batt"]["energy_discharged"] = int(bmv_raw_data["H17"]) * 10
-            global_vars.bmv_data["batt"]["energy_charged"] = int(bmv_raw_data["H18"]) * 10
+            elif field["label"] == "H1":
+                # Depth of the deepest discharge, Ah
+                global_vars.bmv_data["stats"]["deepest_discharge"] = int(field["data"]) / 1000.0
+            elif field["label"] == "H2":
+                # Depth of the last discharge, Ah
+                global_vars.bmv_data["stats"]["last_discharge"] = int(field["data"]) / 1000.0
+            elif field["label"] == "H3":
+                # Depth of the average discharge, Ah
+                global_vars.bmv_data["stats"]["average_discharge"] = int(field["data"]) / 1000.0
+            elif field["label"] == "H4":
+                # Number of charge cycles
+                global_vars.bmv_data["stats"]["cycles"] = int(field["data"])
+            elif field["label"] == "H5":
+                # Number of full discharges
+                global_vars.bmv_data["stats"]["full_discharges"] = int(field["data"])
+            elif field["label"] == "H6":
+                # Cumulative Amp Hours drawn, Ah
+                global_vars.bmv_data["stats"]["total_charge_consumed"] = int(field["data"]) / 1000.0
+            elif field["label"] == "H7":
+                # Minimum battery voltage, V
+                global_vars.bmv_data["stats"]["min_voltage"] = int(field["data"]) / 1000.0
+            elif field["label"] == "H8":
+                # Maximum battery voltage, V
+                global_vars.bmv_data["stats"]["max_voltage"] = int(field["data"]) / 1000.0
+            elif field["label"] == "H9":
+                # Number of seconds since last full charge, s
+                global_vars.bmv_data["batt"]["discharge_time"] = int(field["data"])
+            elif field["label"] == "H10":
+                # Number of automatic synchronizations (24V system only)
+                global_vars.bmv_data["stats"]["sync_count"] = int(field["data"])
+            elif field["label"] == "H11":
+                # Number of low main voltage alarms
+                global_vars.bmv_data["stats"]["lv_alarm_count"] = int(field["data"])
+            elif field["label"] == "H12":
+                # Number of high main voltage alarms
+                global_vars.bmv_data["stats"]["hv_alarm_count"] = int(field["data"])
+            elif field["label"] == "H17":
+                # Amount of discharged energy, Wh
+                global_vars.bmv_data["batt"]["energy_discharged"] = int(field["data"]) * 10
+            elif field["label"] == "H18":
+                # Amount of charged energy, Wh
+                global_vars.bmv_data["batt"]["energy_charged"] = int(field["data"]) * 10
 
     except Exception as e:
         if ser.isOpen():
