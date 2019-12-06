@@ -1,5 +1,6 @@
 import time
 import schedule
+from vedirect_interface import check_load_state,check_batt_voltage
 from megaio_get_data import get_relay_data
 from megaio_set_relays import relay_auto_timeout
 from e3372_interface import get_modem_data,connection_checker
@@ -25,6 +26,10 @@ def setup_scheduler():
     logger.info("Starting relay auto timeout task")
     schedule.every().second.do(relay_auto_timeout)
     logger.info("Starting connection checker task")
+    schedule.every(5).seconds.do(connection_checker)
+    logger.info("Starting battery voltage checker task")
+    schedule.every(5).seconds.do(connection_checker)
+    logger.info("Starting load state checker task")
     schedule.every(5).seconds.do(connection_checker)
     logger.info("Starting river checking tasks")
     init_river()

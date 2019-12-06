@@ -94,8 +94,6 @@ mppt_text = {
 
 def get_mppt_data():
 
-    mppt_raw_data = {}
-
     try:
         ser = serial.Serial()
         ser.port = mppt_tty_dev
@@ -106,9 +104,13 @@ def get_mppt_data():
         ser.timeout = 1
 
         ser.open()
+        # Discard any garbage
         ser.flushInput()
         while True:
+            field = {}
             ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
+            while not '\t' in ve_string:
+                ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
             field["label"] = ve_string.split("\t")[0]
             field["data"] = ve_string.split("\t")[1]
 
@@ -174,8 +176,6 @@ def get_mppt_data():
 
 def get_bmv_data():
 
-    bmv_raw_data = {}
-
     try:
         ser = serial.Serial()
         ser.port = bmv_tty_dev
@@ -186,9 +186,13 @@ def get_bmv_data():
         ser.timeout = 1
 
         ser.open()
+        # Discard any garbage
         ser.flushInput()
         while True:
+            field = {}
             ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
+            while not '\t' in ve_string:
+                ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
             field["label"] = ve_string.split("\t")[0]
             field["data"] = ve_string.split("\t")[1]
 
@@ -297,17 +301,12 @@ def mppt_loop():
     logger.info("Starting MPPT data loop from VE.Direct interface")
     while True:
         get_mppt_data()
-        check_load_state()
-        check_batt_voltage()
         time.sleep(0.5)
     pass
 
 def bmv_loop():
     logger.info("Starting BMV data loop from VE.Direct interface")
     while True:
-# Need to install BMV712 first!
         get_bmv_data()
-# Needs rewrite first
-#        check_batt_voltage()
         time.sleep(0.5)
     pass
