@@ -203,6 +203,12 @@ def get_bmv_data():
             elif field["label"] == "V":
                  # Battery voltage, V
                 global_vars.bmv_data["batt"]["v"] = int(field["data"]) / 1000.0
+            elif field["label"] == "VM":
+                 # Battery  mid-point voltage, V
+                global_vars.bmv_data["batt"]["vm"] = int(field["data"]) / 1000.0
+            elif field["label"] == "DM":
+                 # Battery mid-point voltage deviation, %
+                global_vars.bmv_data["batt"]["dm"] = int(field["data"]) / 1000.0
             elif field["label"] == "I":
                 # Battery current, A, negative indicates discharge, positive indicates charge
                 global_vars.bmv_data["batt"]["i"] = int(field["data"]) / 1000.0
