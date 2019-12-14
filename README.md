@@ -48,4 +48,9 @@ There is a river level monitoring station on the river in the field, data from t
 
 ## static/index.html
 
-Literally just a page with buttons. Will ideally reflect current state of relays and show battery/pv/weather/river info. Historical data not required but might be nice over a 24h period.
+Now has fancy toggle switches that reflect the current state of relays. Also shows PV/Battery/Environment data. Updates by pulling JSON every 1s for relays, 5s for PV/Battery, and only on load for temperature. 
+
+## static/style.css
+
+Where the terrible CSS lives!
+
