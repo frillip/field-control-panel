@@ -46,6 +46,7 @@
 <div id="power"></div>
 <div id="voltage"></div>
 <div id="mppt"></div>
+<div id="yield"></div>
 </div>
 </p>
 </div>
@@ -136,6 +137,7 @@ function get_v_data()
                 $(".pv #voltage").text(json.pvp + "W")
                 $(".pv #power").text(json.pvv + "V")
                 $(".pv #mppt").text(json.pvmppt)
+                $(".pv #yield").text(json.pvy + "Wh")
             },
 
             error: function ()

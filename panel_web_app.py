@@ -46,6 +46,7 @@ def run_web_app():
         ajax_resp['pvp'] = global_vars.mppt_data['pv']['p']
         ajax_resp['pvv'] = global_vars.mppt_data['pv']['v']
         ajax_resp['pvmppt'] = global_vars.mppt_data['pv']['mppt_text']
+        ajax_resp['pvy'] = global_vars.mppt_data['pv']['yield']
         return web.json_response(ajax_resp)
 
     async def buttonhandler(request):
