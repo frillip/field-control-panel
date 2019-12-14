@@ -159,7 +159,6 @@ def get_mppt_data():
             elif field["label"] == "H20":
                 # Today's total yield in Wh
                 global_vars.mppt_data["pv"]["yield"] = int(field["data"]) * 10
-            elif field["label"] == "Checksum":
                 # We've reached the end of the block, so presumably everything has been read
                 # These are computed here, rather than being read from the MPPT
                 global_vars.mppt_data["load"]["p"] = round(global_vars.mppt_data["load"]["v"] * global_vars.mppt_data["load"]["i"],2)
@@ -301,12 +300,14 @@ def mppt_loop():
     logger.info("Starting MPPT data loop from VE.Direct interface")
     while True:
         get_mppt_data()
-        time.sleep(0.5)
+        # Sleep for 10 seconds to avoid flooding the log, usually caused by serial device randomly vanishing thanks to an undervoltage condition...
+        time.sleep(10)
     pass
 
 def bmv_loop():
     logger.info("Starting BMV data loop from VE.Direct interface")
     while True:
         get_bmv_data()
-        time.sleep(0.5)
+        # Sleep for 10 seconds to avoid flooding the log, usually caused by serial device randomly vanishing thanks to an undervoltage condition...
+        time.sleep(10)
     pass

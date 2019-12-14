@@ -2,64 +2,181 @@
 <html>
 <head>
 <title>Field Control Panel</title>
-<style>
-body {
-	text-align: left;
-	font-family: sans-serif;
-}
-h1 {
-	text-align: center;
-	font-size: 2em;
-}
-p {
-	font-size: 12px;
-}
-.btn-group .button {
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  width: 100px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  cursor: pointer;
-  float: left;
-}
-
-.btn-group .button:hover {
-  background-color: #3e8e41;
-}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-
 <h1>Field Control Panel</h1>
+<div class="row">
+  <div class="column">
 <h2>Fence</h2>
-<div class="btn-group">
-<form action="" method="post">
-    <button style="background-color: #4CAF50" class="button" type="submit" name="fence" value="on">ON</button>
-    <button style="background-color: #F44336" class="button" type="submit" name="fence" value="off">OFF</button>
-</form>
-</div>
-<br/><br/><br/>
-
+<label class="switch">
+  <input type="checkbox" id="fence">
+  <span class="slider round"></span>
+</label>
+<br/><br/>
 <h2>Cameras</h2>
-<div class="btn-group">
-<form action="" method="post">
-    <button style="background-color: #4CAF50" class="button" type="submit" name="cameras" value="on">ON</button>
-    <button style="background-color: #F44336" class="button" type="submit" name="cameras" value="off">OFF</button>
-</form>
-</div>
-<br/><br/><br/>
-
+<label class="switch">
+  <input type="checkbox" id="cameras">
+  <span class="slider round"></span>
+</label>
+<br/><br/>
 <h2>Lighting</h2>
-<div class="btn-group">
-<form action="" method="post">
-    <button style="background-color: #4CAF50" class="button" type="submit" name="lighting" value="on">ON</button>
-    <button style="background-color: #F44336" class="button" type="submit" name="lighting" value="off">OFF</button>
-</form>
+<label class="switch">
+  <input type="checkbox" id="lighting">
+  <span class="slider round"></span>
+</label>
 </div>
+<div class="column">
+<div class="env">
+<h2>Weather</h2>
+<div id="t"></div>
+<div id="p"></div>
+<div id="h"></div>
+</div>
+<div class="battery">
+<h2>Battery</h2>
+<div id="voltage"></div>
+<div id="current"></div>
+<div id="cs"></div>
+</div>
+<div class="pv">
+<h2>PV</h2>
+<div id="power"></div>
+<div id="voltage"></div>
+<div id="mppt"></div>
+</div>
+</p>
+</div>
+</div>
+
+<script>
+    $('input[type="checkbox"]').on('click', function(){
+
+        var data = {};
+        relay = $(this).attr('id');
+        data[relay] = $(this).is(':checked') ? "on" : "off";
+
+        $.ajax({
+            type: "POST",
+            url: "buttons",
+            data: data,
+        }).done(function(data) {
+                console.log(data);
+        });
+    });
+</script>
+<script>
+    var r1switchElement = $(".switch #fence");
+    var r2switchElement = $(".switch #cameras");
+    var r3switchElement = $(".switch #lighting");
+
+function get_r_data()
+{
+        $.ajax(
+        {
+            url: 'relay_ajax.json',
+            dataType: 'json',
+            success: function(json)
+            {
+                if( json.r1 == true ) {
+                    r1switchElement.prop('checked', true);
+                } else {
+                    r1switchElement.prop('checked', false);
+                }
+
+                if( json.r2 == true ) {
+                    r2switchElement.prop('checked', true);
+                } else {
+                    r2switchElement.prop('checked', false);
+                }
+
+                if( json.r3 == true ) {
+                    r3switchElement.prop('checked', true);
+                } else {
+                    r3switchElement.prop('checked', false);
+                }
+            },
+
+            error: function ()
+            {
+                // on error, stop execution
+                clearInterval(i);
+            }
+        });
+
+}
+
+$(function ()
+{
+    // reference cache to speed up the process of querying for the status element
+
+    get_r_data();
+
+    // this function will run each 3000 ms until stopped with clearInterval()
+    var i = setInterval(function ()
+    {
+         get_r_data();
+    }, 1000);
+});
+</script>
+<script>
+function get_v_data()
+{
+        $.ajax(
+        {
+            url: 'stats_ajax.json',
+            dataType: 'json',
+            success: function(json)
+            {
+                $(".battery #voltage").text(json.bv + "V")
+                $(".battery #current").text(json.bi + "A")
+                $(".battery #cs").text(json.bcs + ": " + json.bsoc + "%")
+                $(".pv #voltage").text(json.pvp + "W")
+                $(".pv #power").text(json.pvv + "V")
+                $(".pv #mppt").text(json.pvmppt)
+            },
+
+            error: function ()
+            {
+                // on error, stop execution
+            }
+        });
+}
+$(function ()
+{
+    // get data first
+    get_v_data();
+    // this function will run each 5000 ms until stopped with clearInterval()
+    var i = setInterval(function ()
+    {
+        get_v_data();
+    }, 5000);
+});
+</script>
+<script>
+$(function ()
+{
+        $.ajax(
+        {
+            url: 'bme.json',
+            dataType: 'json',
+            success: function(json)
+            {
+                $(".env #t").text(json.t + String.fromCharCode(176) + "C")
+                $(".env #p").text(json.p + "mb")
+                $(".env #h").text(json.h + "%")
+            },
+
+            error: function ()
+            {
+                // on error, stop execution
+            }
+        });
+});
+</script>
+
 </body>
 </html> 
 

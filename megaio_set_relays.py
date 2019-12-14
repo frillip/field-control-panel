@@ -29,6 +29,8 @@ def set_relay_state(request):
                     new_raw_state = True ^ global_vars.relay_data[relay_id]['invert']
                     megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
                     global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
+                    global_vars.relay_data[relay_id]['state'] = True
+                    global_vars.relay_data[relay_id]['raw_state'] = new_raw_state
                     global_vars.relay_timestamp[relay_id] = unix_time_int
                     return relay+" now ON"
 
@@ -37,6 +39,8 @@ def set_relay_state(request):
                     new_raw_state = False ^ global_vars.relay_data[relay_id]['invert']
                     megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
                     global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
+                    global_vars.relay_data[relay_id]['state'] = False
+                    global_vars.relay_data[relay_id]['raw_state'] = new_raw_state
                     global_vars.relay_timestamp[relay_id] = unix_time_int
                     return relay+" now OFF"
 
@@ -61,6 +65,8 @@ def relay_auto_timeout():
                     logger.warning("Auto " + global_vars.relay_data[relay_id]['name'] + " off")
                     new_raw_state = False ^ global_vars.relay_data[relay_id]['invert']
                     megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
+                    global_vars.relay_data[relay_id]['state'] = False
+                    global_vars.relay_data[relay_id]['raw_state'] = new_raw_state
                     global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
 
 # Turn on a relay if it is off and the timout has expired
@@ -68,6 +74,8 @@ def relay_auto_timeout():
                     logger.waning(": Auto " + global_vars.relay_data[relay_id]['name'] + " on")
                     new_raw_state = True ^ global_vars.relay_data[relay_id]['invert']
                     megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
+                    global_vars.relay_data[relay_id]['state'] = True
+                    global_vars.relay_data[relay_id]['raw_state'] = new_raw_state
                     global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
 
                 global_vars.relay_timestamp[relay_id] = 0
