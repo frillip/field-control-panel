@@ -9,6 +9,9 @@ h1 {
 p {
 	font-size: 12px;
 }
+.lte {
+  font-size: 12px;
+}
 .column {
   float: left;
   width: 50%;
