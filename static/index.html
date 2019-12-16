@@ -168,7 +168,7 @@ function get_m_data()
         success: function(json)
         {
             $(".lte #net").text(json.network_type);
-            $(".lte #ssi").attr("src","static/signal_"+json.signal_strength+".png");
+            $(".lte #ssi").attr("src","/static/signal_"+json.signal_strength+".png");
             var up_mb = (json.data_usage.data_up /(1024*1024)).toFixed(2);
             var down_mb = (json.data_usage.data_down /(1024*1024)).toFixed(2);
             var rate_up_kb = (json.data_usage.data_rate_up /1024).toFixed(2);
