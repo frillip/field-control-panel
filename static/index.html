@@ -51,7 +51,7 @@
         </div>
     </div>
     <div class="lte">
-        <img id="ssi" src=""/>
+        <div id="net"><img id="ssi" src=""/></div>
         <div id="data"></div>
         <div id="rate"></div>
         <div id="total_data"></div>
@@ -138,13 +138,18 @@ function get_v_data()
 }
 
 function seconds2time (seconds) {
-    var hours   = Math.floor(seconds / 3600);
-    var minutes = Math.floor((seconds - (hours * 3600)) / 60);
-    var seconds = seconds - (hours * 3600) - (minutes * 60);
+    var days    = Math.floor(seconds / 86400);
+    var hours   = Math.floor((seconds - (days * 86400)) / 3600);
+    var minutes = Math.floor((seconds - (days * 86400) - (hours * 3600)) / 60);
+    var seconds = seconds - (days * 86400) - (hours * 3600) - (minutes * 60);
     var time = "";
 
-    if (hours != 0) {
-      time = hours+":";
+    if (days != 0) {
+      time = days+" days ";
+    }
+    if (hours != 0 || time !== "") {
+      hours = (hours < 10 && time !== "") ? "0"+hours : String(hours);
+      time += hours+":";
     }
     if (minutes != 0 || time !== "") {
       minutes = (minutes < 10 && time !== "") ? "0"+minutes : String(minutes);
@@ -168,6 +173,7 @@ function get_m_data()
         success: function(json)
         {
             $(".lte #net").text(json.network_type);
+            $(".lte #net").prepend('<img id="ssi" src="" />')
             $(".lte #ssi").attr("src","/static/signal_"+json.signal_strength+".png");
             var up_mb = (json.data_usage.data_up /(1024*1024)).toFixed(2);
             var down_mb = (json.data_usage.data_down /(1024*1024)).toFixed(2);
@@ -178,13 +184,13 @@ function get_m_data()
             var conn_time = seconds2time(json.connected_time);
             var total_conn_time = seconds2time(json.connected_total_time);
             if(json.connected) {
-                $(".lte #data").text("Connected: "+conn_time+" "+down_mb+"MB / "+up_mb+"MB");
-                $(".lte #rate").text(rate_down_kb+"kB/s / "+rate_up_kb+"kB/s");
+                $(".lte #data").text("Connected: "+down_mb+"MB / "+up_mb+"MB - "+conn_time);
+                $(".lte #rate").text("Speed: "+rate_down_kb+"kB/s / "+rate_up_kb+"kB/s");
             } else {
                 $(".lte #data").text("Not Connected!");
                 $(".lte #rate").text("");
             }
-            $(".lte #total_data").text("Total: "+total_conn_time+" "+total_down_gb+"GB / "+total_up_gb+"GB");
+            $(".lte #total_data").text("Total: "+total_down_gb+"GB / "+total_up_gb+"GB - "+total_conn_time);
         },
 
         error: function ()
@@ -219,6 +225,7 @@ $(function ()
     get_env_data();
     get_v_data();
     get_r_data();
+    get_m_data();
 
     var counter = 0;
     var i = setInterval(function ()

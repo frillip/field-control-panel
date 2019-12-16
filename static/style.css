@@ -10,8 +10,22 @@ p {
 	font-size: 12px;
 }
 .lte {
+  padding-top: 20px;
   font-size: 12px;
 }
+
+.lte #net {
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.lte #ssi {
+  padding-right: 8px;
+  vertical-align:middle;
+  position: relative;
+  top:-2px;
+}
+
 .column {
   float: left;
   width: 50%;
