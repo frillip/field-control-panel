@@ -154,12 +154,10 @@ function get_env_data()
 
 $(function ()
 {
-    // reference cache to speed up the process of querying for the status element
+    get_env_data();
     get_v_data();
     get_r_data();
-    get_env_data();
 
-    // this function will run each 3000 ms until stopped with clearInterval()
     var counter = 0;
     var i = setInterval(function ()
     {
