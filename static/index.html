@@ -81,23 +81,23 @@ function get_r_data()
 {
     $.ajax(
     {
-        url: 'relay_ajax.json',
+        url: 'relay.json',
         dataType: 'json',
         success: function(json)
         {
-            if( json.r1 == true ) {
+            if( json[1].state == true ) {
                 r1switchElement.prop('checked', true);
             } else {
                 r1switchElement.prop('checked', false);
             }
 
-            if( json.r2 == true ) {
+            if( json[2].state == true ) {
                 r2switchElement.prop('checked', true);
             } else {
                 r2switchElement.prop('checked', false);
             }
 
-            if( json.r3 == true ) {
+            if( json[3].state == true ) {
                 r3switchElement.prop('checked', true);
             } else {
                 r3switchElement.prop('checked', false);
