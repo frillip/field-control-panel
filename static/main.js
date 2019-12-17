@@ -11,7 +11,8 @@ function get_r_data()
         success: function(json)
         {
             if( json[1].state == true ) {
-                r1switchElement.prop('checked', true);
+                console.log(json[1].state);
+                r1switchElement.prop('checked', 'true');
             } else {
                 r1switchElement.prop('checked', false);
             }
@@ -32,7 +33,6 @@ function get_r_data()
         error: function ()
         {
             // on error, stop execution
-            clearInterval(i);
         }
     });
 
@@ -145,25 +145,50 @@ function get_env_data()
     });
 }
 
+function get_river_data()
+{
+    $.ajax(
+    {
+        url: 'river.json',
+        dataType: 'json',
+        success: function(json)
+        {
+            $(".river #name").text(json.name);
+            $(".river #name").prepend('<img id="icon" src="" />')
+            $(".river #icon").attr("src","/static/river.png"); // Will change colour based on level in the future
+            $(".river #level").text("Current level: " + json.level + "m @ "+json.last_reading)
+            $(".river #last_high").text("Last high: " + json.last_high_level + "m @ "+json.last_high)
+        },
+
+        error: function ()
+        {
+            // on error, stop execution
+        }
+    });
+}
+
 $(function ()
 {
     get_env_data();
     get_v_data();
     get_r_data();
     get_m_data();
+    get_river_data();
 
     var counter = 0;
     var i = setInterval(function ()
     {
         get_r_data();
+        console.log(counter);
         counter++;
         if(counter%3 == 0) {
             get_v_data();
             get_m_data();
         }
-        if(counter==15) {
+        if(counter==60) {
             counter=0;
             get_env_data();
+            get_river_data();
         }
     }, 1000);
 });

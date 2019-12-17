@@ -26,6 +26,23 @@ p {
   top:-2px;
 }
 
+.river {
+  padding-top: 20px;
+  font-size: 12px;
+}
+
+.river #name {
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.river #icon {
+  padding-right: 8px;
+  vertical-align:middle;
+  position: relative;
+  top:-2px;
+}
+
 .column {
   float: left;
   width: 50%;
