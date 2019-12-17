@@ -11,7 +11,6 @@ function get_r_data()
         success: function(json)
         {
             if( json[1].state == true ) {
-                console.log(json[1].state);
                 r1switchElement.prop('checked', 'true');
             } else {
                 r1switchElement.prop('checked', false);
