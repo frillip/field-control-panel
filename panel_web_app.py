@@ -30,12 +30,8 @@ def run_web_app():
     async def styleresp(request):
         return web.FileResponse('./static/style.css')
 
-    async def relay_ajax_get(request):
-        ajax_resp = {}
-        ajax_resp['r1'] = global_vars.relay_data[1]['state']
-        ajax_resp['r2'] = global_vars.relay_data[2]['state']
-        ajax_resp['r3'] = global_vars.relay_data[3]['state']
-        return web.json_response(ajax_resp)
+    async def scriptresp(request):
+        return web.FileResponse('./static/main.js')
 
     async def stats_ajax_get(request):
         ajax_resp = {}
@@ -50,12 +46,6 @@ def run_web_app():
         return web.json_response(ajax_resp)
 
     async def buttonhandler(request):
-        logger.info("Relay state change requested")
-        data = await request.post()
-        resp=set_relay_state(data)
-        return web.Response(text=resp)
-
-    async def jsonbuttonhandler(request):
         logger.info("Relay state change requested")
         data = await request.post()
         resp=set_relay_state(data)
@@ -92,10 +82,9 @@ def run_web_app():
     app = web.Application()
     app.add_routes([web.get('/', indexresp),
                     web.get('/style.css', styleresp),
-                    web.get('/relay_ajax.json', relay_ajax_get),
+                    web.get('/main.js', scriptresp),
                     web.get('/stats_ajax.json', stats_ajax_get),
-                    web.post('/', buttonhandler),
-                    web.post('/buttons', jsonbuttonhandler),
+                    web.post('/buttons', buttonhandler),
                     web.get('/status.json', status_json),
                     web.get('/relay.json', relay_json),
                     web.get('/bme.json', bme_json),
