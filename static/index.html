@@ -13,23 +13,7 @@
     <h1>Field Control Panel</h1>
     <div class="row">
         <div class="column">
-            <h2>Fence</h2>
-            <label class="switch">
-                <input type="checkbox" id="fence">
-                <span class="slider round"></span>
-            </label>
-            <br/><br/>
-            <h2>Cameras</h2>
-            <label class="switch">
-                <input type="checkbox" id="cameras">
-                <span class="slider round"></span>
-            </label>
-            <br/><br/>
-            <h2>Lighting</h2>
-            <label class="switch">
-                <input type="checkbox" id="lighting">
-                <span class="slider round"></span>
-            </label>
+            <div id="relays"</div>
         </div>
         <div class="column">
             <div class="env">
@@ -81,6 +65,37 @@ $('input[type="checkbox"]').on('click', function(){
 });
 </script>
 <script>
+
+function create_switches() {
+{
+    $.ajax(
+    {
+        url: 'relay.json',
+        dataType: 'json',
+        success: function(json)
+        {
+            for (relay in json) {
+                if (relay != "e") {
+                    var relay_name = json[relay].name;
+                    var relays_div = document.getElementById('relays');
+                    var title = document.createElement("h2");
+                    var name = document.createTextNode(relay_name);
+                    title.appendChild(name);
+                    var label = document.createElement("label");
+                    label.setAttribute("class","switch");
+                    if (json[relay].state) {
+                        label.innerHTML = '<input type="checkbox" id="'+relay+'" checked><span class="slider round"></span>';
+                    } else {
+                        label.innerHTML = '<input type="checkbox" id="'+relay+'"><span class="slider round"></span>';
+                    }
+                    relays_div.appendChild(title);
+                    relays_div.appendChild(label);
+                }
+            }
+        }
+    }
+}
+
 var r1switchElement = $(".switch #fence");
 var r2switchElement = $(".switch #cameras");
 var r3switchElement = $(".switch #lighting");
@@ -253,7 +268,7 @@ $(function ()
 {
     get_env_data();
     get_v_data();
-    get_r_data();
+    create_switches();
     get_m_data();
     get_river_data();
 
