@@ -1,3 +1,5 @@
+var g_ignore_relay_resp = {}
+
 function create_switches()
 {
     $.ajax(
@@ -21,6 +23,7 @@ function create_switches()
                     input.id = "relay_"+relay+"_switch";
                     input.type = "checkbox";
                     input.setAttribute("onclick","change_relay_state(this)");
+                    g_ignore_relay_resp[relay] = false;
                     var slider = document.createElement("span");
                     slider.setAttribute("class","slider round");
                     if (json[relay].state) {
@@ -47,6 +50,7 @@ function change_relay_state(elem){
     var data = {};
     relay = $(elem).attr("relay_name")
     data[relay] = $(elem).is(':checked') ? "on" : "off";
+    g_ignore_relay_resp[$(elem).attr("relay_id")] = true;
     console.log(data);
     $.ajax({
         type: "POST",
@@ -67,12 +71,14 @@ function get_r_data()
         {
             for (relay in json) {
                 if (relay != "e") {
-                    var relay_switch = $("#relay_"+relay+"_switch");
-                    if (json[relay].state) {
-                        relay_switch.prop("checked", true);
-                    } else {
-                        relay_switch.prop("checked", false);
-                    }
+                    if(!g_ignore_relay_resp[relay]) {
+                        var relay_switch = $("#relay_"+relay+"_switch");
+                        if (json[relay].state) {
+                            relay_switch.prop("checked", true);
+                        } else {
+                            relay_switch.prop("checked", false);
+                        }
+                    } else { g_ignore_relay_resp[relay] = false; }
                 }
             }
         },
