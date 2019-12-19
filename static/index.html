@@ -13,7 +13,7 @@
     <h1>Field Control Panel</h1>
     <div class="row">
         <div class="column">
-            <div id="relays"</div>
+            <div id="relays"></div>
         </div>
         <div class="column">
             <div class="env">
@@ -66,7 +66,7 @@ $('input[type="checkbox"]').on('click', function(){
 </script>
 <script>
 
-function create_switches() {
+function create_switches()
 {
     $.ajax(
     {
@@ -92,8 +92,14 @@ function create_switches() {
                     relays_div.appendChild(label);
                 }
             }
+        },
+
+        error: function ()
+        {
+            // on error, stop execution
         }
-    }
+    });
+
 }
 
 var r1switchElement = $(".switch #fence");

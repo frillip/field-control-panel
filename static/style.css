@@ -6,6 +6,9 @@ h1 {
 	text-align: center;
 	font-size: 2em;
 }
+h2 {
+  text-transform: capitalize; 
+}
 p {
 	font-size: 12px;
 }
