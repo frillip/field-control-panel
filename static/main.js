@@ -1,6 +1,61 @@
-var r1switchElement = $(".switch #fence");
-var r2switchElement = $(".switch #cameras");
-var r3switchElement = $(".switch #lighting");
+function create_switches()
+{
+    $.ajax(
+    {
+        url: 'relay.json',
+        dataType: 'json',
+        success: function(json)
+        {
+            for (relay in json) {
+                if (relay != "e") {
+                    var relay_name = json[relay].name;
+                    var relays_div = document.getElementById('relays');
+                    var title = document.createElement("h2");
+                    var name = document.createTextNode(relay_name);
+                    title.appendChild(name);
+                    var label = document.createElement("label");
+                    label.setAttribute("class","switch");
+                    var input = document.createElement("input");
+                    input.setAttribute("relay_id",relay);
+                    input.setAttribute("relay_name",relay_name);
+                    input.id = "relay_"+relay+"_switch";
+                    input.type = "checkbox";
+                    input.setAttribute("onclick","change_relay_state(this)");
+                    var slider = document.createElement("span");
+                    slider.setAttribute("class","slider round");
+                    if (json[relay].state) {
+                          input.setAttribute("checked", true);
+                    }
+                    label.appendChild(input);
+                    label.appendChild(slider);
+                    relays_div.appendChild(title);
+                    relays_div.appendChild(label);
+                }
+            }
+        },
+
+        error: function ()
+        {
+            // on error, stop execution
+        }
+    });
+
+}
+
+function change_relay_state(elem){
+
+    var data = {};
+    relay = $(elem).attr("relay_name")
+    data[relay] = $(elem).is(':checked') ? "on" : "off";
+    console.log(data);
+    $.ajax({
+        type: "POST",
+        url: "buttons",
+        data: data,
+    }).done(function(data) {
+            console.log(data);
+    });
+}
 
 function get_r_data()
 {
@@ -10,22 +65,15 @@ function get_r_data()
         dataType: 'json',
         success: function(json)
         {
-            if( json[1].state == true ) {
-                r1switchElement.prop('checked', 'true');
-            } else {
-                r1switchElement.prop('checked', false);
-            }
-
-            if( json[2].state == true ) {
-                r2switchElement.prop('checked', true);
-            } else {
-                r2switchElement.prop('checked', false);
-            }
-
-            if( json[3].state == true ) {
-                r3switchElement.prop('checked', true);
-            } else {
-                r3switchElement.prop('checked', false);
+            for (relay in json) {
+                if (relay != "e") {
+                    var relay_switch = $("#relay_"+relay+"_switch");
+                    if (json[relay].state) {
+                        relay_switch.prop("checked", true);
+                    } else {
+                        relay_switch.prop("checked", false);
+                    }
+                }
             }
         },
 
@@ -170,7 +218,7 @@ $(function ()
 {
     get_env_data();
     get_v_data();
-    get_r_data();
+    create_switches();
     get_m_data();
     get_river_data();
 
@@ -178,7 +226,6 @@ $(function ()
     var i = setInterval(function ()
     {
         get_r_data();
-        console.log(counter);
         counter++;
         if(counter%3 == 0) {
             get_v_data();
