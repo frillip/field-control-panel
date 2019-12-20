@@ -55,15 +55,13 @@ p {
 }
 
 .river #status {
-  padding-right: 8px;
   vertical-align:middle;
   position: relative;
-  top:-6px;
+  top:-4px;
 }
 
 .river #warn {
   padding-left: 2px;
-  padding-right: 8px;
   vertical-align:middle;
   position: relative;
   top:-4px;
