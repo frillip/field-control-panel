@@ -207,6 +207,13 @@ function get_river_data()
         success: function(json)
         {
             $(".river #name").text(json.name);
+            if (json.level > json.high_warn) {
+                $(".river #name").append('<img id="warn" src="" />')
+                $(".river #warn").attr("src","/static/alert.png");
+            } else if (json.level > json.high) {
+                $(".river #name").append('<img id="warn" src="" />')
+                $(".river #warn").attr("src","/static/warning.png");
+            }
             if (json.status =="rising") {
                 $(".river #name").append('<img id="status" src="" />')
                 $(".river #status").attr("src","/static/arrow_up.png");

@@ -61,6 +61,14 @@ p {
   top:-6px;
 }
 
+.river #warn {
+  padding-left: 2px;
+  padding-right: 8px;
+  vertical-align:middle;
+  position: relative;
+  top:-4px;
+}
+
 .column {
   float: left;
   width: 50%;
