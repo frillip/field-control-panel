@@ -46,6 +46,13 @@ p {
   top:-2px;
 }
 
+.river #status {
+  padding-right: 8px;
+  vertical-align:middle;
+  position: relative;
+  top:-6px;
+}
+
 .column {
   float: left;
   width: 50%;
