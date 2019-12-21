@@ -107,9 +107,8 @@ def get_modem_data():
     get_mon_stat_api_url="http://" + dongle_ip + "/api/monitoring/status"
     get_mon_traf_api_url="http://" + dongle_ip + "/api/monitoring/traffic-statistics"
 
-    modem_data = {}
-
     try:
+        global_vars.modem_data["e"]=False
         auth_data=get_auth_data()
         if auth_data:
              headers = construct_auth_headers(auth_data)
@@ -119,87 +118,83 @@ def get_modem_data():
         if "DeviceName" in dev_info_resp.text:
             dev_info = xmltodict.parse(dev_info_resp.content)['response']
 
-            modem_data["name"] = dev_info["DeviceName"]
+            global_vars.modem_data["name"] = dev_info["DeviceName"]
         else:
             logger.error("Modem task failed: could not retrieve " + get_dev_info_api_url)
-            modem_data["e"]=True
+            global_vars.modem_data["e"]=True
 
         mon_stat_resp = requests.get(get_mon_stat_api_url, headers=headers)
 
         if "ConnectionStatus" in mon_stat_resp.text:
             mon_stat = xmltodict.parse(mon_stat_resp.content)['response']
 
-            modem_data["signal_strength"] = int(mon_stat["SignalIcon"])
-            modem_data["wan_ip"] = mon_stat["WanIPAddress"]
+            global_vars.modem_data["signal_strength"] = int(mon_stat["SignalIcon"])
+            global_vars.modem_data["wan_ip"] = mon_stat["WanIPAddress"]
             net_type_ex=int(mon_stat["CurrentNetworkTypeEx"])
             if net_type_ex == 0:
-                modem_data["network_type"] = "No Service"
+                global_vars.modem_data["network_type"] = "No Service"
             elif net_type_ex == 1:
-                modem_data["network_type"] = "GSM"
+                global_vars.modem_data["network_type"] = "GSM"
             elif net_type_ex == 2:
-                modem_data["network_type"] = "GPRS"
+                global_vars.modem_data["network_type"] = "GPRS"
             elif net_type_ex == 3:
-                modem_data["network_type"] = "EDGE"
+                global_vars.modem_data["network_type"] = "EDGE"
             elif net_type_ex == 41:
-                modem_data["network_type"] = "WCDMA"
+                global_vars.modem_data["network_type"] = "WCDMA"
             elif net_type_ex == 42:
-                modem_data["network_type"] = "HSDPA"
+                global_vars.modem_data["network_type"] = "HSDPA"
             elif net_type_ex == 43:
-                modem_data["network_type"] = "HSUPA"
+                global_vars.modem_data["network_type"] = "HSUPA"
             elif net_type_ex == 44:
-                modem_data["network_type"] = "HSPA"
+                global_vars.modem_data["network_type"] = "HSPA"
             elif net_type_ex == 45:
-                modem_data["network_type"] = "HSPA+"
+                global_vars.modem_data["network_type"] = "HSPA+"
             elif net_type_ex == 46:
-                modem_data["network_type"] = "HSPA+"
+                global_vars.modem_data["network_type"] = "HSPA+"
             elif net_type_ex == 62:
-                modem_data["network_type"] = "HSDPA"
+                global_vars.modem_data["network_type"] = "HSDPA"
             elif net_type_ex == 63:
-                modem_data["network_type"] = "HSUPA"
+                global_vars.modem_data["network_type"] = "HSUPA"
             elif net_type_ex == 64:
-                modem_data["network_type"] = "HSPA"
+                global_vars.modem_data["network_type"] = "HSPA"
             elif net_type_ex == 65:
-                modem_data["network_type"] = "HSPA+"
+                global_vars.modem_data["network_type"] = "HSPA+"
             elif net_type_ex == 101:
-                modem_data["network_type"] = "LTE"
+                global_vars.modem_data["network_type"] = "LTE"
             else:
-                modem_data["network_type"] = "Unknown"
+                global_vars.modem_data["network_type"] = "Unknown"
 
             if mon_stat["ConnectionStatus"] == "901":
-                modem_data["connected"] = True
+                global_vars.modem_data["connected"] = True
             else:
-                modem_data["connected"] = False
+                global_vars.modem_data["connected"] = False
         else:
             logger.error("Modem task failed: could not retrieve " + get_mon_stat_api_url)
-            modem_data["e"]=True
+            global_vars.modem_data["e"]=True
 
         mon_traf_resp = requests.get(get_mon_traf_api_url, headers=headers)
         if "CurrentConnectTime" in mon_traf_resp.text:
             mon_traf = xmltodict.parse(mon_traf_resp.content)['response']
 
-            data_usage = {}
-            data_usage["data_up"] = int(mon_traf["CurrentUpload"])
-            data_usage["data_down"] = int(mon_traf["CurrentDownload"])
-            data_usage["data_rate_up"] = int(mon_traf["CurrentUploadRate"])
-            data_usage["data_rate_down"] = int(mon_traf["CurrentDownloadRate"])
-            data_usage["data_total_up"] = int(mon_traf["TotalUpload"])
-            data_usage["data_total_down"] = int(mon_traf["TotalDownload"])
+            global_vars.modem_data["data_usage"]["data_up"] = int(mon_traf["CurrentUpload"])
+            global_vars.modem_data["data_usage"]["data_down"] = int(mon_traf["CurrentDownload"])
+            global_vars.modem_data["data_usage"]["data_rate_up"] = int(mon_traf["CurrentUploadRate"])
+            global_vars.modem_data["data_usage"]["data_rate_down"] = int(mon_traf["CurrentDownloadRate"])
+            global_vars.modem_data["data_usage"]["data_total_up"] = int(mon_traf["TotalUpload"])
+            global_vars.modem_data["data_usage"]["data_total_down"] = int(mon_traf["TotalDownload"])
 
-            modem_data["data_usage"] = data_usage
-
-            modem_data["connected_time"] = int(mon_traf["CurrentConnectTime"])
-            modem_data["connected_total_time"] = int(mon_traf["TotalConnectTime"])
+            global_vars.modem_data["connected_time"] = int(mon_traf["CurrentConnectTime"])
+            global_vars.modem_data["connected_total_time"] = int(mon_traf["TotalConnectTime"])
         else:
             logger.error("Modem task failed: could not retrieve " + get_mon_traf_api_url)
-            modem_data["e"]=True
+            global_vars.modem_data["e"]=True
 
-        modem_data["e"]=False
+        if not global_vars.modem_data["e"]:
+            global_vars.modem_data["e"]=False
 
     except Exception as e:
         logger.error("Modem task failed: " + str(e))
-        modem_data["e"]=True
-
-    global_vars.modem_data = modem_data
+        global_vars.modem_data["e"]=True
 
     pass
 
@@ -238,10 +233,14 @@ def send_sms(dest,message):
 #def read_sms(message_no) # future function to read SMS from device for balance notification and other useful things
 
 def net_connected():
-    if global_vars.modem_data["connected"] and global_vars.modem_data["connected_time"]:
-       return True
-    else:
-       return False
+    try:
+        if global_vars.modem_data["connected"] and global_vars.modem_data["connected_time"]:
+           return True
+        else:
+           return False
+    except Exception as e:
+        logger.error("Connection check failed: " + str(e))
+        return False
 
 def connection_checker():
     if not net_connected():
