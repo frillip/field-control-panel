@@ -198,6 +198,25 @@ function get_env_data()
     });
 }
 
+function get_sun_data()
+{
+    $.ajax(
+    {
+        url: 'sun.json',
+        dataType: 'json',
+        success: function(json)
+        {
+            $(".env #sunrise").text(json.sunrise.slice(11, 16))
+            $(".env #sunset").text(json.sunset.slice(11, 16))
+        },
+
+        error: function ()
+        {
+            // on error, stop execution
+        }
+    });
+}
+
 function get_river_data()
 {
     $.ajax(
@@ -241,6 +260,7 @@ $(function ()
     create_switches();
     get_m_data();
     get_river_data();
+    get_sun_data();
 
     var counter = 0;
     var i = setInterval(function ()
@@ -251,7 +271,7 @@ $(function ()
             get_v_data();
             get_m_data();
         }
-        if(counter==60) {
+        if(counter==300) {
             counter=0;
             get_env_data();
             get_river_data();
