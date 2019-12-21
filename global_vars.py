@@ -12,6 +12,14 @@ log_format = ColoredFormatter(
         'CRITICAL': 'red,bg_white',
         })
 
+timezone = 'Europe/London'
+sun_data = {}
+sun_data['next'] = {}
+
+field_latitude = 52.553
+field_longitude = -1.171
+field_elevation = 0
+
 bme_data = {}
 
 mppt_data = {}
@@ -24,6 +32,7 @@ bmv_data["batt"] = {}
 bmv_data["stats"] = {}
 
 modem_data = {}
+modem_data["data_usage"] = {}
 river_data = {}
 
 relay_map = { "fence" : 1 , "cameras" : 2, "lighting" : 3 }

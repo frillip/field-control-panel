@@ -59,6 +59,7 @@ def run_web_app():
         status_data['bmv'] = global_vars.bmv_data
         status_data['modem'] = global_vars.modem_data
         status_data['river'] = global_vars.river_data
+        status_data['sun'] = global_vars.sun_data
         return web.json_response(status_data)
 
     async def relay_json(request):
@@ -79,6 +80,9 @@ def run_web_app():
     async def river_json(request):
         return web.json_response(global_vars.river_data)
 
+    async def sun_json(request):
+        return web.json_response(global_vars.sun_data)
+
     app = web.Application()
     app.add_routes([web.get('/', indexresp),
                     web.get('/style.css', styleresp),
@@ -91,6 +95,7 @@ def run_web_app():
                     web.get('/mppt.json', mppt_json),
                     web.get('/bmv.json', bmv_json),
                     web.get('/modem.json', modem_json),
-                    web.get('/river.json', river_json)])
+                    web.get('/river.json', river_json),
+                    web.get('/sun.json', sun_json)])
     runner = web.AppRunner(app, access_log=None)
     return runner

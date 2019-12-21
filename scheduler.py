@@ -6,6 +6,7 @@ from megaio_set_relays import relay_auto_timeout
 from e3372_interface import get_modem_data,connection_checker
 from bme_env_data import get_bme_data
 from environment_agency import init_river,check_river
+from sun import get_new_sun_data,update_sun_data
 import global_vars
 import logging
 import colorlog
@@ -37,6 +38,10 @@ def setup_scheduler():
     schedule.every().hour.at(':16').do(check_river)
     schedule.every().hour.at(':31').do(check_river)
     schedule.every().hour.at(':46').do(check_river)
+    logger.info("Starting sun data tasks")
+    schedule.every().day.at('00:00').do(get_new_sun_data)
+    get_new_sun_data()
+    schedule.every().second.do(update_sun_data)
     logger.info("All tasks scheduled!")
     pass
 
