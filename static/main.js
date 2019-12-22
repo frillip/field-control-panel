@@ -1,5 +1,12 @@
 var g_ignore_relay_resp = {}
 
+var g_sun_timer = 0
+
+var g_modem_connected = true
+var g_up_mb = 0
+var g_down_mb = 0
+var g_conn_time = 0
+
 function create_switches()
 {
     $.ajax(
@@ -153,16 +160,19 @@ function get_m_data()
             $(".lte #net").text(json.network_type);
             $(".lte #net").prepend('<img id="ssi" src="" />')
             $(".lte #ssi").attr("src","/static/signal_"+json.signal_strength+".png");
-            var up_mb = (json.data_usage.data_up /(1024*1024)).toFixed(2);
-            var down_mb = (json.data_usage.data_down /(1024*1024)).toFixed(2);
+            g_up_mb = (json.data_usage.data_up /(1024*1024)).toFixed(2);
+            g_down_mb = (json.data_usage.data_down /(1024*1024)).toFixed(2);
             var rate_up_kb = (json.data_usage.data_rate_up /1024).toFixed(2);
             var rate_down_kb = (json.data_usage.data_rate_down /1024).toFixed(2);
             var total_up_gb = (json.data_usage.data_total_up /(1024*1024*1024)).toFixed(2);
             var total_down_gb = (json.data_usage.data_total_down /(1024*1024*1024)).toFixed(2);
             var total_data_percent =  (((json.data_usage.data_total_up + json.data_usage.data_total_down) / (24 * 1024 * 1024 * 1024)) * 100).toFixed(1);
-            var conn_time = seconds2time(json.connected_time);
-            if(json.connected) {
-                $(".lte #data").text("Connected: "+down_mb+"MB / "+up_mb+"MB - "+conn_time);
+            g_modem_connected = json.connected;
+            if(g_modem_connected) {
+                if(g_conn_time %60 == 0) {
+                    g_conn_time = json.connected_time;
+                    $(".lte #data").text("Connected: "+g_down_mb+"MB / "+g_up_mb+"MB - "+seconds2time(g_conn_time));
+                }
                 $(".lte #rate").text("Speed: "+rate_down_kb+"kB/s / "+rate_up_kb+"kB/s");
             } else {
                 $(".lte #data").text("Not Connected!");
@@ -176,6 +186,16 @@ function get_m_data()
             // on error, stop execution
         }
     });
+}
+
+function update_conn_time()
+{
+    g_conn_time++;
+    if(g_modem_connected) {
+        $(".lte #data").text("Connected: "+g_down_mb+"MB / "+g_up_mb+"MB - "+seconds2time(g_conn_time));
+    } else {
+        $(".lte #data").text("Not Connected!");
+    }
 }
 
 function get_env_data()
@@ -206,8 +226,17 @@ function get_sun_data()
         dataType: 'json',
         success: function(json)
         {
-            $(".env #sunrise").text(json.sunrise.slice(11, 16))
-            $(".env #sunset").text(json.sunset.slice(11, 16))
+            $(".pv #sunrise").text(json.sunrise.slice(11, 16))
+            $(".pv #sunset").text(json.sunset.slice(11, 16))
+            $(".pv #elevation").text(json.solar_elevation + String.fromCharCode(176))
+            if(json.time_to_sunrise > 0) {
+                $(".pv #sun_timer_icon").attr("src","/static/sunrise.png");
+                g_sun_timer = json.time_to_sunrise
+            } else {
+                $(".pv #sun_timer_icon").attr("src","/static/sunset.png");
+                g_sun_timer = json.time_to_sunset
+            }
+            $(".pv #sun_timer").text(seconds2time(g_sun_timer))
         },
 
         error: function ()
@@ -215,6 +244,16 @@ function get_sun_data()
             // on error, stop execution
         }
     });
+}
+
+function update_sun_timer()
+{
+    g_sun_timer--;
+    if(g_sun_timer < 0) {
+        get_sun_data();
+    } else {
+        $(".pv #sun_timer").text(seconds2time(g_sun_timer));
+    }
 }
 
 function get_river_data()
@@ -266,6 +305,8 @@ $(function ()
     var i = setInterval(function ()
     {
         get_r_data();
+        update_sun_timer();
+        update_conn_time();
         counter++;
         if(counter%3 == 0) {
             get_v_data();

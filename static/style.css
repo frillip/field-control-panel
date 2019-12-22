@@ -19,6 +19,13 @@ p {
   display:inline-block;
   float: left;
 }
+.pv img {
+  width: 15px;
+  height: 15px;
+  padding-right: 2px;
+  display:inline-block;
+  float: left;
+}
 
 .lte {
   padding-top: 20px;
