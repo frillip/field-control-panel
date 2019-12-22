@@ -1,5 +1,7 @@
 # Ignore private user data
 user_data.py
+
+#vIgnore sample json for testing
 static/*.json
 
 # Byte-compiled / optimized / DLL files
