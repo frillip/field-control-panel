@@ -20,6 +20,9 @@ field_latitude = 52.553
 field_longitude = -1.171
 field_elevation = 0
 
+weather_data = {}
+weather_data['site'] = {}
+
 bme_data = {}
 
 mppt_data = {}

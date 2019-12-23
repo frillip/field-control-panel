@@ -60,6 +60,7 @@ def run_web_app():
         status_data['modem'] = global_vars.modem_data
         status_data['river'] = global_vars.river_data
         status_data['sun'] = global_vars.sun_data
+        status_data['weather'] = global_vars.weather_data
         return web.json_response(status_data)
 
     async def relay_json(request):
@@ -83,6 +84,9 @@ def run_web_app():
     async def sun_json(request):
         return web.json_response(global_vars.sun_data)
 
+    async def weather_json(request):
+        return web.json_response(global_vars.weather_data)
+
     app = web.Application()
     app.add_routes([web.get('/', indexresp),
                     web.get('/style.css', styleresp),
@@ -96,6 +100,7 @@ def run_web_app():
                     web.get('/bmv.json', bmv_json),
                     web.get('/modem.json', modem_json),
                     web.get('/river.json', river_json),
-                    web.get('/sun.json', sun_json)])
+                    web.get('/sun.json', sun_json),
+                    web.get('/weather.json', weather_json)])
     runner = web.AppRunner(app, access_log=None)
     return runner
