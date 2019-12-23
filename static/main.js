@@ -246,6 +246,29 @@ function get_sun_data()
     });
 }
 
+function get_weather_data()
+{
+    $.ajax(
+    {
+        url: 'weather.json',
+        dataType: 'json',
+        success: function(json)
+        {
+            $("#weather_type_icon").attr("src","/static/weather/"+json.weather_type+".png")
+            $("#weather_type_text").text(json.weather_type_text)
+            var wind_icon = "wind"+(Math.round(json.wind_speed / 5)*5)+".png"
+            $("#wind_direction").attr("src","/static/wind/"+wind_icon)
+            $("#wind_speed").text(json.wind_speed+" mph")
+            $("#precipitation_chance").text(json.precipitation_chance+"%")
+        },
+
+        error: function ()
+        {
+            // on error, stop execution
+        }
+    });
+}
+
 function update_sun_timer()
 {
     g_sun_timer--;
@@ -300,6 +323,7 @@ $(function ()
     get_m_data();
     get_river_data();
     get_sun_data();
+    get_weather_data();
 
     var counter = 0;
     var i = setInterval(function ()
@@ -316,6 +340,7 @@ $(function ()
             counter=0;
             get_env_data();
             get_river_data();
+            get_weather_data();
         }
     }, 1000);
 });
