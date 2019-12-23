@@ -258,6 +258,7 @@ function get_weather_data()
             $("#weather_type_text").text(json.weather_type_text)
             var wind_icon = "wind"+(Math.round(json.wind_speed / 5)*5)+".png"
             $("#wind_direction").attr("src","/static/wind/"+wind_icon)
+            $("#wind_direction").attr("class","wind"+json.wind_direction)
             $("#wind_speed").text(json.wind_speed+" mph")
             $("#precipitation_chance").text(json.precipitation_chance+"%")
         },

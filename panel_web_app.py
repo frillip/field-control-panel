@@ -30,6 +30,9 @@ def run_web_app():
     async def styleresp(request):
         return web.FileResponse('./static/style.css')
 
+    async def windstyleresp(request):
+        return web.FileResponse('./static/wind.css')
+
     async def scriptresp(request):
         return web.FileResponse('./static/main.js')
 
@@ -90,6 +93,7 @@ def run_web_app():
     app = web.Application()
     app.add_routes([web.get('/', indexresp),
                     web.get('/style.css', styleresp),
+                    web.get('/wind.css', windstyleresp),
                     web.get('/main.js', scriptresp),
                     web.get('/stats_ajax.json', stats_ajax_get),
                     web.post('/buttons', buttonhandler),
