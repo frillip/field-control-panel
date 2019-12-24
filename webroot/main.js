@@ -159,7 +159,7 @@ function get_m_data()
         {
             $(".lte #net").text(json.network_type);
             $(".lte #net").prepend('<img id="ssi" src="" />')
-            $(".lte #ssi").attr("src","/icons/signal_"+json.signal_strength+".png");
+            $(".lte #ssi").attr("src","/icon/signal_"+json.signal_strength+".png");
             g_up_mb = (json.data_usage.data_up /(1024*1024)).toFixed(2);
             g_down_mb = (json.data_usage.data_down /(1024*1024)).toFixed(2);
             var rate_up_kb = (json.data_usage.data_rate_up /1024).toFixed(2);
@@ -230,10 +230,10 @@ function get_sun_data()
             $(".pv #sunset").text(json.sunset.slice(11, 16))
             $(".pv #elevation").text(json.solar_elevation + String.fromCharCode(176))
             if(json.time_to_sunrise > 0) {
-                $(".pv #sun_timer_icon").attr("src","/icons/sunrise.png");
+                $(".pv #sun_timer_icon").attr("src","/icon/sunrise.png");
                 g_sun_timer = json.time_to_sunrise
             } else {
-                $(".pv #sun_timer_icon").attr("src","/icons/sunset.png");
+                $(".pv #sun_timer_icon").attr("src","/icon/sunset.png");
                 g_sun_timer = json.time_to_sunset
             }
             $(".pv #sun_timer").text(seconds2time(g_sun_timer))
@@ -254,10 +254,10 @@ function get_weather_data()
         dataType: 'json',
         success: function(json)
         {
-            $("#weather_type_icon").attr("src","/icons/weather/"+json.weather_type+".png")
+            $("#weather_type_icon").attr("src","/icon/weather/"+json.weather_type+".png")
             $("#weather_type_text").text(json.weather_type_text)
             var wind_icon = "wind"+(Math.round(json.wind_speed / 5)*5)+".png"
-            $("#wind_direction").attr("src","/icons/wind/"+wind_icon)
+            $("#wind_direction").attr("src","/icon/wind/"+wind_icon)
             $("#wind_direction").attr("class","wind"+json.wind_direction)
             $("#wind_speed").text(json.wind_speed+" mph")
             $("#precipitation_chance").text(json.precipitation_chance+"%")
@@ -291,20 +291,20 @@ function get_river_data()
             $(".river #name").text(json.name);
             if (json.level > json.high_warn) {
                 $(".river #name").append('<img id="warn" src="" />')
-                $(".river #warn").attr("src","/icons/alert.png");
+                $(".river #warn").attr("src","/icon/alert.png");
             } else if (json.level > json.high) {
                 $(".river #name").append('<img id="warn" src="" />')
-                $(".river #warn").attr("src","/icons/warning.png");
+                $(".river #warn").attr("src","/icon/warning.png");
             }
             if (json.status =="rising") {
                 $(".river #name").append('<img id="status" src="" />')
-                $(".river #status").attr("src","/icons/arrow_up.png");
+                $(".river #status").attr("src","/icon/arrow_up.png");
             } else if (json.status =="falling") {
                 $(".river #name").append('<img id="status" src="" />')
-                $(".river #status").attr("src","/icons/arrow_down.png");
+                $(".river #status").attr("src","/icon/arrow_down.png");
             }
             $(".river #name").prepend('<img id="icon" src="" />')
-            $(".river #icon").attr("src","/icons/river.png"); // Will change colour based on level in the future
+            $(".river #icon").attr("src","/icon/river.png"); // Will change colour based on level in the future
             $(".river #level").text("Current level: " + json.level + "m @ "+json.last_reading)
             $(".river #last_high").text("Last high: " + json.last_high_level + "m @ "+json.last_high)
         },
