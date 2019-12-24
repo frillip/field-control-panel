@@ -256,7 +256,21 @@ function get_weather_data()
         {
             $("#weather_type_icon").attr("src","/icon/weather/"+json.weather_type+".png")
             $("#weather_type_text").text(json.weather_type_text)
-            var wind_icon = "wind"+(Math.round(json.wind_speed / 5)*5)+".png"
+            var wind_icon = ""
+            if (json.wind_speed == 0) {
+                wind_icon = "wind0.png"
+            } else if (json.wind_speed < 3) {
+                wind_icon = "wind1.png"
+            } else if (json.wind_speed < 63) {
+                wind_icon = "wind"+(Math.round(json.wind_speed / 5)*5)+".png"
+            } else if (json.wind_speed < 98) {
+                wind_icon = "wind60.png"
+            } else if (json.wind_speed < 108) {
+                wind_icon = "wind"+(Math.round(json.wind_speed / 5)*5)+".png"
+            } else {
+               // We're in serious trouble if the wind is > 107mph...
+                wind_icon = "wind105.png"
+            }
             $("#wind_direction").attr("src","/icon/wind/"+wind_icon)
             $("#wind_direction").attr("class","wind"+json.wind_direction)
             $("#wind_speed").text(json.wind_speed+" mph")
