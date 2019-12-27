@@ -9,21 +9,18 @@ var g_conn_time = 0
 
 function create_switches()
 {
-    $.ajax(
-    {
-        url: 'relay.json',
-        dataType: 'json',
-        success: function(json)
-        {
-            for (relay in json) {
+    fetch("relay.json")
+        .then(response => response.json())
+        .then(data => {
+            for (relay in data) {
                 if (relay != "e") {
-                    var relay_name = json[relay].name;
+                    var relay_name = data[relay].name;
                     var relays_div = document.getElementById('relays');
                     var title = document.createElement("h2");
                     var name = document.createTextNode(relay_name);
                     title.appendChild(name);
                     var label = document.createElement("label");
-                    label.setAttribute("class","switch");
+                    label.className = "switch";
                     var input = document.createElement("input");
                     input.setAttribute("relay_id",relay);
                     input.setAttribute("relay_name",relay_name);
@@ -32,9 +29,11 @@ function create_switches()
                     input.setAttribute("onclick","change_relay_state(this)");
                     g_ignore_relay_resp[relay] = false;
                     var slider = document.createElement("span");
-                    slider.setAttribute("class","slider round");
-                    if (json[relay].state) {
-                          input.setAttribute("checked", true);
+                    slider.className = "slider round";
+                    if (data[relay].state) {
+                          input.checked = true;
+                    } else {
+                          input.checked = false;
                     }
                     label.appendChild(input);
                     label.appendChild(slider);
@@ -42,14 +41,10 @@ function create_switches()
                     relays_div.appendChild(label);
                 }
             }
-        },
-
-        error: function ()
-        {
+        }).catch(error => {
+            console.log(error);
             // on error, stop execution
-        }
-    });
-
+        });
 }
 
 function change_relay_state(elem){
