@@ -68,34 +68,27 @@ function change_relay_state(elem){
     });
 }
 
-function get_r_data()
+function get_relay_data()
 {
-    $.ajax(
-    {
-        url: 'relay.json',
-        dataType: 'json',
-        success: function(json)
-        {
-            for (relay in json) {
+    fetch("relay.json")
+        .then(response => response.json())
+        .then(data => {
+            for (relay in data) {
                 if (relay != "e") {
                     if(!g_ignore_relay_resp[relay]) {
-                        var relay_switch = $("#relay_"+relay+"_switch");
-                        if (json[relay].state) {
-                            relay_switch.prop("checked", true);
+                        var relay_switch = document.querySelector("#relay_"+relay+"_switch");
+                        if (data[relay].state) {
+                            relay_switch.checked = true;
                         } else {
-                            relay_switch.prop("checked", false);
+                            relay_switch.checked = false;
                         }
                     } else { g_ignore_relay_resp[relay] = false; }
                 }
             }
-        },
-
-        error: function ()
-        {
+        }).catch(error => {
+            console.log(error);
             // on error, stop execution
-        }
-    });
-
+        });
 }
 
 function get_v_data()
@@ -343,7 +336,7 @@ $(function ()
     var counter = 0;
     var i = setInterval(function ()
     {
-        get_r_data();
+        get_relay_data();
         update_sun_timer();
         update_conn_time();
         counter++;
@@ -359,3 +352,12 @@ $(function ()
         }
     }, 1000);
 });
+
+window.onfocus = function() {
+    get_v_data();
+    get_env_data();
+    get_m_data();
+    get_river_data();
+    get_sun_data();
+    get_weather_data();
+}
