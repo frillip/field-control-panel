@@ -43,10 +43,10 @@ def set_relay_state(request):
                     global_vars.relay_timestamp[relay_id] = unix_time_int
                     return relay+" now OFF"
                 else:
-                    logger.warning("Garbled relay request: "+str(request))
+                    logger.error("Garbled relay request, no valid state: "+str(request))
                     return "Ah-ah-ah! You didn't say the magic word!"
             else:
-                logger.warning("Garbled relay request: "+str(request))
+                logger.error("Garbled relay request, no valid relay: "+str(request))
                 return "Ah-ah-ah! You didn't say the magic word!"
 
     except Exception as e:

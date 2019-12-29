@@ -56,7 +56,6 @@ function change_relay_state(elem){
     data[relay_name] = relay_state;
     g_ignore_relay_resp[relay_id] = true;
     console.log(data);
-    console.log(JSON.stringify(data));
     fetch("buttons", {
         method: 'POST',
         body: JSON.stringify(data) })
@@ -94,26 +93,20 @@ function get_relay_data()
 
 function get_v_data()
 {
-    $.ajax(
-    {
-        url: 'stats_ajax.json',
-        dataType: 'json',
-        success: function(json)
-        {
-            $(".battery #voltage").text(json.bv + "V")
-            $(".battery #current").text(json.bi + "A")
-            $(".battery #cs").text(json.bcs + ": " + json.bsoc + "%")
-            $(".pv #voltage").text(json.pvp + "W")
-            $(".pv #power").text(json.pvv + "V")
-            $(".pv #mppt").text(json.pvmppt)
-            $(".pv #yield").text(json.pvy + "Wh")
-        },
-
-        error: function ()
-        {
+    fetch("stats_ajax.json")
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector(".battery #voltage").innerHTML = data.bv + "V"
+            document.querySelector(".battery #current").innerHTML = data.bi + "A"
+            document.querySelector(".battery #cs").innerHTML = data.bcs + ": " + data.bsoc + "%"
+            document.querySelector(".pv #voltage").innerHTML = data.pvp + "W"
+            document.querySelector(".pv #power").innerHTML = data.pvv + "V"
+            document.querySelector(".pv #mppt").innerHTML = data.pvmppt
+            document.querySelector(".pv #yield").innerHTML = data.pvy + "Wh"
+        }).catch(error => {
+            console.log(error);
             // on error, stop execution
-        }
-    });
+        });
 }
 
 function seconds2time (seconds) {
@@ -145,137 +138,112 @@ function seconds2time (seconds) {
 
 function get_m_data()
 {
-    $.ajax(
-    {
-        url: 'modem.json',
-        dataType: 'json',
-        success: function(json)
-        {
-            $(".lte #net").text(json.network_type);
-            $(".lte #net").prepend('<img id="ssi" src="" />')
-            $(".lte #ssi").attr("src","/icon/signal_"+json.signal_strength+".png");
-            g_up_mb = (json.data_usage.data_up /(1024*1024)).toFixed(2);
-            g_down_mb = (json.data_usage.data_down /(1024*1024)).toFixed(2);
-            var rate_up_kb = (json.data_usage.data_rate_up /1024).toFixed(2);
-            var rate_down_kb = (json.data_usage.data_rate_down /1024).toFixed(2);
-            var total_up_gb = (json.data_usage.data_total_up /(1024*1024*1024)).toFixed(2);
-            var total_down_gb = (json.data_usage.data_total_down /(1024*1024*1024)).toFixed(2);
-            var total_data_percent =  (((json.data_usage.data_total_up + json.data_usage.data_total_down) / (24 * 1024 * 1024 * 1024)) * 100).toFixed(1);
-            g_modem_connected = json.connected;
+    fetch("modem.json")
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector(".lte #net").innerHTML = '<img id="ssi" src="" />' +data.network_type;
+            document.querySelector(".lte #ssi").src = "/icon/signal_"+data.signal_strength+".png";
+            g_up_mb = (data.data_usage.data_up /(1024*1024)).toFixed(2);
+            g_down_mb = (data.data_usage.data_down /(1024*1024)).toFixed(2);
+            var rate_up_kb = (data.data_usage.data_rate_up /1024).toFixed(2);
+            var rate_down_kb = (data.data_usage.data_rate_down /1024).toFixed(2);
+            var total_up_gb = (data.data_usage.data_total_up /(1024*1024*1024)).toFixed(2);
+            var total_down_gb = (data.data_usage.data_total_down /(1024*1024*1024)).toFixed(2);
+            var total_data_percent =  (((data.data_usage.data_total_up + data.data_usage.data_total_down) / (24 * 1024 * 1024 * 1024)) * 100).toFixed(1);
+            g_modem_connected = data.connected;
             if(g_modem_connected) {
                 if(g_conn_time %60 == 0) {
-                    g_conn_time = json.connected_time;
-                    $(".lte #data").text("Connected: "+g_down_mb+"MB / "+g_up_mb+"MB - "+seconds2time(g_conn_time));
+                    g_conn_time = data.connected_time;
+                    document.querySelector(".lte #data").innerHTML = "Connected: "+g_down_mb+"MB / "+g_up_mb+"MB - "+seconds2time(g_conn_time);
                 }
-                $(".lte #rate").text("Speed: "+rate_down_kb+"kB/s / "+rate_up_kb+"kB/s");
+                document.querySelector(".lte #rate").innerHTML = "Speed: "+rate_down_kb+"kB/s / "+rate_up_kb+"kB/s";
             } else {
-                $(".lte #data").text("Not Connected!");
-                $(".lte #rate").text("");
+                document.querySelector(".lte #data").innerHTML = "Not Connected!";
+                document.querySelector(".lte #rate").innerHTML = "";
             }
-            $(".lte #total_data").text("Total: "+total_down_gb+"GB / "+total_up_gb+"GB - "+total_data_percent+"% of 24GB");
-        },
-
-        error: function ()
-        {
+            document.querySelector(".lte #total_data").innerHTML = "Total: "+total_down_gb+"GB / "+total_up_gb+"GB - "+total_data_percent+"% of 24GB";
+        }).catch(error => {
+            console.log(error);
             // on error, stop execution
-        }
-    });
+        });
 }
 
 function update_conn_time()
 {
     g_conn_time++;
     if(g_modem_connected) {
-        $(".lte #data").text("Connected: "+g_down_mb+"MB / "+g_up_mb+"MB - "+seconds2time(g_conn_time));
+        document.querySelector(".lte #data").innerHTML = "Connected: "+g_down_mb+"MB / "+g_up_mb+"MB - "+seconds2time(g_conn_time);
     } else {
-        $(".lte #data").text("Not Connected!");
+        document.querySelector(".lte #data").innerHTML = "Not Connected!";
     }
 }
 
 function get_env_data()
 {
-    $.ajax(
-    {
-        url: 'bme.json',
-        dataType: 'json',
-        success: function(json)
-        {
-            $(".env #t").text(json.t + String.fromCharCode(176) + "C")
-            $(".env #p").text(json.p + "mb")
-            $(".env #h").text(json.h + "%")
-        },
-
-        error: function ()
-        {
+    fetch("bme.json")
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector(".env #t").innerHTML = data.t + String.fromCharCode(176) + "C"
+            document.querySelector(".env #p").innerHTML = data.p + "mb"
+            document.querySelector(".env #h").innerHTML = data.h + "%"
+        }).catch(error => {
+            console.log(error);
             // on error, stop execution
-        }
-    });
+        });
 }
 
 function get_sun_data()
 {
-    $.ajax(
-    {
-        url: 'sun.json',
-        dataType: 'json',
-        success: function(json)
-        {
-            $(".pv #sunrise").text(json.sunrise.slice(11, 16))
-            $(".pv #sunset").text(json.sunset.slice(11, 16))
-            $(".pv #elevation").text(json.solar_elevation + String.fromCharCode(176))
-            if(json.time_to_sunrise > 0) {
-                $(".pv #sun_timer_icon").attr("src","/icon/sunrise.png");
-                g_sun_timer = json.time_to_sunrise
+    fetch("sun.json")
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector(".pv #sunrise").innerHTML = data.sunrise.slice(11, 16)
+            document.querySelector(".pv #sunset").innerHTML = data.sunset.slice(11, 16)
+            document.querySelector(".pv #elevation").innerHTML = data.solar_elevation + String.fromCharCode(176)
+            if(data.time_to_sunrise > 0) {
+                document.querySelector(".pv #sun_timer_icon").src = "/icon/sunrise.png";
+                g_sun_timer = data.time_to_sunrise
             } else {
-                $(".pv #sun_timer_icon").attr("src","/icon/sunset.png");
-                g_sun_timer = json.time_to_sunset
+                document.querySelector(".pv #sun_timer_icon").src = "/icon/sunset.png";
+                g_sun_timer = data.time_to_sunset
             }
-            $(".pv #sun_timer").text(seconds2time(g_sun_timer))
-        },
-
-        error: function ()
-        {
+            document.querySelector(".pv #sun_timer").innerHTML = seconds2time(g_sun_timer)
+        }).catch(error => {
+            console.log(error);
             // on error, stop execution
-        }
-    });
+        });
 }
 
 function get_weather_data()
 {
-    $.ajax(
-    {
-        url: 'weather.json',
-        dataType: 'json',
-        success: function(json)
-        {
-            $("#weather_type_icon").attr("src","/icon/weather/"+json.weather_type+".png")
-            $("#weather_type_text").text(json.weather_type_text)
+    fetch("weather.json")
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector("#weather_type_icon").src = "/icon/weather/"+data.weather_type+".png";
+            document.querySelector("#weather_type_text").innerHTML = data.weather_type_text
             var wind_icon = ""
-            if (json.wind_speed == 0) {
-                wind_icon = "wind0.png"
-            } else if (json.wind_speed < 3) {
-                wind_icon = "wind1.png"
-            } else if (json.wind_speed < 63) {
-                wind_icon = "wind"+(Math.round(json.wind_speed / 5)*5)+".png"
-            } else if (json.wind_speed < 98) {
-                wind_icon = "wind60.png"
-            } else if (json.wind_speed < 108) {
-                wind_icon = "wind"+(Math.round(json.wind_speed / 5)*5)+".png"
+            if (data.wind_speed == 0) {
+                wind_icon = "wind0.png";
+            } else if (data.wind_speed < 3) {
+                wind_icon = "wind1.png";
+            } else if (data.wind_speed < 63) {
+                wind_icon = "wind"+(Math.round(data.wind_speed / 5)*5)+".png";
+            } else if (data.wind_speed < 98) {
+                wind_icon = "wind60.png";
+            } else if (data.wind_speed < 108) {
+                wind_icon = "wind"+(Math.round(data.wind_speed / 5)*5)+".png";
             } else {
                // We're in serious trouble if the wind is > 107mph...
-                wind_icon = "wind105.png"
+                wind_icon = "wind105.png";
             }
-            $("#wind_direction").attr("src","/icon/wind/"+wind_icon)
-            $("#wind_direction").attr("class","wind"+json.wind_direction)
-            $("#wind_speed").text(json.wind_speed+" mph")
-            $("#precipitation_chance").text(json.precipitation_chance+"%")
-        },
-
-        error: function ()
-        {
+            document.querySelector("#wind_direction").src = "/icon/wind/"+wind_icon;
+            document.querySelector("#wind_direction").className = "wind"+data.wind_direction;
+            document.querySelector("#wind_speed").innerHTML = data.wind_speed+" mph";
+            document.querySelector("#precipitation_chance").innerHTML = data.precipitation_chance+"%";
+        }).catch(error => {
+            console.log(error);
             // on error, stop execution
-        }
-    });
+        });
 }
 
 function update_sun_timer()
@@ -284,47 +252,40 @@ function update_sun_timer()
     if(g_sun_timer < 0) {
         get_sun_data();
     } else {
-        $(".pv #sun_timer").text(seconds2time(g_sun_timer));
+        document.querySelector(".pv #sun_timer").innerHTML = seconds2time(g_sun_timer);
     }
 }
 
 function get_river_data()
 {
-    $.ajax(
-    {
-        url: 'river.json',
-        dataType: 'json',
-        success: function(json)
-        {
-            $(".river #name").text(json.name);
-            if (json.level > json.high_warn) {
-                $(".river #name").append('<img id="warn" src="" />')
-                $(".river #warn").attr("src","/icon/alert.png");
-            } else if (json.level > json.high) {
-                $(".river #name").append('<img id="warn" src="" />')
-                $(".river #warn").attr("src","/icon/warning.png");
+    fetch("river.json")
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector(".river #name").innerHTML = '<img id="icon" src="" />' + data.name;
+            document.querySelector(".river #icon").src = "/icon/river.png"; // Will change colour based on level in the future
+            if (data.level > data.high_warn) {
+                document.querySelector(".river #name").innerHTML += '<img id="warn" src="" />';
+                document.querySelector(".river #warn").src = "/icon/alert.png";
+            } else if (data.level > data.high) {
+                document.querySelector(".river #name").innerHTML += '<img id="warn" src="" />';
+                document.querySelector(".river #warn").src = "/icon/warning.png";
             }
-            if (json.status =="rising") {
-                $(".river #name").append('<img id="status" src="" />')
-                $(".river #status").attr("src","/icon/arrow_up.png");
-            } else if (json.status =="falling") {
-                $(".river #name").append('<img id="status" src="" />')
-                $(".river #status").attr("src","/icon/arrow_down.png");
+            if (data.status =="rising") {
+                document.querySelector(".river #name").innerHTML += '<img id="status" src="" />';
+                document.querySelector(".river #status").src = "/icon/arrow_up.png";
+            } else if (data.status =="falling") {
+                document.querySelector(".river #name").innerHTML += '<img id="status" src="" />';
+                document.querySelector(".river #status").src = "/icon/arrow_down.png";
             }
-            $(".river #name").prepend('<img id="icon" src="" />')
-            $(".river #icon").attr("src","/icon/river.png"); // Will change colour based on level in the future
-            $(".river #level").text("Current level: " + json.level + "m @ "+json.last_reading)
-            $(".river #last_high").text("Last high: " + json.last_high_level + "m @ "+json.last_high)
-        },
-
-        error: function ()
-        {
+            document.querySelector(".river #level").innerHTML = "Current level: " + data.level + "m @ "+data.last_reading
+            document.querySelector(".river #last_high").innerHTML = "Last high: " + data.last_high_level + "m @ "+data.last_high
+        }).catch(error => {
+            console.log(error);
             // on error, stop execution
-        }
-    });
+        });
 }
 
-$(function ()
+document.addEventListener('DOMContentLoaded', function()
 {
     get_env_data();
     get_v_data();
@@ -352,7 +313,7 @@ $(function ()
             get_weather_data();
         }
     }, 1000);
-});
+}, false);
 
 window.onfocus = function() {
     get_v_data();
