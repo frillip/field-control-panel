@@ -23,7 +23,6 @@ def set_relay_state(request):
         for relay in request:
             if relay in global_vars.relay_map:
                 relay_id = global_vars.relay_map[relay]
-
                 if request[relay] == "on":
                     logger.warning("Manual " + relay + " on")
                     new_raw_state = True ^ global_vars.relay_data[relay_id]['invert']
@@ -43,6 +42,12 @@ def set_relay_state(request):
                     global_vars.relay_data[relay_id]['raw_state'] = new_raw_state
                     global_vars.relay_timestamp[relay_id] = unix_time_int
                     return relay+" now OFF"
+                else:
+                    logger.warning("Garbled relay request: "+str(request))
+                    return "Ah-ah-ah! You didn't say the magic word!"
+            else:
+                logger.warning("Garbled relay request: "+str(request))
+                return "Ah-ah-ah! You didn't say the magic word!"
 
     except Exception as e:
         logger.error("Failed to set relay state: " + str(e))

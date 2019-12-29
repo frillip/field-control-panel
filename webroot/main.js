@@ -50,17 +50,23 @@ function create_switches()
 function change_relay_state(elem){
 
     var data = {};
-    relay = $(elem).attr("relay_name")
-    data[relay] = $(elem).is(':checked') ? "on" : "off";
-    g_ignore_relay_resp[$(elem).attr("relay_id")] = true;
+    var relay_name = elem.getAttribute("relay_name");
+    var relay_id = elem.getAttribute("relay_id");
+    var relay_state = elem.checked ? 'on' : "off";
+    data[relay_name] = relay_state;
+    g_ignore_relay_resp[relay_id] = true;
     console.log(data);
-    $.ajax({
-        type: "POST",
-        url: "buttons",
-        data: data,
-    }).done(function(data) {
-            console.log(data);
-    });
+    console.log(JSON.stringify(data));
+    fetch("buttons", {
+        method: 'POST',
+        body: JSON.stringify(data) })
+        .then((response) => response.text())
+        .then((data) => {
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
 }
 
 function get_relay_data()

@@ -24,7 +24,6 @@ def run_server(runner):
 
 def run_web_app():
     async def indexresp(request):
-        logger.info("Index page requested")
         return web.FileResponse('./webroot/index.html')
 
     async def scriptresp(request):
@@ -44,8 +43,9 @@ def run_web_app():
 
     async def buttonhandler(request):
         logger.info("Relay state change requested")
-        data = await request.post()
-        resp=set_relay_state(data)
+        data = await request.text()
+        relay_req=json.loads(data)
+        resp=set_relay_state(relay_req)
         return web.Response(text=resp)
 
     async def status_json(request):
