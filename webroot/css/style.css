@@ -38,6 +38,7 @@ p {
 }
 
 .lte #ssi {
+  height: 30px;
   padding-right: 8px;
   vertical-align:middle;
   position: relative;
@@ -55,6 +56,7 @@ p {
 }
 
 .river #icon {
+  height: 30px;
   padding-right: 8px;
   vertical-align:middle;
   position: relative;
