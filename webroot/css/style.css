@@ -2,16 +2,20 @@ body {
 	text-align: left;
 	font-family: sans-serif;
 }
+
 h1 {
 	text-align: center;
 	font-size: 2em;
 }
+
 h2 {
   text-transform: capitalize; 
 }
+
 p {
 	font-size: 12px;
 }
+
 .env img {
   width: 15px;
   height: 15px;
@@ -19,6 +23,15 @@ p {
   display:inline-block;
   float: left;
 }
+
+.battery img {
+  width: 15px;
+  height: 15px;
+  padding-right: 2px;
+  display:inline-block;
+  float: left;
+}
+
 .pv img {
   width: 15px;
   height: 15px;

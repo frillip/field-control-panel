@@ -100,8 +100,8 @@ function get_v_data()
             document.querySelector(".battery #voltage").innerHTML = data.bv + "V"
             document.querySelector(".battery #current").innerHTML = data.bi + "A"
             document.querySelector(".battery #cs").innerHTML = data.bcs + ": " + data.bsoc + "%"
-            document.querySelector(".pv #voltage").innerHTML = data.pvp + "W"
-            document.querySelector(".pv #power").innerHTML = data.pvv + "V"
+            document.querySelector(".pv #power").innerHTML = data.pvp + "W"
+            document.querySelector(".pv #voltage").innerHTML = data.pvv + "V"
             document.querySelector(".pv #mppt").innerHTML = data.pvmppt
             document.querySelector(".pv #yield").innerHTML = data.pvy + "Wh"
         }).catch(error => {
