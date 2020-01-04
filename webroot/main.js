@@ -1,6 +1,6 @@
 var g_ignore_relay_resp = {}
-var g_sunrise_datetime = new Date("1970-01-01T00:00:00");
 
+var g_sunrise_datetime = new Date("1970-01-01T00:00:00");
 var g_sun_timer = 0
 
 var g_modem_connected = true
@@ -198,6 +198,11 @@ function get_sun_data()
     fetch("sun.json")
         .then(response => response.json())
         .then(data => {
+            if(data.state == "day") {
+                document.querySelector(".pv #pv_mppt_icon").src = "/icon/solar_panel_sun.png"
+            } else {
+                document.querySelector(".pv #pv_mppt_icon").src = "/icon/solar_panel.png"
+            }
             document.querySelector(".pv #sunrise").innerHTML = data.sunrise.slice(11, 16)
             g_sunrise_datetime = new Date(data.sunrise)
             document.querySelector(".pv #sunset").innerHTML = data.sunset.slice(11, 16)
