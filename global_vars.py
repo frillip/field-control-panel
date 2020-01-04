@@ -1,7 +1,8 @@
 from datetime import datetime
-from colorlog import ColoredFormatter
+import logging
+import colorlog
 
-log_format = ColoredFormatter(
+log_format = colorlog.ColoredFormatter(
         "%(asctime)s %(log_color)s[%(levelname)s]%(reset)s %(name)s: %(message)s",
         datefmt="%Y-%m-%dT%H:%M:%S",
         log_colors={
@@ -11,6 +12,18 @@ log_format = ColoredFormatter(
         'ERROR': 'red',
         'CRITICAL': 'red,bg_white',
         })
+
+log_level = logging.INFO
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(log_format)
+logger = colorlog.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(log_level)
+
+from megaio_get_data import get_relay_data
+
+# Will be moved to YAML eventually
 
 timezone = 'Europe/London'
 sun_data = {}
@@ -72,11 +85,30 @@ relay_data[3]['auto_off'] = False
 relay_data[3]['auto_timeout'] = 0
 relay_data[3]['last_state_change'] = datetime.now().replace(microsecond=0).isoformat()
 
-relay_map = {}
-relay_timestamp = {}
+relay_data[4] = {}
+relay_data[4]['enabled'] = False
+relay_data[5] = {}
+relay_data[5]['enabled'] = False
+relay_data[6] = {}
+relay_data[6]['enabled'] = False
+relay_data[7] = {}
+relay_data[7]['enabled'] = False
+relay_data[8] = {}
+relay_data[8]['enabled'] = False
 
-for relay_number in relay_data:
-    if relay_data[relay_number]['enabled']:
-        relay_name = relay_data[relay_number]['name']
-        relay_map[relay_name] = relay_number
-        relay_timestamp[relay_number] = 0
+try:
+    get_relay_data()
+    relay_map = {}
+    relay_timestamp = {}
+
+    for relay_number in relay_data:
+        if relay_data[relay_number]['enabled']:
+            relay_name = relay_data[relay_number]['name']
+            relay_map[relay_name] = relay_number
+            relay_timestamp[relay_number] = 0
+
+except Exception as e:
+    # Error has occurred, log it
+    logger.error("Failed to set up global vars: " + str(e))
+
+

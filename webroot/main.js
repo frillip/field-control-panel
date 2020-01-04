@@ -14,7 +14,7 @@ function create_switches()
         .then(response => response.json())
         .then(data => {
             for (relay in data) {
-                if (relay != "e") {
+                if (data[relay].enabled == true) {
                     var relay_name = data[relay].name;
                     var relays_div = document.getElementById('relays');
                     var title = document.createElement("h2");

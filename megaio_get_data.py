@@ -10,35 +10,37 @@ logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-
+# Megaio boards can have different stack IDs (0-3), ours is 0.
 megaio_stack_id = 0
 
+# Bit mask dict for reading individual relays
+relay_mask = { 1 : 0x01,
+               2 : 0x02,
+               3 : 0x04,
+               4 : 0x08,
+               5 : 0x10,
+               6 : 0x20,
+               7 : 0x40,
+               8 : 0x80 }
+
+# Function that gets ALL the relay states
 def get_relay_data():
 
-    global megaio_stack_id
-
-    relay_mask = { 1 : 0x01,
-                   2 : 0x02,
-                   3 : 0x04,
-                   4 : 0x08,
-                   5 : 0x10,
-                   6 : 0x20,
-                   7 : 0x40,
-                   8 : 0x80 }
-
     try:
+        # For some reason, you can only read ALL of the relay states as a single byte, so do this
         relay_byte=megaio.get_relays(megaio_stack_id)
-        global_vars.relay_data.pop("e", None)
+        # Then for each relay
         for relay_id in global_vars.relay_data:
-            global_vars.relay_data[relay_id]['raw_state'] = bool(relay_byte & relay_mask[relay_id])
-            global_vars.relay_data[relay_id]['state'] = global_vars.relay_data[relay_id]['raw_state'] ^ global_vars.relay_data[relay_id]['invert']
-
-        global_vars.relay_data['e'] = False
-
+            # And if it's enabled
+            if global_vars.relay_data[relay_id]['enabled']:
+                # Bitmask it to get the raw state
+                global_vars.relay_data[relay_id]['raw_state'] = bool(relay_byte & relay_mask[relay_id])
+                # And invert to get the 'true' state if required
+                global_vars.relay_data[relay_id]['state'] = global_vars.relay_data[relay_id]['raw_state'] ^ global_vars.relay_data[relay_id]['invert']
 
     except Exception as e:
+        # Error has occurred, log it
         logger.error("Relay data task failed: " + str(e))
-        global_vars.relay_data['e'] = True
 
     pass
 
