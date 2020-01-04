@@ -9,7 +9,7 @@ handler = colorlog.StreamHandler()
 handler.setFormatter(global_vars.log_format)
 logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(global_vars.log_level)
 
 api_url = "https://api.clickatell.com/rest/message"
 

@@ -14,7 +14,7 @@ function create_switches()
         .then(response => response.json())
         .then(data => {
             for (relay in data) {
-                if (data[relay].enabled == true) {
+                if (data[relay].enabled) {
                     var relay_name = data[relay].name;
                     var relays_div = document.getElementById('relays');
                     var title = document.createElement("h2");
@@ -75,7 +75,7 @@ function get_relay_data()
         .then(response => response.json())
         .then(data => {
             for (relay in data) {
-                if (relay != "e") {
+                if (data[relay].enabled) {
                     if(!g_ignore_relay_resp[relay]) {
                         var relay_switch = document.querySelector("#relay_"+relay+"_switch");
                         if (data[relay].state) {

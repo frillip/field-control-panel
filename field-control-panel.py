@@ -23,7 +23,7 @@ def main():
     handler = colorlog.StreamHandler()
     handler.setFormatter(global_vars.log_format)
     logger = colorlog.getLogger("main")
-    logger.setLevel(logging.INFO)
+    logger.setLevel(global_vars.log_level)
     logger.addHandler(handler)
     logger.info("Starting Jurassic Park Control System")
 

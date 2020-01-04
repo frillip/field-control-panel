@@ -11,7 +11,7 @@ handler = colorlog.StreamHandler()
 handler.setFormatter(global_vars.log_format)
 logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(global_vars.log_level)
 
 env_agency_api_url = "https://environment.data.gov.uk/flood-monitoring/id/measures/4195-level-stage-i-15_min-mASD"
 env_agency_api_station_url = "https://environment.data.gov.uk/flood-monitoring/id/stations/4195"
