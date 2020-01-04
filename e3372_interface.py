@@ -108,7 +108,6 @@ def get_modem_data():
     get_mon_traf_api_url="http://" + dongle_ip + "/api/monitoring/traffic-statistics"
 
     try:
-        global_vars.modem_data["e"]=False
         auth_data=get_auth_data()
         if auth_data:
              headers = construct_auth_headers(auth_data)
@@ -121,7 +120,6 @@ def get_modem_data():
             global_vars.modem_data["name"] = dev_info["DeviceName"]
         else:
             logger.error("Modem task failed: could not retrieve " + get_dev_info_api_url)
-            global_vars.modem_data["e"]=True
 
         mon_stat_resp = requests.get(get_mon_stat_api_url, headers=headers)
 
@@ -170,7 +168,6 @@ def get_modem_data():
                 global_vars.modem_data["connected"] = False
         else:
             logger.error("Modem task failed: could not retrieve " + get_mon_stat_api_url)
-            global_vars.modem_data["e"]=True
 
         mon_traf_resp = requests.get(get_mon_traf_api_url, headers=headers)
         if "CurrentConnectTime" in mon_traf_resp.text:
@@ -187,14 +184,9 @@ def get_modem_data():
             global_vars.modem_data["connected_total_time"] = int(mon_traf["TotalConnectTime"])
         else:
             logger.error("Modem task failed: could not retrieve " + get_mon_traf_api_url)
-            global_vars.modem_data["e"]=True
-
-        if not global_vars.modem_data["e"]:
-            global_vars.modem_data["e"]=False
 
     except Exception as e:
         logger.error("Modem task failed: " + str(e))
-        global_vars.modem_data["e"]=True
 
     pass
 

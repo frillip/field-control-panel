@@ -98,6 +98,24 @@ function get_v_data()
         .then(response => response.json())
         .then(data => {
             document.querySelector(".battery #voltage").innerHTML = Number(data.bv).toFixed(2) + "V"
+            var battery_icon = document.querySelector(".battery #battery_charge_icon")
+            if(data.bcs == "Fault") {
+                battery_icon.src= "/icon/battery_missing.png"
+            } else if(data.bcs != "Not charging") {
+                battery_icon.src= "/icon/battery_charging.png"
+            } else if(data.bsoc > 95) {
+                battery_icon.src= "/icon/battery_4.png"
+            } else if(data.bsoc > 80) {
+                battery_icon.src= "/icon/battery_3.png"
+            } else if(data.bsoc > 60) {
+                battery_icon.src= "/icon/battery_2.png"
+            } else if(data.bsoc > 40) {
+                battery_icon.src= "/icon/battery_1.png"
+            } else if(data.bsoc > 0) {
+                battery_icon.src= "/icon/battery_0.png"
+            } else {
+                battery_icon.src= "/icon/battery_missing.png"
+            }
             document.querySelector(".battery #current").innerHTML = Number(data.bi).toFixed(2) + "A"
             document.querySelector(".battery #cs").innerHTML = data.bcs + ": " + data.bsoc + "%"
             document.querySelector(".pv #power").innerHTML = data.pvp + "W"
