@@ -97,8 +97,8 @@ function get_v_data()
     fetch("stats_ajax.json")
         .then(response => response.json())
         .then(data => {
-            document.querySelector(".battery #voltage").innerHTML = data.bv + "V"
-            document.querySelector(".battery #current").innerHTML = data.bi + "A"
+            document.querySelector(".battery #voltage").innerHTML = Number(data.bv).toFixed(2) + "V"
+            document.querySelector(".battery #current").innerHTML = Number(data.bi).toFixed(2) + "A"
             document.querySelector(".battery #cs").innerHTML = data.bcs + ": " + data.bsoc + "%"
             document.querySelector(".pv #power").innerHTML = data.pvp + "W"
             document.querySelector(".pv #voltage").innerHTML = data.pvv + "V"
