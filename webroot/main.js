@@ -1,4 +1,5 @@
 var g_ignore_relay_resp = {}
+var g_sunrise_datetime = new Date("1970-01-01T00:00:00");
 
 var g_sun_timer = 0
 
@@ -198,6 +199,7 @@ function get_sun_data()
         .then(response => response.json())
         .then(data => {
             document.querySelector(".pv #sunrise").innerHTML = data.sunrise.slice(11, 16)
+            g_sunrise_datetime = new Date(data.sunrise)
             document.querySelector(".pv #sunset").innerHTML = data.sunset.slice(11, 16)
             document.querySelector(".pv #elevation").innerHTML = data.solar_elevation + String.fromCharCode(176)
             if(data.time_to_sunrise > 0) {
@@ -212,6 +214,19 @@ function get_sun_data()
             console.log(error);
             // on error, stop execution
         });
+}
+
+function update_sun_timer()
+{
+    g_sun_timer--;
+    var current_datetime = new Date()
+    if(g_sunrise_datetime.getDay() != current_datetime.getDay()) {
+        get_sun_data();
+    } else if(g_sun_timer < 0) {
+        get_sun_data();
+    } else {
+        document.querySelector(".pv #sun_timer").innerHTML = seconds2time(g_sun_timer);
+    }
 }
 
 function get_weather_data()
@@ -244,16 +259,6 @@ function get_weather_data()
             console.log(error);
             // on error, stop execution
         });
-}
-
-function update_sun_timer()
-{
-    g_sun_timer--;
-    if(g_sun_timer < 0) {
-        get_sun_data();
-    } else {
-        document.querySelector(".pv #sun_timer").innerHTML = seconds2time(g_sun_timer);
-    }
 }
 
 function get_river_data()
