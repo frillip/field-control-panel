@@ -1,8 +1,11 @@
 # Ignore private user data
 user_data.py
 
-#vIgnore sample json for testing
+# Ignore sample json for testing
 static/*.json
+
+# Ignore YAML
+*.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

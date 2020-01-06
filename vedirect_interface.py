@@ -92,6 +92,9 @@ mppt_text = {
 2: 'MPP Tracker active'
 }
 
+run_mppt_vedirect_loop = True
+run_bmv_vedirect_loop = True
+
 def get_mppt_data():
 
     try:
@@ -106,7 +109,9 @@ def get_mppt_data():
         ser.open()
         # Discard any garbage
         ser.flushInput()
-        while True:
+        logger.info("MPPT VE.Direct data loop started")
+        while run_mppt_vedirect_loop:
+
             field = {}
             ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
             while not '\t' in ve_string:
@@ -170,6 +175,8 @@ def get_mppt_data():
             ser.close()
         logger.error("mppt data task failed: " + str(e))
 
+    logger.warning("MPPT VE.Direct data loop stopped")
+
     pass
 
 
@@ -187,7 +194,8 @@ def get_bmv_data():
         ser.open()
         # Discard any garbage
         ser.flushInput()
-        while True:
+        logger.info("BMV VE.Direct data loop started")
+        while run_bmv_vedirect_loop:
             field = {}
             ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
             while not '\t' in ve_string:
@@ -294,11 +302,13 @@ def get_bmv_data():
             ser.close()
         logger.error("bmv data task failed: " + str(e))
 
+    logger.warning("BMV VE.Direct data loop stopped")
+
     pass
 
 def mppt_loop():
     logger.info("Starting MPPT data loop from VE.Direct interface")
-    while True:
+    while run_mppt_vedirect_loop:
         get_mppt_data()
         # Sleep for 10 seconds to avoid flooding the log, usually caused by serial device randomly vanishing thanks to an undervoltage condition...
         time.sleep(10)
@@ -306,7 +316,7 @@ def mppt_loop():
 
 def bmv_loop():
     logger.info("Starting BMV data loop from VE.Direct interface")
-    while True:
+    while run_bmv_vedirect_loop:
         get_bmv_data()
         # Sleep for 10 seconds to avoid flooding the log, usually caused by serial device randomly vanishing thanks to an undervoltage condition...
         time.sleep(10)

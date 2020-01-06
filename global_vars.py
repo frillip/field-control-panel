@@ -21,8 +21,6 @@ logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(log_level)
 
-from megaio_get_data import get_relay_data
-
 # Will be moved to YAML eventually
 
 timezone = 'Europe/London'
@@ -96,19 +94,16 @@ relay_data[7]['enabled'] = False
 relay_data[8] = {}
 relay_data[8]['enabled'] = False
 
+relay_map = {}
+relay_timestamp = {}
+
 try:
-    get_relay_data()
-    relay_map = {}
-    relay_timestamp = {}
-
-    for relay_number in relay_data:
-        if relay_data[relay_number]['enabled']:
-            relay_name = relay_data[relay_number]['name']
-            relay_map[relay_name] = relay_number
-            relay_timestamp[relay_number] = 0
-
+    for relay_id in relay_data:
+        if relay_data[relay_id]['enabled']:
+            relay_name = relay_data[relay_id]['name']
+            relay_map[relay_name] = relay_id
+            relay_timestamp[relay_id] = 0
 except Exception as e:
     # Error has occurred, log it
-    logger.error("Failed to set up global vars: " + str(e))
-
+    logger.error("Failed to generate relay mapping: " + str(e))
 

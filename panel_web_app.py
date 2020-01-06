@@ -1,4 +1,5 @@
 import asyncio
+from time import sleep
 from aiohttp import web
 import json
 from megaio_set_relays import set_relay_state
@@ -12,15 +13,28 @@ logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(global_vars.log_level)
 
+run_webapp_server = True
+
+loop = asyncio.new_event_loop()
+
+def stop_server():
+    loop.call_soon_threadsafe(loop.stop)
+    while loop.is_running():
+        logger.info("Webapp still running")
+        sleep(1)
+    loop.close()
+    logger.warning("Webapp server stopped")
 
 def run_server(runner):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(runner.setup())
-    logger.info("Starting webapp server")
-    site = web.TCPSite(runner, 'localhost', 8080)
-    loop.run_until_complete(site.start())
-    loop.run_forever()
+    try:
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(runner.setup())
+        logger.info("Starting webapp server")
+        site = web.TCPSite(runner, 'localhost', 8080)
+        loop.run_until_complete(site.start())
+        loop.run_forever()
+    except Exception as e:
+        logger.error("Webapp server failed: " + str(e))
 
 def run_web_app():
     async def indexresp(request):

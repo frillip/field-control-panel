@@ -18,6 +18,8 @@ logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(global_vars.log_level)
 
+run_scheduler = True
+
 def setup_scheduler():
     logger.info("Starting modem task")
     schedule.every().second.do(get_modem_data)
@@ -54,10 +56,11 @@ def loop_scheduler():
     logging.getLogger('schedule').setLevel(logging.WARNING)
     logger.info("Starting scheduler")
     setup_scheduler()
-    while True:
+    while run_scheduler:
         try:
             schedule.run_pending()
         except Exception as e:
             logger.error("Scheduled task failed: " + str(e))
         time.sleep(0.1)
-    pass # Should never get here...
+    logger.warning("Scheduled tasks stopped") 
+    pass
