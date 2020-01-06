@@ -1,0 +1,80 @@
+megaio:
+  stack_id: 0
+
+relay:
+  1:
+    auto_off: false
+    auto_on: false
+    auto_timeout: 0
+    enabled: true
+    invert: true
+    last_state_change: '2020-01-04T16:16:49'
+    name: fence
+  2:
+    auto_off: true
+    auto_on: false
+    auto_timeout: 300
+    enabled: true
+    invert: false
+    last_state_change: '2020-01-04T16:16:49'
+    name: cameras
+  3:
+    auto_off: false
+    auto_on: false
+    auto_timeout: 0
+    enabled: true
+    invert: false
+    last_state_change: '2020-01-04T16:16:49'
+    name: lighting
+  4:
+    enabled: false
+  5:
+    enabled: false
+  6:
+    enabled: false
+  7:
+    enabled: false
+  8:
+    enabled: false
+
+field:
+  latitude: 52.553
+  longitude: -1.171
+  elevation: 0
+  timezone: 'Europe/London'
+
+bme:
+  i2c_port: 1
+  i2c_address: 0x76
+
+mppt:
+  tty_dev: /dev/ttyUSB1
+  baudrate: 19200
+
+bmv:
+  tty_dev: /dev/ttyUSB0
+  baudrate: 19200
+  warn_sms_list:
+    - +447xxxxxxxxx
+    - +447xxxxxxxxx
+
+e3372:
+  dongle_ip: 192.168.8.1
+
+river:
+  api_url: https://environment.data.gov.uk/flood-monitoring/id/measures/4195-level-stage-i-15_min-mASD
+  api_station_url: https://environment.data.gov.uk/flood-monitoring/id/stations/4195
+  last_high: '2020-01-04T16:16:49'
+  last_high_level: 0.3
+  high: 0.95
+  high_warn: 1.1
+  warn_sms_list:
+    - +447xxxxxxxxx
+    - +447xxxxxxxxx
+
+met_office:
+  api_url: http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/351592
+  datapoint_api_key: xxxx-xxxx-xxxx
+
+clickatell:
+  api_key: xxxx-xxxx-xxxx
