@@ -51,6 +51,8 @@ def relay_handle_request(request):
     return "Ah-ah-ah! You didn't say the magic word!"
 
 def relay_auto_timeout():
+    # Get current unix timestamp
+    unix_time_int = int(time.time())
     # For every relay in the timestamp dict
     for relay_id in global_vars.relay_timestamp:
         try:
