@@ -10,8 +10,8 @@ logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(global_vars.log_level)
 
-# Megaio boards can have different stack IDs (0-3), ours is 0.
-megaio_stack_id = 0
+# Get megaio stack id, will be from yaml config eventually
+megaio_stack_id = global_vars.megaio_stack_id
 
 # Bit mask dict for reading individual relays
 relay_mask = { 1 : 0x01,

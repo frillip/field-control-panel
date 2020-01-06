@@ -13,6 +13,9 @@ log_format = colorlog.ColoredFormatter(
         'CRITICAL': 'red,bg_white',
         })
 
+# Megaio boards can have different stack IDs (0-3), ours is 0.
+megaio_stack_id = 0
+
 log_level = logging.INFO
 
 handler = colorlog.StreamHandler()

@@ -2,7 +2,7 @@ import asyncio
 from time import sleep
 from aiohttp import web
 import json
-from megaio_set_relays import set_relay_state
+from megaio_set_relays import relay_handle_request
 import global_vars
 import logging
 import colorlog
@@ -59,7 +59,7 @@ def run_web_app():
         logger.info("Relay state change requested")
         data = await request.text()
         relay_req=json.loads(data)
-        resp=set_relay_state(relay_req)
+        resp=relay_handle_request(relay_req)
         return web.Response(text=resp)
 
     async def status_json(request):
