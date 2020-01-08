@@ -7,7 +7,8 @@ import scheduler
 from e3372_interface import get_modem_data,send_connection_req,net_connected
 import panel_web_app
 import vedirect_interface
-import yaml_parser
+import yaml_save_state
+import yaml_config
 import logging
 import colorlog
 
@@ -37,7 +38,9 @@ def main():
     logger.info("Starting Jurassic Park Control System")
     logger.info("Registering SIGINT handler")
     signal.signal(signal.SIGINT, signal_handler)
-    yaml_parser.load_last_saved_state()
+    # Move this lime to yaml_config.load_config() when implemented
+    yaml_config.generate_relay_map()
+    yaml_save_state.load_last_saved_state()
     logger.info("Connecting to LTE")
     get_modem_data()
     while not net_connected():
@@ -60,7 +63,7 @@ def main():
 
 def signal_handler(sig, frame):
     logger.warning("Caught CTRL-C interrupt! Stopping...")
-    yaml_parser.save_running_state()
+    yaml_save_state.save_running_state()
     logger.warning("Stopping scheduled tasks")
     scheduler.run_scheduler = False
     logger.warning("Stopping VE.Direct data loops")

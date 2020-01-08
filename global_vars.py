@@ -13,9 +13,6 @@ log_format = colorlog.ColoredFormatter(
         'CRITICAL': 'red,bg_white',
         })
 
-# Megaio boards can have different stack IDs (0-3), ours is 0.
-megaio_stack_id = 0
-
 log_level = logging.INFO
 
 handler = colorlog.StreamHandler()
@@ -24,15 +21,13 @@ logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(log_level)
 
-# Will be moved to YAML eventually
+# Global var for if config/save state has been loaded
+config_loaded = False
+last_state_loaded = False
 
-timezone = 'Europe/London'
+# Set up dicts for holding data
 sun_data = {}
 sun_data['next'] = {}
-
-field_latitude = 52.553
-field_longitude = -1.171
-field_elevation = 0
 
 weather_data = {}
 weather_data['site'] = {}
@@ -50,10 +45,32 @@ bmv_data["stats"] = {}
 
 modem_data = {}
 modem_data["data_usage"] = {}
+
 river_data = {}
 
 relay_data = {}
 relay_data[1] = {}
+relay_data[2] = {}
+relay_data[3] = {}
+relay_data[4] = {}
+relay_data[5] = {}
+relay_data[6] = {}
+relay_data[7] = {}
+relay_data[8] = {}
+relay_map = {}
+relay_timestamp = {}
+
+# Below need to be moved to YAML
+
+# Megaio boards can have different stack IDs (0-3), ours is 0.
+megaio_stack_id = 0
+
+timezone = 'Europe/London'
+field_latitude = 52.553
+field_longitude = -1.171
+field_elevation = 0
+
+# Move to yaml
 relay_data[1]['enabled'] = True
 relay_data[1]['name'] = "fence"
 relay_data[1]['raw_state'] = False
@@ -64,7 +81,6 @@ relay_data[1]['auto_off'] = False
 relay_data[1]['auto_timeout'] = 0
 relay_data[1]['last_state_change'] = datetime.now().replace(microsecond=0).isoformat()
 
-relay_data[2] = {}
 relay_data[2]['enabled'] = True
 relay_data[2]['name'] = "cameras"
 relay_data[2]['raw_state'] = False
@@ -75,7 +91,6 @@ relay_data[2]['auto_off'] = True
 relay_data[2]['auto_timeout'] = 300
 relay_data[2]['last_state_change'] = datetime.now().replace(microsecond=0).isoformat()
 
-relay_data[3] = {}
 relay_data[3]['enabled'] = True
 relay_data[3]['name'] = "lighting"
 relay_data[3]['raw_state'] = False
@@ -86,27 +101,8 @@ relay_data[3]['auto_off'] = False
 relay_data[3]['auto_timeout'] = 0
 relay_data[3]['last_state_change'] = datetime.now().replace(microsecond=0).isoformat()
 
-relay_data[4] = {}
 relay_data[4]['enabled'] = False
-relay_data[5] = {}
 relay_data[5]['enabled'] = False
-relay_data[6] = {}
 relay_data[6]['enabled'] = False
-relay_data[7] = {}
 relay_data[7]['enabled'] = False
-relay_data[8] = {}
 relay_data[8]['enabled'] = False
-
-relay_map = {}
-relay_timestamp = {}
-
-try:
-    for relay_id in relay_data:
-        if relay_data[relay_id]['enabled']:
-            relay_name = relay_data[relay_id]['name']
-            relay_map[relay_name] = relay_id
-            relay_timestamp[relay_id] = 0
-except Exception as e:
-    # Error has occurred, log it
-    logger.error("Failed to generate relay mapping: " + str(e))
-

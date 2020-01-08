@@ -13,6 +13,9 @@ logger.setLevel(global_vars.log_level)
 # Filename for save state file
 save_state_file = 'save_state.yaml'
 
+# Is the last state loaded (or has been attempted to be loaded)?
+last_state_loaded= False
+
 # What we are expecting to save / load
 relay_save_list = ['auto_off','auto_on','auto_timeout','last_state_change','state']
 # Do we want state saving? Maybe, doesn't currently do anything and gets clobbered next time relays are read...
@@ -116,6 +119,8 @@ def load_last_saved_state():
                     # Warn if they are not
                     else:
                         logger.warning("Unrecognised save option in relay save state data: " + str(attribute))
+
+        last_state_loaded = True
 
     except Exception as e:
         logger.error("Unhandled exception whilst loading last saved state: " + str(e))
