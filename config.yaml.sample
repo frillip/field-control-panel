@@ -8,7 +8,6 @@ relay:
     auto_timeout: 0
     enabled: true
     invert: true
-    last_state_change: '2020-01-04T16:16:49'
     name: fence
   2:
     auto_off: true
@@ -16,7 +15,6 @@ relay:
     auto_timeout: 300
     enabled: true
     invert: false
-    last_state_change: '2020-01-04T16:16:49'
     name: cameras
   3:
     auto_off: false
@@ -24,7 +22,6 @@ relay:
     auto_timeout: 0
     enabled: true
     invert: false
-    last_state_change: '2020-01-04T16:16:49'
     name: lighting
   4:
     enabled: false
@@ -54,6 +51,7 @@ mppt:
 bmv:
   tty_dev: /dev/ttyUSB0
   baudrate: 19200
+  warn_enable: False
   warn_sms_list:
     - +447xxxxxxxxx
     - +447xxxxxxxxx
@@ -64,17 +62,16 @@ e3372:
 river:
   api_url: https://environment.data.gov.uk/flood-monitoring/id/measures/4195-level-stage-i-15_min-mASD
   api_station_url: https://environment.data.gov.uk/flood-monitoring/id/stations/4195
-  last_high: '2020-01-04T16:16:49'
-  last_high_level: 0.3
   high: 0.95
   high_warn: 1.1
+  warn_enable: False
   warn_sms_list:
     - +447xxxxxxxxx
     - +447xxxxxxxxx
 
 met_office:
   api_url: http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/351592
-  datapoint_api_key: xxxx-xxxx-xxxx
+  api_key: xxxx-xxxx-xxxx
 
 clickatell:
   api_key: xxxx-xxxx-xxxx

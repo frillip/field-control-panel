@@ -17,8 +17,8 @@ save_state_file = 'save_state.yaml'
 last_state_loaded= False
 
 # What we are expecting to save / load
-relay_save_list = ['auto_off','auto_on','auto_timeout','last_state_change','state']
-# Do we want state saving? Maybe, doesn't currently do anything and gets clobbered next time relays are read...
+relay_save_list = ['last_state_change','state']
+# Do we want relay state saving? Maybe, doesn't currently do anything and gets clobbered next time relays are read...
 river_save_list = ['last_high','last_high_level','last_warn','warning_active']
 
 def save_running_state():
@@ -56,7 +56,7 @@ def save_running_state():
         # Write to yaml file
         logger.info("Writing to "+save_state_file)
         with open(save_state_file, 'w') as file:
-            save_state = yaml.dump(save_data, file)
+            save_state = yaml.safe_dump(save_data, file)
 
     except Exception as e:
         logger.error("Unhandled exception whilst saving current state: " + str(e))

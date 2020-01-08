@@ -38,7 +38,7 @@ def main():
     logger.info("Starting Jurassic Park Control System")
     logger.info("Registering SIGINT handler")
     signal.signal(signal.SIGINT, signal_handler)
-    # Move this lime to yaml_config.load_config() when implemented
+    yaml_config.load_config()
     yaml_config.generate_relay_map()
     yaml_save_state.load_last_saved_state()
     logger.info("Connecting to LTE")
