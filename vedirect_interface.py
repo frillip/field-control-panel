@@ -94,6 +94,7 @@ run_bmv_vedirect_loop = True
 
 def process_mppt_data_string(ve_string):
 
+    field = {}
     field["label"] = ve_string.split("\t")[0]
     field["data"] = ve_string.split("\t")[1]
 
@@ -153,6 +154,7 @@ def process_mppt_data_string(ve_string):
 
 def process_bmv_data_string(ve_string):
 
+    field = {}
     field["label"] = ve_string.split("\t")[0]
     field["data"] = ve_string.split("\t")[1]
 
