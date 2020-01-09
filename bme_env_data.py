@@ -1,12 +1,11 @@
 import smbus2
 import bme280
 import global_vars
+from yaml_config import config
 import logging
 import colorlog
 
-bme_port = 1 # Yes
-bme_address = 0x76 # Cheap BME280s are 0x76, Adafruit is 0x77
-bme_bus = smbus2.SMBus(bme_port)
+bme_bus = smbus2.SMBus(config['bme']['i2c_port'])
 
 handler = colorlog.StreamHandler()
 handler.setFormatter(global_vars.log_format)
@@ -18,9 +17,9 @@ def get_bme_data():
 
     try:
         # Load some data
-        bme280.load_calibration_params(bme_bus,bme_address)
+        bme280.load_calibration_params(bme_bus,config['bme']['i2c_address'])
         # Read some data
-        bme_raw_data = bme280.sample(bme_bus,bme_address)
+        bme_raw_data = bme280.sample(bme_bus,config['bme']['i2c_address'])
 
         # Deposit it into the global dict
         global_vars.bme_data['h'] = round(bme_raw_data.humidity,1)
