@@ -5,7 +5,7 @@ from yaml_config import config
 import logging
 import colorlog
 
-bme_bus = smbus2.SMBus(config['bme']['i2c_port'])
+bme_bus = None
 
 handler = colorlog.StreamHandler()
 handler.setFormatter(global_vars.log_format)
@@ -15,9 +15,15 @@ logger.setLevel(global_vars.log_level)
 
 def get_bme_data():
 
-    try:
+    # Initial set up required
+    global bme_bus
+    if not bme_bus:
+        # Set up the i2c bus for the BME280
+        bme_bus = smbus2.SMBus(config['bme']['i2c_port'])
         # Load some data
         bme280.load_calibration_params(bme_bus,config['bme']['i2c_address'])
+
+    try:
         # Read some data
         bme_raw_data = bme280.sample(bme_bus,config['bme']['i2c_address'])
 
