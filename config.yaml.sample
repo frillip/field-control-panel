@@ -75,3 +75,4 @@ met_office:
 
 clickatell:
   api_key: xxxx-xxxx-xxxx
+  sender_name: SHEEPNET

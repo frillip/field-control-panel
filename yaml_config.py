@@ -86,6 +86,7 @@ met_office = {
 clickatell = {
 'req': ['api_key'],
 'opt': {
+'sender_name': 'SHEEPNET',
 }}
 
 config_structure = {
