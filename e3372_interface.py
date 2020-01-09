@@ -2,6 +2,8 @@ import requests
 import xmltodict
 from time import sleep
 import global_vars
+import global_vars
+from yaml_config import config
 import logging
 import colorlog
 
@@ -12,11 +14,9 @@ logger.addHandler(handler)
 logger.setLevel(global_vars.log_level)
 
 
-dongle_ip = "192.168.8.1"
+dongle_ip = config['e3372']['dongle_ip']
 
 def get_auth_data():
-
-    global dongle_ip
 
     token_info_api_url="http://" + dongle_ip + "/api/webserver/SesTokInfo"
 
@@ -50,8 +50,6 @@ def construct_auth_headers(auth_data):
 
 def send_connection_req():
 
-    global dongle_ip
-
     req_connection_api_url="http://" + dongle_ip + "/api/dialup/dial"
     connection_req_xml = '<?xml version="1.0" encoding="UTF-8"?><request><Action>1</Action></request>'
 
@@ -74,8 +72,6 @@ def send_connection_req():
         logger.error("Modem connection request failed: " + str(e))
 
 def send_reboot_req():
-
-    global dongle_ip
 
     req_reboot_api_url="http://" + dongle_ip + "/api/device/control"
     reboot_req_xml = '<?xml version="1.0" encoding="UTF-8"?><request><Control>1</Control></request>'
@@ -100,8 +96,6 @@ def send_reboot_req():
 
 
 def get_modem_data():
-
-    global dongle_ip
 
     get_dev_info_api_url="http://" + dongle_ip + "/api/device/information"
     get_mon_stat_api_url="http://" + dongle_ip + "/api/monitoring/status"
@@ -192,8 +186,6 @@ def get_modem_data():
 
 
 def send_sms(dest,message):
-
-    global dongle_ip
 
     send_sms_api_url="http://" + dongle_ip + "/api/sms/send-sms"
 
