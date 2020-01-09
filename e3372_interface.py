@@ -14,11 +14,9 @@ logger.addHandler(handler)
 logger.setLevel(global_vars.log_level)
 
 
-dongle_ip = config['e3372']['dongle_ip']
-
 def get_auth_data():
 
-    token_info_api_url="http://" + dongle_ip + "/api/webserver/SesTokInfo"
+    token_info_api_url="http://" + config['e3372']['dongle_ip'] + "/api/webserver/SesTokInfo"
 
     try:
         token_resp = requests.get(token_info_api_url)
@@ -50,7 +48,7 @@ def construct_auth_headers(auth_data):
 
 def send_connection_req():
 
-    req_connection_api_url="http://" + dongle_ip + "/api/dialup/dial"
+    req_connection_api_url="http://" + config['e3372']['dongle_ip'] + "/api/dialup/dial"
     connection_req_xml = '<?xml version="1.0" encoding="UTF-8"?><request><Action>1</Action></request>'
 
     try:
@@ -73,7 +71,7 @@ def send_connection_req():
 
 def send_reboot_req():
 
-    req_reboot_api_url="http://" + dongle_ip + "/api/device/control"
+    req_reboot_api_url="http://" + config['e3372']['dongle_ip'] + "/api/device/control"
     reboot_req_xml = '<?xml version="1.0" encoding="UTF-8"?><request><Control>1</Control></request>'
 
     try:
@@ -97,9 +95,9 @@ def send_reboot_req():
 
 def get_modem_data():
 
-    get_dev_info_api_url="http://" + dongle_ip + "/api/device/information"
-    get_mon_stat_api_url="http://" + dongle_ip + "/api/monitoring/status"
-    get_mon_traf_api_url="http://" + dongle_ip + "/api/monitoring/traffic-statistics"
+    get_dev_info_api_url="http://" + config['e3372']['dongle_ip'] + "/api/device/information"
+    get_mon_stat_api_url="http://" + config['e3372']['dongle_ip'] + "/api/monitoring/status"
+    get_mon_traf_api_url="http://" + config['e3372']['dongle_ip'] + "/api/monitoring/traffic-statistics"
 
     try:
         auth_data=get_auth_data()
@@ -187,7 +185,7 @@ def get_modem_data():
 
 def send_sms(dest,message):
 
-    send_sms_api_url="http://" + dongle_ip + "/api/sms/send-sms"
+    send_sms_api_url="http://" + config['e3372']['dongle_ip'] + "/api/sms/send-sms"
 
     try:
         auth_data=get_auth_data()
