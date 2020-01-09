@@ -1,4 +1,5 @@
 import requests
+from time import sleep
 from datetime import datetime,timedelta,timezone
 import global_vars
 from yaml_config import config
@@ -80,10 +81,19 @@ def get_weather_forecast():
         resp = requests.get(config['metoffice']['api_url'],
                             params=params)
         forecast_data = resp.json()
+        while not forecast_data['SiteRep']['DV'].get('Location'):
+            logger.error('Failed to get weather forecast, retrying in 15s')
+            sleep(15)
+            resp = requests.get(config['metoffice']['api_url'],
+                                params=params)
+            forecast_data = resp.json()
+            if forecast_data['SiteRep']['DV'].get('Location'):
+                logger.info('Successfully retrieved forecast!')
+
         next_forecast = forecast_data['SiteRep']['DV']['Location']['Period'][0]['Rep'][0]
         forecast_date_string = forecast_data['SiteRep']['DV']['Location']['Period'][0]['value']
-        forecast_date = datetime.strptime(forecast_date_string, "%Y-%m-%dZ")
-        forecast_data['SiteRep']['DV']['Location'].pop("Period", None)
+        forecast_date = datetime.strptime(forecast_date_string, '%Y-%m-%dZ')
+        forecast_data['SiteRep']['DV']['Location'].pop('Period', None)
 
         global_vars.weather_data['site']=forecast_data['SiteRep']['DV']['Location']
 
@@ -152,5 +162,5 @@ def get_weather_forecast():
 
         pass
     except Exception as e:
-        logger.error("Met office forecast task failed: " + str(e))
+        logger.error('Met office forecast task failed: ' + str(e))
         pass
