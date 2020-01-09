@@ -305,7 +305,7 @@ function get_river_data()
                 document.querySelector(".river #name").innerHTML += '<img id="status" src="" />';
                 document.querySelector(".river #status").src = "/icon/arrow_down.png";
             }
-            document.querySelector(".river #level").innerHTML = "Current level: " + data.level + "m @ "+data.last_reading
+            document.querySelector(".river #level").innerHTML = "Current level: " + data.level + "m @ "+data.timestamp
             document.querySelector(".river #last_high").innerHTML = "Last high: " + data.last_high_level + "m @ "+data.last_high
         }).catch(error => {
             console.log(error);
