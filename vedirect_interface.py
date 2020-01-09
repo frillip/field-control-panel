@@ -92,229 +92,244 @@ mppt_text = {
 run_mppt_vedirect_loop = True
 run_bmv_vedirect_loop = True
 
-def get_mppt_data():
+def process_mppt_data_string(ve_string):
 
-    try:
-        ser = serial.Serial()
-        ser.port = config['mppt']['tty_dev']
-        ser.baudrate = config['mppt']['baudrate']
-        ser.parity = serial.PARITY_NONE
-        ser.stopbits = serial.STOPBITS_ONE
-        ser.bytesize = serial.EIGHTBITS
-        ser.timeout = 1
+    field["label"] = ve_string.split("\t")[0]
+    field["data"] = ve_string.split("\t")[1]
 
-        ser.open()
-        # Discard any garbage
-        ser.flushInput()
-        logger.info("MPPT VE.Direct data loop started")
-        while run_mppt_vedirect_loop:
-
-            field = {}
-            ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
-            while not '\t' in ve_string:
-                ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
-            field["label"] = ve_string.split("\t")[0]
-            field["data"] = ve_string.split("\t")[1]
-
-            if field["label"] == "PID":
-                # Product ID
-                global_vars.mppt_data["pid"] = field["data"]
-                # Could look this up from a table based on PID, but there's no point unless I combine this and the BMV function...
-                global_vars.mppt_data["name"] = "SmartSolar MPPT 100|20"
-            elif field["label"] == "ERR":
-                # Error value and meaning
-                global_vars.mppt_data["err"] = int(field["data"])
-                global_vars.mppt_data["err_text"] = err_text[global_vars.mppt_data["err"]]
-            elif field["label"] == "FW":
-                # Firmware version
-                global_vars.mppt_data["fw"] = field["data"]
-            elif field["label"] == "V":
-                # Battery voltage
-                global_vars.mppt_data["batt"]["v"] = int(field["data"]) / 1000.0
-                global_vars.mppt_data["load"]["v"] = int(field["data"]) / 1000.0
-            elif field["label"] == "IL":
-                # Load current
-                global_vars.mppt_data["load"]["i"] = int(field["data"]) / 1000.0
-            elif field["label"] == "LOAD":
-                # Load status
-                if field["data"] == "ON":
-                    global_vars.mppt_data["load"]["state"] = True
-                else:
-                    global_vars.mppt_data["load"]["state"] = False
-            elif field["label"] == "I":
-                # Battery current
-                global_vars.mppt_data["batt"]["i"] = int(field["data"]) / 1000.0
-            elif field["label"] == "CS":
-                # Battery charging status and meaning
-                global_vars.mppt_data["batt"]["cs"] = int(field["data"])
-                global_vars.mppt_data["batt"]["cs_text"] = cs_text[global_vars.mppt_data["batt"]["cs"]]
-            elif field["label"] == "VPV":
-                # PV array voltage
-                global_vars.mppt_data["pv"]["v"] = int(field["data"]) / 1000.0
-            elif field["label"] == "PPV":
-                # PV array power
-                global_vars.mppt_data["pv"]["p"] = int(field["data"])
-            elif field["label"] == "MPPT":
-                # MPPT status and meaning
-                global_vars.mppt_data["pv"]["mppt"] = int(field["data"])
-                global_vars.mppt_data["pv"]["mppt_text"] = mppt_text[global_vars.mppt_data["pv"]["mppt"]]
-            elif field["label"] == "H20":
-                # Today's total yield in Wh
-                global_vars.mppt_data["pv"]["yield"] = int(field["data"]) * 10
-                # We've reached the end of the block, so presumably everything has been read
-                # These are computed here, rather than being read from the MPPT
-                global_vars.mppt_data["load"]["p"] = round(global_vars.mppt_data["load"]["v"] * global_vars.mppt_data["load"]["i"],2)
-                global_vars.mppt_data["batt"]["p"] = round(global_vars.mppt_data["batt"]["v"] * global_vars.mppt_data["batt"]["i"],2)
-                global_vars.mppt_data["pv"]["i"] = round(global_vars.mppt_data["pv"]["p"] / global_vars.mppt_data["pv"]["v"],2)
-
-    except Exception as e:
-        if ser.isOpen():
-            ser.close()
-        logger.error("mppt data task failed: " + str(e))
-
-    logger.warning("MPPT VE.Direct data loop stopped")
+    if field["label"] == "PID":
+        # Product ID
+        global_vars.mppt_data["pid"] = field["data"]
+        # Could look this up from a table based on PID, but there's no point unless I combine this and the BMV function...
+        global_vars.mppt_data["name"] = "SmartSolar MPPT 100|20"
+    elif field["label"] == "ERR":
+        # Error value and meaning
+        global_vars.mppt_data["err"] = int(field["data"])
+        global_vars.mppt_data["err_text"] = err_text[global_vars.mppt_data["err"]]
+    elif field["label"] == "FW":
+        # Firmware version
+        global_vars.mppt_data["fw"] = field["data"]
+    elif field["label"] == "V":
+        # Battery voltage
+        global_vars.mppt_data["batt"]["v"] = int(field["data"]) / 1000.0
+        global_vars.mppt_data["load"]["v"] = int(field["data"]) / 1000.0
+    elif field["label"] == "IL":
+        # Load current
+        global_vars.mppt_data["load"]["i"] = int(field["data"]) / 1000.0
+    elif field["label"] == "LOAD":
+        # Load status
+        if field["data"] == "ON":
+            global_vars.mppt_data["load"]["state"] = True
+        else:
+            global_vars.mppt_data["load"]["state"] = False
+    elif field["label"] == "I":
+        # Battery current
+        global_vars.mppt_data["batt"]["i"] = int(field["data"]) / 1000.0
+    elif field["label"] == "CS":
+        # Battery charging status and meaning
+        global_vars.mppt_data["batt"]["cs"] = int(field["data"])
+        global_vars.mppt_data["batt"]["cs_text"] = cs_text[global_vars.mppt_data["batt"]["cs"]]
+    elif field["label"] == "VPV":
+        # PV array voltage
+        global_vars.mppt_data["pv"]["v"] = int(field["data"]) / 1000.0
+    elif field["label"] == "PPV":
+        # PV array power
+        global_vars.mppt_data["pv"]["p"] = int(field["data"])
+    elif field["label"] == "MPPT":
+        # MPPT status and meaning
+        global_vars.mppt_data["pv"]["mppt"] = int(field["data"])
+        global_vars.mppt_data["pv"]["mppt_text"] = mppt_text[global_vars.mppt_data["pv"]["mppt"]]
+    elif field["label"] == "H20":
+        # Today's total yield in Wh
+        global_vars.mppt_data["pv"]["yield"] = int(field["data"]) * 10
+        # We've reached the end of the block, so presumably everything has been read
+        # These are computed here, rather than being read from the MPPT
+        global_vars.mppt_data["load"]["p"] = round(global_vars.mppt_data["load"]["v"] * global_vars.mppt_data["load"]["i"],2)
+        global_vars.mppt_data["batt"]["p"] = round(global_vars.mppt_data["batt"]["v"] * global_vars.mppt_data["batt"]["i"],2)
+        global_vars.mppt_data["pv"]["i"] = round(global_vars.mppt_data["pv"]["p"] / global_vars.mppt_data["pv"]["v"],2)
 
     pass
 
 
-def get_bmv_data():
+def process_bmv_data_string(ve_string):
 
-    try:
-        ser = serial.Serial()
-        ser.port = config['bmv']['tty_dev']
-        ser.baudrate = config['bmv']['baudrate']
-        ser.parity = serial.PARITY_NONE
-        ser.stopbits = serial.STOPBITS_ONE
-        ser.bytesize = serial.EIGHTBITS
-        ser.timeout = 1
+    field["label"] = ve_string.split("\t")[0]
+    field["data"] = ve_string.split("\t")[1]
 
-        ser.open()
-        # Discard any garbage
-        ser.flushInput()
-        logger.info("BMV VE.Direct data loop started")
-        while run_bmv_vedirect_loop:
-            field = {}
-            ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
-            while not '\t' in ve_string:
-                ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
-            field["label"] = ve_string.split("\t")[0]
-            field["data"] = ve_string.split("\t")[1]
+    if field["label"] == "PID":
+        # Product ID
+        global_vars.bmv_data["pid"] = field["data"]
+        # Could look this up from a table based on PID, but there's no point unless I combine this and the MPPT function...
+        global_vars.bmv_data["name"] = "BMV-712 Smart"
+    elif field["label"] == "FW":
+        # FIrmware version
+        global_vars.bmv_data["fw"] = field["data"]
+    elif field["label"] == "V":
+         # Battery voltage, V
+        global_vars.bmv_data["batt"]["v"] = int(field["data"]) / 1000.0
+    elif field["label"] == "VM":
+         # Battery  mid-point voltage, V
+        global_vars.bmv_data["batt"]["vm"] = int(field["data"]) / 1000.0
+    elif field["label"] == "DM":
+         # Battery mid-point voltage deviation, %
+        global_vars.bmv_data["batt"]["dm"] = int(field["data"]) / 1000.0
+    elif field["label"] == "I":
+        # Battery current, A, negative indicates discharge, positive indicates charge
+        global_vars.bmv_data["batt"]["i"] = int(field["data"]) / 1000.0
+    elif field["label"] == "P":
+        # Battery power, W, negative indicates discharge, positive indicates charge
+        global_vars.bmv_data["batt"]["p"] = int(field["data"])
+    elif field["label"] == "T":
+        # Battery temperature, degC, may be replaced with midpoint voltage in the future
+        # in which case BME280 temperature can be used as an estimate
+        global_vars.bmv_data["batt"]["t"] = int(field["data"])
+    elif field["label"] == "SOC":
+        # State of charge ,%
+        global_vars.bmv_data["batt"]["soc"] = int(field["data"]) / 10.0
+    elif field["label"] == "TTG":
+        # Time left on battery power, s
+        global_vars.bmv_data["batt"]["ttg"] = int(field["data"])
+    elif field["label"] == "CE":
+        # Amount of charge consumed, Ah
+        global_vars.bmv_data["batt"]["charge_consumed"] = int(field["data"]) / 1000.0
+    elif field["label"] == "Alarm":
+        # Alarm condition
+        if field["data"] == "ON":
+            global_vars.bmv_data["alarm"] = True
+        else:
+            global_vars.bmv_data["alarm"] = False
+        # Needs bitmasking done as multiple alarms can be present
+        #global_vars.bmv_data["alarm_text"] = alarm_text[global_vars.bmv_data["AR"]]
+    elif field["label"] == "Relay":
+        # Relay state
+        if field["data"] == "ON":
+            global_vars.bmv_data["relay"] = True
+        else:
+            global_vars.bmv_data["relay"] = False
 
-            if field["label"] == "PID":
-                # Product ID
-                global_vars.bmv_data["pid"] = field["data"]
-                # Could look this up from a table based on PID, but there's no point unless I combine this and the MPPT function...
-                global_vars.bmv_data["name"] = "BMV-712 Smart"
-            elif field["label"] == "FW":
-                # FIrmware version
-                global_vars.bmv_data["fw"] = field["data"]
-            elif field["label"] == "V":
-                 # Battery voltage, V
-                global_vars.bmv_data["batt"]["v"] = int(field["data"]) / 1000.0
-            elif field["label"] == "VM":
-                 # Battery  mid-point voltage, V
-                global_vars.bmv_data["batt"]["vm"] = int(field["data"]) / 1000.0
-            elif field["label"] == "DM":
-                 # Battery mid-point voltage deviation, %
-                global_vars.bmv_data["batt"]["dm"] = int(field["data"]) / 1000.0
-            elif field["label"] == "I":
-                # Battery current, A, negative indicates discharge, positive indicates charge
-                global_vars.bmv_data["batt"]["i"] = int(field["data"]) / 1000.0
-            elif field["label"] == "P":
-                # Battery power, W, negative indicates discharge, positive indicates charge
-                global_vars.bmv_data["batt"]["p"] = int(field["data"])
-            elif field["label"] == "T":
-                # Battery temperature, degC, may be replaced with midpoint voltage in the future
-                # in which case BME280 temperature can be used as an estimate
-                global_vars.bmv_data["batt"]["t"] = int(field["data"])
-            elif field["label"] == "SOC":
-                # State of charge ,%
-                global_vars.bmv_data["batt"]["soc"] = int(field["data"]) / 10.0
-            elif field["label"] == "TTG":
-                # Time left on battery power, s
-                global_vars.bmv_data["batt"]["ttg"] = int(field["data"])
-            elif field["label"] == "CE":
-                # Amount of charge consumed, Ah
-                global_vars.bmv_data["batt"]["charge_consumed"] = int(field["data"]) / 1000.0
-            elif field["label"] == "Alarm":
-                # Alarm condition
-                if field["data"] == "ON":
-                    global_vars.bmv_data["alarm"] = True
-                else:
-                    global_vars.bmv_data["alarm"] = False
-                # Needs bitmasking done as multiple alarms can be present
-                #global_vars.bmv_data["alarm_text"] = alarm_text[global_vars.bmv_data["AR"]]
-            elif field["label"] == "Relay":
-                # Relay state
-                if field["data"] == "ON":
-                    global_vars.bmv_data["relay"] = True
-                else:
-                    global_vars.bmv_data["relay"] = False
-
-            elif field["label"] == "H1":
-                # Depth of the deepest discharge, Ah
-                global_vars.bmv_data["stats"]["deepest_discharge"] = int(field["data"]) / 1000.0
-            elif field["label"] == "H2":
-                # Depth of the last discharge, Ah
-                global_vars.bmv_data["stats"]["last_discharge"] = int(field["data"]) / 1000.0
-            elif field["label"] == "H3":
-                # Depth of the average discharge, Ah
-                global_vars.bmv_data["stats"]["average_discharge"] = int(field["data"]) / 1000.0
-            elif field["label"] == "H4":
-                # Number of charge cycles
-                global_vars.bmv_data["stats"]["cycles"] = int(field["data"])
-            elif field["label"] == "H5":
-                # Number of full discharges
-                global_vars.bmv_data["stats"]["full_discharges"] = int(field["data"])
-            elif field["label"] == "H6":
-                # Cumulative Amp Hours drawn, Ah
-                global_vars.bmv_data["stats"]["total_charge_consumed"] = int(field["data"]) / 1000.0
-            elif field["label"] == "H7":
-                # Minimum battery voltage, V
-                global_vars.bmv_data["stats"]["min_voltage"] = int(field["data"]) / 1000.0
-            elif field["label"] == "H8":
-                # Maximum battery voltage, V
-                global_vars.bmv_data["stats"]["max_voltage"] = int(field["data"]) / 1000.0
-            elif field["label"] == "H9":
-                # Number of seconds since last full charge, s
-                global_vars.bmv_data["batt"]["discharge_time"] = int(field["data"])
-            elif field["label"] == "H10":
-                # Number of automatic synchronizations (24V system only)
-                global_vars.bmv_data["stats"]["sync_count"] = int(field["data"])
-            elif field["label"] == "H11":
-                # Number of low main voltage alarms
-                global_vars.bmv_data["stats"]["lv_alarm_count"] = int(field["data"])
-            elif field["label"] == "H12":
-                # Number of high main voltage alarms
-                global_vars.bmv_data["stats"]["hv_alarm_count"] = int(field["data"])
-            elif field["label"] == "H17":
-                # Amount of discharged energy, Wh
-                global_vars.bmv_data["batt"]["energy_discharged"] = int(field["data"]) * 10
-            elif field["label"] == "H18":
-                # Amount of charged energy, Wh
-                global_vars.bmv_data["batt"]["energy_charged"] = int(field["data"]) * 10
-
-    except Exception as e:
-        if ser.isOpen():
-            ser.close()
-        logger.error("bmv data task failed: " + str(e))
-
-    logger.warning("BMV VE.Direct data loop stopped")
+    elif field["label"] == "H1":
+        # Depth of the deepest discharge, Ah
+        global_vars.bmv_data["stats"]["deepest_discharge"] = int(field["data"]) / 1000.0
+    elif field["label"] == "H2":
+        # Depth of the last discharge, Ah
+        global_vars.bmv_data["stats"]["last_discharge"] = int(field["data"]) / 1000.0
+    elif field["label"] == "H3":
+        # Depth of the average discharge, Ah
+        global_vars.bmv_data["stats"]["average_discharge"] = int(field["data"]) / 1000.0
+    elif field["label"] == "H4":
+        # Number of charge cycles
+        global_vars.bmv_data["stats"]["cycles"] = int(field["data"])
+    elif field["label"] == "H5":
+        # Number of full discharges
+        global_vars.bmv_data["stats"]["full_discharges"] = int(field["data"])
+    elif field["label"] == "H6":
+        # Cumulative Amp Hours drawn, Ah
+        global_vars.bmv_data["stats"]["total_charge_consumed"] = int(field["data"]) / 1000.0
+    elif field["label"] == "H7":
+        # Minimum battery voltage, V
+        global_vars.bmv_data["stats"]["min_voltage"] = int(field["data"]) / 1000.0
+    elif field["label"] == "H8":
+        # Maximum battery voltage, V
+        global_vars.bmv_data["stats"]["max_voltage"] = int(field["data"]) / 1000.0
+    elif field["label"] == "H9":
+        # Number of seconds since last full charge, s
+        global_vars.bmv_data["batt"]["discharge_time"] = int(field["data"])
+    elif field["label"] == "H10":
+        # Number of automatic synchronizations (24V system only)
+        global_vars.bmv_data["stats"]["sync_count"] = int(field["data"])
+    elif field["label"] == "H11":
+        # Number of low main voltage alarms
+        global_vars.bmv_data["stats"]["lv_alarm_count"] = int(field["data"])
+    elif field["label"] == "H12":
+        # Number of high main voltage alarms
+        global_vars.bmv_data["stats"]["hv_alarm_count"] = int(field["data"])
+    elif field["label"] == "H17":
+        # Amount of discharged energy, Wh
+        global_vars.bmv_data["batt"]["energy_discharged"] = int(field["data"]) * 10
+    elif field["label"] == "H18":
+        # Amount of charged energy, Wh
+        global_vars.bmv_data["batt"]["energy_charged"] = int(field["data"]) * 10
 
     pass
 
 def mppt_loop():
     logger.info("Starting MPPT data loop from VE.Direct interface")
     while run_mppt_vedirect_loop:
-        get_mppt_data()
-        # Sleep for 10 seconds to avoid flooding the log, usually caused by serial device randomly vanishing thanks to an undervoltage condition...
+
+        try:
+            # Set up the serial port
+            ser = serial.Serial()
+            ser.port = config['mppt']['tty_dev']
+            ser.baudrate = config['mppt']['baudrate']
+            ser.parity = serial.PARITY_NONE
+            ser.stopbits = serial.STOPBITS_ONE
+            ser.bytesize = serial.EIGHTBITS
+            ser.timeout = 1
+
+            # Open the serial port
+            ser.open()
+            # Discard any garbage
+            ser.flushInput()
+            logger.info("MPPT VE.Direct data loop started")
+            
+            while ser.isOpen():
+                field = {}
+                ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
+                while not '\t' in ve_string:
+                    ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
+                process_mppt_data_string(ve_string)
+
+        except Exception as e:
+            if ser.isOpen():
+                ser.close()
+            logger.error("mppt data task failed: " + str(e))
+
+        # If we get here the serial port has been closed
+        logger.warning("MPPT VE.Direct data loop stopped")
+
+        # Sleep for 10 seconds to avoid flooding the log
+        # usually caused by serial device randomly vanishing
+        # thanks to an undervoltage condition...
         time.sleep(10)
     pass
 
 def bmv_loop():
     logger.info("Starting BMV data loop from VE.Direct interface")
     while run_bmv_vedirect_loop:
-        get_bmv_data()
-        # Sleep for 10 seconds to avoid flooding the log, usually caused by serial device randomly vanishing thanks to an undervoltage condition...
+
+        try:
+            # Set up the serial port
+            ser = serial.Serial()
+            ser.port = config['bmv']['tty_dev']
+            ser.baudrate = config['bmv']['baudrate']
+            ser.parity = serial.PARITY_NONE
+            ser.stopbits = serial.STOPBITS_ONE
+            ser.bytesize = serial.EIGHTBITS
+            ser.timeout = 1
+
+            # Open the serial port
+            ser.open()
+            # Discard any garbage
+            ser.flushInput()
+            logger.info("BMV VE.Direct data loop started")
+            
+            while ser.isOpen():
+                field = {}
+                ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
+                while not '\t' in ve_string:
+                    ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
+                process_bmv_data_string(ve_string)
+
+        except Exception as e:
+            if ser.isOpen():
+                ser.close()
+            logger.error("bmv data task failed: " + str(e))
+
+        # If we get here the serial port has been closed
+        logger.warning("BMV VE.Direct data loop stopped")
+
+        # Sleep for 10 seconds to avoid flooding the log
+        # usually caused by serial device randomly vanishing
+        # thanks to an undervoltage condition...
         time.sleep(10)
     pass
