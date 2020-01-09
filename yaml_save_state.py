@@ -1,7 +1,10 @@
 import yaml
 from os import path
 import global_vars
+from yaml_config import config
 from megaio_set_relays import set_relay_state
+from datetime import datetime
+import system_status
 import logging
 import colorlog
 
@@ -11,16 +14,47 @@ logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(global_vars.log_level)
 
+now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
+
 # Filename for save state file
 save_state_file = 'save_state.yaml'
 
-# Is the last state loaded (or has been attempted to be loaded)?
-last_state_loaded= False
+last_state_loaded = False
 
 # What we are expecting to save / load
-relay_save_list = ['last_state_change','state']
-# Do we want relay state saving? Maybe, doesn't currently do anything and gets clobbered next time relays are read...
-river_save_list = ['last_high','last_high_level','last_high_warn','last_level','last_timestamp','last_warn','last_warn_level','warning_active','status']
+relay_save_list = {
+'last_state_change': now_iso_stamp,
+'state': False,
+}
+
+river_save_list = {
+'last_high':  now_iso_stamp,
+'last_high_level': 0.0,
+'last_high_warn': 0.0,
+'last_level': now_iso_stamp,
+'last_timestamp': now_iso_stamp,
+'last_warn': now_iso_stamp,
+'last_warn_level': 0.0,
+'warning_active': False,
+'status': 'steady',
+}
+
+system_save_list = {
+'batt_state': True,
+'batt_state_sent_time': 0,
+'last_load_state': True,
+'last_load_state_time': 0,
+'batt_voltage_sent': 0.0,
+'batt_warning_sent': False,
+'batt_warning_sent_time': 0,
+'batt_warning_stage': 0,
+}
+
+save_state_structure = {
+'relay': relay_save_list,
+'river': river_save_list,
+'system': system_save_list,
+}
 
 def save_running_state():
     try:
@@ -53,6 +87,12 @@ def save_running_state():
         for attr in river_save_list:
            save_data['river'][attr]=global_vars.river_data[attr]
 
+        # Do the same for the river data
+        save_data['system'] = {}
+        logger.info("Saving river data")
+        for attr in system_save_list:
+           save_data['system'][attr]=system_status.system_state[attr]
+
         # Write to yaml file
         logger.info("Writing to "+save_state_file)
         with open(save_state_file, 'w') as file:
@@ -81,46 +121,72 @@ def load_last_saved_state():
             pass
 
         # Iterate through the saved blocks of data
-        for save_block in last_saved_state:
+        for save_block in save_state_structure:
             # For relays
             if save_block == 'relay':
                 logger.info("Restoring relay data")
+                if not last_saved_state.get('relay'):
+                    logger.warning('Missing relay data block in save state')
+                    last_saved_state['relay'] = {}
                 # Iterate over each relay
-                for relay_id in last_saved_state['relay']:
+                for relay_id in config['relay']:
                     # Check the relay exists
-                    if global_vars.relay_data.get(relay_id):
-                        # Configuration is master for relay enabled, so no check here against last_saved_state['relay'][relay_id]['enabled']
-                        if global_vars.relay_data[relay_id]['enabled']:
-                            logger.info("Relay "+str(relay_id)+" enabled, restoring data")
-                            # Iterate over the attributes in the yaml file
-                            for attr in last_saved_state['relay'][relay_id]:
-                                # Check if they exist in the list of things that we're expecting
-                                if attr in relay_save_list:
-                                     global_vars.relay_data[relay_id][attr] = last_saved_state['relay'][relay_id][attr]
-                                # Or if they're the special auto timeout timestamp
-                                elif attr == 'state_change_timestamp':
-                                    global_vars.relay_timestamp[relay_id] = last_saved_state['relay'][relay_id]['state_change_timestamp']
-                                # We ignore the 'enabled' option as config is master, and ignore (but warn) if there is unrecognised data
-                                elif attr != 'enabled':
-                                    logger.warning("Unrecognised save option in relay save state data: " + str(attr))
-                            # Assert the saved relay state
-                            set_relay_state(relay_id,global_vars.relay_data[relay_id]['state'])
-                        else:
-                            logger.info("Relay "+str(relay_id)+" disabled, skipping")
+                    if not last_saved_state['relay'].get(relay_id):
+                        logger.warning("No save data for relay "+str(relay_id))
+                        last_saved_state['relay'][relay_id] = {}
+                    # Configuration is master for relay enabled, so no check here against last_saved_state['relay'][relay_id]['enabled']
+                    if config['relay'][relay_id]['enabled']:
+                        logger.info("Relay "+str(relay_id)+" enabled, restoring data")
+                        # Iterate over the attributes in the yaml file
+                        for attr in relay_save_list:
+                            # Check if they exist in the list of things that we're expecting
+                            if attr in last_saved_state['relay'][relay_id]:
+                                 global_vars.relay_data[relay_id][attr] = last_saved_state['relay'][relay_id][attr]
+                            # Or if they're the special auto timeout timestamp
+                            elif attr == 'state_change_timestamp':
+                                global_vars.relay_timestamp[relay_id] = last_saved_state['relay'][relay_id]['state_change_timestamp']
+                            # We ignore the 'enabled' option as config is master, and ignore (but warn) if there is unrecognised data
+                            elif attr == 'enabled':
+                                pass
+                            else:
+                                logger.warning('Missing data in relay save state, loading default: ' + str(attr)+' : '+str(relay_save_list[attr]))
+                                global_vars.relay_data[relay_id][attr] = relay_save_list[attr]
+                        # Assert the saved relay state
+                        set_relay_state(relay_id,global_vars.relay_data[relay_id]['state'])
                     else:
-                        logger.warning("Unkown relay in save state file: "+str(relay_id))
+                        logger.info("Relay "+str(relay_id)+" disabled, skipping")
 
             # For river data
             elif save_block == 'river':
-                logger.info("Restoring river data")
+                logger.info('Restoring river data')
+                if not last_saved_state.get('river'):
+                    logger.warning('Missing river data block in save state')
+                    last_saved_state['river'] = {}
                 # iterate over the attributes
-                for attr in last_saved_state['river']:
+                for attr in river_save_list:
                     # Restore them if they're expected
-                    if attr in river_save_list:
+                    if attr in last_saved_state['river']:
                         global_vars.river_data[attr] = last_saved_state['river'][attr]
-                    # Warn if they are not
+                    # Load default if not
                     else:
-                        logger.warning("Unrecognised save option in relay save state data: " + str(attr))
+                        global_vars.river_data[attr] = river_save_list[attr]
+                        logger.warning('Missing data in river save state, loading default: ' + str(attr)+' : '+str(river_save_list[attr]))
+
+            # For system data
+            elif save_block == 'system':
+                logger.info('Restoring system data')
+                if not last_saved_state.get('system'):
+                    last_saved_state['system'] = {}
+                    logger.warning('Missing system data block in save state')
+                # Iterate over the attributes
+                for attr in system_save_list:
+                    # Restore them if they're expected
+                    if attr in last_saved_state['system']:
+                        system_status.system_state[attr] = last_saved_state['system'][attr]
+                    # Load default if not
+                    else:
+                        system_status.system_state[attr] = system_save_list[attr]
+                        logger.warning('Missing data in system save state, loading default: ' + str(attr)+' : '+str(system_save_list[attr]))
 
         last_state_loaded = True
 
