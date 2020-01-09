@@ -2,7 +2,7 @@
 user_data.py
 
 # Ignore sample json for testing
-static/*.json
+*.json
 
 # Ignore YAML
 *.yaml
