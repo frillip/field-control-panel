@@ -1,7 +1,6 @@
 import yaml
 from os import path
 import global_vars
-import user_data
 import logging
 import colorlog
 
