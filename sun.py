@@ -1,4 +1,5 @@
 import global_vars
+from yaml_config import config
 from datetime import datetime,timedelta
 import pytz
 import astral
@@ -13,11 +14,12 @@ logger.setLevel(global_vars.log_level)
 
 def get_new_sun_data():
     try:
-        now = datetime.now(pytz.timezone(global_vars.timezone))
+        now = datetime.now(pytz.timezone(config['field']['timezone']))
         logger.info("Getting new sun data for " + now.strftime("%Y-%m-%d"))
-        field = astral.Location(('Field','Countesthorpe',global_vars.field_latitude,global_vars.field_longitude,global_vars.timezone,global_vars.field_elevation))
 
+        field = astral.Location(('Field','Countesthorpe',config['field']['latitude'],config['field']['longitude'],config['field']['timezone'],config['field']['elevation']))
         sun = field.sun()
+
         for state in sun:
             global_vars.sun_data[state] = sun[state].replace(tzinfo=None).isoformat()
         logger.info("Sunrise: "+sun['sunrise'].strftime("%H:%M"))
@@ -39,8 +41,9 @@ def get_new_sun_data():
 
 def update_sun_data():
     try:
-        now = datetime.now(pytz.timezone(global_vars.timezone))
-        field = astral.Location(('Field','Countesthorpe',global_vars.field_latitude,global_vars.field_longitude,global_vars.timezone,global_vars.field_elevation))
+        now = datetime.now(pytz.timezone(config['field']['timezone']))
+
+        field = astral.Location(('Field','Countesthorpe',config['field']['latitude'],config['field']['longitude'],config['field']['timezone'],config['field']['elevation']))
         sun = field.sun()
 
         if ( now > sun['sunrise'] ) and ( now < sun['sunset'] ):
