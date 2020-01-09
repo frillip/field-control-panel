@@ -1,10 +1,7 @@
 import requests
 from yaml_config import config
-from yaml_save_state import river_save_list
 import global_vars
 from datetime import datetime
-
-import user_data
 from sms_sender import send_sms
 import logging
 import colorlog
