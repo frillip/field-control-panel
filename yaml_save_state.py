@@ -1,6 +1,7 @@
 import yaml
 from os import path
 import global_vars
+from megaio_set_relays import set_relay_state
 import logging
 import colorlog
 
@@ -39,9 +40,8 @@ def save_running_state():
             # Save the attributes if the relay is enabled
             if global_vars.relay_data[relay_id]['enabled']:
                 logger.info("Relay "+str(relay_id)+" enabled, saving")
-                for attribute in relay_save_list:
-                    save_data['relay'][relay_id][attribute] = global_vars.relay_data[relay_id][attribute]
-
+                for attr in relay_save_list:
+                    save_data['relay'][relay_id][attr] = global_vars.relay_data[relay_id][attr]
                 # Save the auto timeout timestamp too
                 save_data['relay'][relay_id]['state_change_timestamp'] = global_vars.relay_timestamp[relay_id]
             else:
@@ -50,8 +50,8 @@ def save_running_state():
         # Do the same for the river data
         save_data['river'] = {}
         logger.info("Saving river data")
-        for attribute in river_save_list:
-           save_data['river'][attribute]=global_vars.river_data[attribute]
+        for attr in river_save_list:
+           save_data['river'][attr]=global_vars.river_data[attr]
 
         # Write to yaml file
         logger.info("Writing to "+save_state_file)
@@ -93,16 +93,18 @@ def load_last_saved_state():
                         if global_vars.relay_data[relay_id]['enabled']:
                             logger.info("Relay "+str(relay_id)+" enabled, restoring data")
                             # Iterate over the attributes in the yaml file
-                            for attribute in last_saved_state['relay'][relay_id]:
+                            for attr in last_saved_state['relay'][relay_id]:
                                 # Check if they exist in the list of things that we're expecting
-                                if attribute in relay_save_list:
-                                     global_vars.relay_data[relay_id][attribute] = last_saved_state['relay'][relay_id][attribute]
+                                if attr in relay_save_list:
+                                     global_vars.relay_data[relay_id][attr] = last_saved_state['relay'][relay_id][attr]
                                 # Or if they're the special auto timeout timestamp
-                                elif attribute == 'state_change_timestamp':
+                                elif attr == 'state_change_timestamp':
                                     global_vars.relay_timestamp[relay_id] = last_saved_state['relay'][relay_id]['state_change_timestamp']
                                 # We ignore the 'enabled' option as config is master, and ignore (but warn) if there is unrecognised data
-                                elif attribute != 'enabled':
-                                    logger.warning("Unrecognised save option in relay save state data: " + str(attribute))
+                                elif attr != 'enabled':
+                                    logger.warning("Unrecognised save option in relay save state data: " + str(attr))
+                            # Assert the saved relay state
+                            set_relay_state(relay_id,global_vars.relay_data[relay_id]['state'])
                         else:
                             logger.info("Relay "+str(relay_id)+" disabled, skipping")
                     else:
@@ -112,13 +114,13 @@ def load_last_saved_state():
             elif save_block == 'river':
                 logger.info("Restoring river data")
                 # iterate over the attributes
-                for attribute in last_saved_state['river']:
+                for attr in last_saved_state['river']:
                     # Restore them if they're expected
-                    if attribute in river_save_list:
-                        global_vars.river_data[attribute] = last_saved_state['river'][attribute]
+                    if attr in river_save_list:
+                        global_vars.river_data[attr] = last_saved_state['river'][attr]
                     # Warn if they are not
                     else:
-                        logger.warning("Unrecognised save option in relay save state data: " + str(attribute))
+                        logger.warning("Unrecognised save option in relay save state data: " + str(attr))
 
         last_state_loaded = True
 
