@@ -120,19 +120,19 @@ def load_config():
             pass
 
         # Load the config data one block at a timea
-        for config_block in loaded_yaml:
+        for config_block_name in loaded_yaml:
 
-            config[config_block] = {}
-            logger.info('Loading '+config_block+' config')
+            config[config_block_name] = {}
+            logger.info('Loading '+config_block_name+' config')
 
             # Relays are special because they have moar levels
-            if config_block == 'relay':
+            if config_block_name == 'relay':
             # For each relay
                 for relay_id in global_vars.relay_data:
                     try:
                         # If it's enabled in the config, load the data
                         if loaded_yaml['relay'][relay_id]['enabled']:
-                            config['relay'][relay_id] = load_config_block(relay,loaded_yaml['relay'][relay_id])
+                            config['relay'][relay_id] = load_config_block('relay',relay,loaded_yaml['relay'][relay_id])
                         # Otherwise mark as disabled
                         else:
                             config['relay'][relay_id] = {}
@@ -145,11 +145,12 @@ def load_config():
                 # Loaded all relay data, so generate the mapping
                 generate_relay_map()
 
-            elif config_block in config_structure:
-                config[config_block] = load_config_block(config_structure[config_block],loaded_yaml[config_block])
+            # All the other config blocks can be loaded in the same way
+            elif config_block_name in config_structure:
+                config[config_block_name] = load_config_block(config_block_name,config_structure[config_block_name],loaded_yaml[config_block_name])
 
             else:
-                logger.warning('Unrecognised config block '+config_block+' not loaded!')
+                logger.warning('Unrecognised config block '+config_block_name+' not loaded!')
 
         # This will disappear once other parts are rewritten
         # to use the config options rather than global_vars
@@ -164,14 +165,14 @@ def load_config():
 
     pass
 
-def load_config_block(config_params, config_block):
+def load_config_block(config_name, config_params, config_block):
     loaded_config_block = {}
 
     for attr in config_params['req']:
         if config_block.get(attr):
             loaded_config_block[attr] = config_block[attr]
         else:
-            raise KeyError('Missing required configuration parameter: '+attr)
+            raise KeyError('Missing required configuration parameter in '+config_name+' config: '+attr)
 
     # Optional attributes
     for attr in config_params['opt']:
@@ -181,6 +182,11 @@ def load_config_block(config_params, config_block):
         # If not, populate the default
         else:
             loaded_config_block[attr] = config_params['opt'][attr]
+
+    # Check for options that aren't expected
+    for attr in config_block:
+        if ( not attr in config_params['req']) and ( not attr in config_params['opt']):
+            logger.warning('Unexpected option in '+config_name+' config: '+attr)
 
     return loaded_config_block
 
