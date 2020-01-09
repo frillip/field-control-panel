@@ -93,6 +93,10 @@ def set_relay_state(relay_id, new_state):
         global_vars.relay_data[relay_id]['raw_state'] = new_raw_state
         global_vars.relay_data[relay_id]['last_state_change'] = now_iso_stamp
         global_vars.relay_timestamp[relay_id] = unix_time_int
+        if new_state:
+            logger.warning(config['relay'][relay_id]['name']+' now on')
+        else:
+            logger.warning(config['relay'][relay_id]['name']+' now off')
 
     except Exception as e:
         # Log an error if one has occurred
