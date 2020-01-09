@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime,timedelta,timezone
 import global_vars
-import user_data
+from yaml_config import config
 import logging
 import colorlog
 from pprint import pprint
@@ -11,8 +11,6 @@ handler.setFormatter(global_vars.log_format)
 logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(global_vars.log_level)
-
-met_office_api_url = 'http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/351592'
 
 weather_type = {
     'NA': 'Not available',
@@ -76,10 +74,11 @@ visibility = {
 
 def get_weather_forecast():
     params = {}
-    params['key'] = user_data.datapoint_api_key
+    params['key'] = config['metoffice']['api_key']
     params['res'] = '3hourly'
     try:
-        resp = requests.get(met_office_api_url, params=params)
+        resp = requests.get(config['metoffice']['api_url'],
+                            params=params)
         forecast_data = resp.json()
         next_forecast = forecast_data['SiteRep']['DV']['Location']['Period'][0]['Rep'][0]
         forecast_date_string = forecast_data['SiteRep']['DV']['Location']['Period'][0]['value']

@@ -69,7 +69,7 @@ river:
     - '+447xxxxxxxxx'
     - '+447xxxxxxxxx'
 
-met_office:
+metoffice:
   api_url: http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/351592
   api_key: xxxx-xxxx-xxxx
 

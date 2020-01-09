@@ -78,7 +78,7 @@ river = {
 'warn_sms_list': [],
 }}
 
-met_office = {
+metoffice = {
 'req': ['api_url', 'api_key'],
 'opt': {
 }}
@@ -98,7 +98,7 @@ config_structure = {
 'bmv': bmv,
 'e3372': e3372,
 'river': river,
-'met_office': met_office,
+'metoffice': metoffice,
 'clickatell': clickatell,
 }
 
