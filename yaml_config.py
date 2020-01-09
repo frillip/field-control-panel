@@ -88,6 +88,18 @@ clickatell = {
 'sender_name': 'SHEEPNET',
 }}
 
+system = {
+'req': [],
+'opt': {
+'batt_voltage_overvoltage': 15.9,
+'batt_voltage_normal': 12.6,
+'batt_voltage_low': 11.8,
+'batt_voltage_very_low': 11.5,
+'batt_voltage_critical': 11.3,
+'batt_warning_interval': 900,
+'load_warning_interval': 900,
+}}
+
 config_structure = {
 'megaio' : megaio,
 'relay': relay,
@@ -99,8 +111,8 @@ config_structure = {
 'river': river,
 'metoffice': metoffice,
 'clickatell': clickatell,
+'system': system,
 }
-
 
 def load_config():
     global config

@@ -21,17 +21,6 @@ batt_warning_stage_text = {
 4: 'Disconnected'
 }
 
-# Needs to be moved to yaml config
-
-batt_voltage_overvoltage = 15.9
-batt_voltage_normal = 12.8
-batt_voltage_low = 11.8
-batt_voltage_very_low = 11.5
-batt_voltage_critical = 11.3
-batt_warning_interval = 900
-load_warning_interval = 900
-
-# Needs to be saved in save_state
 
 system_state = {}
 
@@ -53,11 +42,11 @@ def check_batt_voltage():
             # Is the battery charging or discharging?
             if global_vars.mppt_data["batt"]["cs"] == 0:
                 # cs = 0 means the battery is not being charged
-                if global_vars.mppt_data["batt"]["v"] < batt_voltage_critical:
+                if global_vars.mppt_data["batt"]["v"] < config['system']['batt_voltage_critical']:
                     new_batt_warning_stage = 3
-                elif global_vars.mppt_data["batt"]["v"] < batt_voltage_very_low:
+                elif global_vars.mppt_data["batt"]["v"] < config['system']['batt_voltage_very_low']:
                     new_batt_warning_stage = 2
-                elif global_vars.mppt_data["batt"]["v"] < batt_voltage_low:
+                elif global_vars.mppt_data["batt"]["v"] < config['system']['batt_voltage_low']:
                     new_batt_warning_stage = 1
                 else:
                     new_batt_warning_stage = 0
@@ -67,13 +56,13 @@ def check_batt_voltage():
                     system_state['batt_warning_stage'] = new_batt_warning_stage
 
             else:
-                if global_vars.mppt_data["batt"]["v"] > batt_voltage_overvoltage:
+                if global_vars.mppt_data["batt"]["v"] > config['system']['batt_voltage_overvoltage']:
                     new_batt_warning_stage = -1
-                elif global_vars.mppt_data["batt"]["v"] > batt_voltage_normal:
+                elif global_vars.mppt_data["batt"]["v"] > config['system']['batt_voltage_normal']:
                     new_batt_warning_stage = 0
-                elif global_vars.mppt_data["batt"]["v"] > batt_voltage_low:
+                elif global_vars.mppt_data["batt"]["v"] > config['system']['batt_voltage_low']:
                     new_batt_warning_stage = 1
-                elif global_vars.mppt_data["batt"]["v"] > batt_voltage_very_low:
+                elif global_vars.mppt_data["batt"]["v"] > config['system']['batt_voltage_very_low']:
                     new_batt_warning_stage = 2
                 else:
                     new_batt_warning_stage = 3
@@ -102,7 +91,7 @@ def check_batt_voltage():
                 warn_sms_text = human_datetime + ": Battery in overvoltage condition! Current voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
                 logger.warning("Battery in overvoltage condition! Current voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
 
-            if (warn_sms_text and ( unix_time_int > system_state['batt_warning_sent_time'] + batt_warning_interval )) or (warn_sms_text and system_state['batt_warning_stage'] == 0):
+            if (warn_sms_text and ( unix_time_int > system_state['batt_warning_sent_time'] + config['system']['batt_warning_interval'] )) or (warn_sms_text and system_state['batt_warning_stage'] == 0):
                 if ( system_state['batt_voltage_sent'] - 0.1 < global_vars.mppt_data["batt"]["v"] ) or ( system_state['batt_voltage_sent'] + 0.1 > global_vars.mppt_data["batt"]["v"] ) or system_state['batt_warning_stage'] == 0:
                     system_state['batt_voltage_sent'] = global_vars.mppt_data["batt"]["v"]
                     system_state['batt_warning_sent_time'] = unix_time_int
@@ -114,7 +103,7 @@ def check_batt_voltage():
         else:
             system_state['batt_state'] = False
 
-            if not system_state['batt_state'] and ( unix_time_int > system_state['batt_state_sent_time'] + batt_warning_interval ):
+            if not system_state['batt_state'] and ( unix_time_int > system_state['batt_state_sent_time'] + config['system']['batt_warning_interval'] ):
                 warn_sms_text = human_datetime + ": Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
                 logger.critical("Battery disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
 
@@ -155,7 +144,7 @@ def check_load_state():
             load_state_sent_time = unix_time_int
             send_sms(config['bmv']['warn_sms_list'], warn_sms_text)
 
-        if not global_vars.mppt_data["load"]["state"] and ( unix_time_int > system_state['last_load_state_time'] + load_warning_interval ):
+        if not global_vars.mppt_data["load"]["state"] and ( unix_time_int > system_state['last_load_state_time'] + config['system']['load_warning_interval'] ):
             warn_sms_text = human_datetime + ": Load disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
             logger.critical("Load disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
             load_state_sent_time = unix_time_int
