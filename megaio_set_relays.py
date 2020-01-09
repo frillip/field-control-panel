@@ -2,6 +2,7 @@ import megaio
 from datetime import datetime
 import time
 import global_vars
+from yaml_config import config
 import logging
 import colorlog
 
@@ -57,21 +58,21 @@ def relay_auto_timeout():
     for relay_id in global_vars.relay_timestamp:
         try:
             # Check if the timeout has expired
-            if ( unix_time_int >= global_vars.relay_timestamp[relay_id] + global_vars.relay_data[relay_id]['auto_timeout'] ):
+            if ( unix_time_int >= global_vars.relay_timestamp[relay_id] + config['relay'][relay_id]['auto_timeout'] ):
 
                 # If auto_off is set, turn relay off if it is on
-                if global_vars.relay_data[relay_id]['auto_off'] and global_vars.relay_data[relay_id]['state']:
-                    logger.warning("Auto " + global_vars.relay_data[relay_id]['name'] + " off")
+                if config['relay'][relay_id]['auto_off'] and global_vars.relay_data[relay_id]['state']:
+                    logger.warning("Auto " + config['relay'][relay_id]['name'] + " off")
                     set_relay_state(relay_id,False)
 
                 # If auto_on is set, turn relay on if it is off
-                if global_vars.relay_data[relay_id]['auto_on'] and not global_vars.relay_data[relay_id]['state']:
-                    logger.waning(": Auto " + global_vars.relay_data[relay_id]['name'] + " on")
+                if config['relay'][relay_id]['auto_on'] and not global_vars.relay_data[relay_id]['state']:
+                    logger.waning(": Auto " + config['relay'][relay_id]['name'] + " on")
                     set_relay_state(relay_id,True)
 
         except Exception as e:
             # Log an error if one has occurred
-            logger.error("Failed to auto switch " + global_vars.relay_data[relay_id]['name'] + "relay: " + str(e))
+            logger.error("Failed to auto switch " + config['relay'][relay_id]['name'] + "relay: " + str(e))
 
     pass
 
@@ -84,7 +85,7 @@ def set_relay_state(relay_id, new_state):
         # Make sure new_state is boolean
         new_state = bool(new_state)
         # XOR with the 'invert' attribute to get the new_raw_state
-        new_raw_state = new_state ^ global_vars.relay_data[relay_id]['invert']
+        new_raw_state = new_state ^ config['relay'][relay_id]['invert']
         # Set the relay via megaio library
         megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
         # Update the relay data immediately, rather than waiting for get_relay_data() to run
