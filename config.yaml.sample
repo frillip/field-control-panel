@@ -53,8 +53,8 @@ bmv:
   baudrate: 19200
   warn_enable: False
   warn_sms_list:
-    - +447xxxxxxxxx
-    - +447xxxxxxxxx
+    - '+447xxxxxxxxx'
+    - '+447xxxxxxxxx'
 
 e3372:
   dongle_ip: 192.168.8.1
@@ -66,8 +66,8 @@ river:
   high_warn: 1.1
   warn_enable: False
   warn_sms_list:
-    - +447xxxxxxxxx
-    - +447xxxxxxxxx
+    - '+447xxxxxxxxx'
+    - '+447xxxxxxxxx'
 
 met_office:
   api_url: http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/351592
