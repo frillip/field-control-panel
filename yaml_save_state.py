@@ -19,7 +19,7 @@ last_state_loaded= False
 # What we are expecting to save / load
 relay_save_list = ['last_state_change','state']
 # Do we want relay state saving? Maybe, doesn't currently do anything and gets clobbered next time relays are read...
-river_save_list = ['last_high','last_high_level','last_warn','warning_active']
+river_save_list = ['last_high','last_high_level','last_high_warn','last_level','last_timestamp','last_warn','last_warn_level','warning_active','status']
 
 def save_running_state():
     try:
