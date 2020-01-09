@@ -39,7 +39,9 @@ def main():
     logger.info("Registering SIGINT handler")
     signal.signal(signal.SIGINT, signal_handler)
     yaml_config.load_config()
-    yaml_config.generate_relay_map()
+    if not yaml_config.config['loaded']:
+        logger.error("Config not loaded! Exiting...")
+        sys.exit(1)
     yaml_save_state.load_last_saved_state()
     logger.info("Connecting to LTE")
     get_modem_data()
