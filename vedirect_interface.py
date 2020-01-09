@@ -1,6 +1,7 @@
 import time
 import serial
 import global_vars
+from yaml_config import config
 import logging
 import colorlog
 from system_status import check_batt_voltage,check_load_state
@@ -10,10 +11,6 @@ handler.setFormatter(global_vars.log_format)
 logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(global_vars.log_level)
-
-mppt_tty_dev = '/dev/ttyUSB1'
-bmv_tty_dev = '/dev/ttyUSB0'
-baudrate = 19200
 
 alarm_text = {
 0x0001: 'Low voltage',
@@ -99,8 +96,8 @@ def get_mppt_data():
 
     try:
         ser = serial.Serial()
-        ser.port = mppt_tty_dev
-        ser.baudrate = baudrate
+        ser.port = config['mppt']['tty_dev']
+        ser.baudrate = config['mppt']['baudrate']
         ser.parity = serial.PARITY_NONE
         ser.stopbits = serial.STOPBITS_ONE
         ser.bytesize = serial.EIGHTBITS
@@ -184,8 +181,8 @@ def get_bmv_data():
 
     try:
         ser = serial.Serial()
-        ser.port = bmv_tty_dev
-        ser.baudrate = baudrate
+        ser.port = config['bmv']['tty_dev']
+        ser.baudrate = config['bmv']['baudrate']
         ser.parity = serial.PARITY_NONE
         ser.stopbits = serial.STOPBITS_ONE
         ser.bytesize = serial.EIGHTBITS
