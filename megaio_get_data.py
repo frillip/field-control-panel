@@ -1,6 +1,7 @@
 import megaio
 from datetime import datetime
 import global_vars
+from yaml_config import config
 import logging
 import colorlog
 
@@ -32,11 +33,11 @@ def get_relay_data():
         # Then for each relay
         for relay_id in global_vars.relay_data:
             # And if it's enabled
-            if global_vars.relay_data[relay_id]['enabled']:
+            if config['relay'][relay_id]['enabled']:
                 # Bitmask it to get the raw state
                 global_vars.relay_data[relay_id]['raw_state'] = bool(relay_byte & relay_mask[relay_id])
                 # And invert to get the 'true' state if required
-                global_vars.relay_data[relay_id]['state'] = global_vars.relay_data[relay_id]['raw_state'] ^ global_vars.relay_data[relay_id]['invert']
+                global_vars.relay_data[relay_id]['state'] = global_vars.relay_data[relay_id]['raw_state'] ^ config['relay'][relay_id]['invert']
 
     except Exception as e:
         # Error has occurred, log it
