@@ -81,14 +81,10 @@ def get_weather_forecast():
         resp = requests.get(config['metoffice']['api_url'],
                             params=params)
         forecast_data = resp.json()
-        while not forecast_data['SiteRep']['DV'].get('Location'):
-            logger.error('Failed to get weather forecast, retrying in 60s')
-            sleep(60)
-            resp = requests.get(config['metoffice']['api_url'],
-                                params=params)
-            forecast_data = resp.json()
-            if forecast_data['SiteRep']['DV'].get('Location'):
-                logger.info('Successfully retrieved forecast!')
+        if not forecast_data['SiteRep']['DV'].get('Location'):
+            logger.error('Failed to get weather forecast, will retry in 300s')
+        else:
+            logger.info('Successfully retrieved forecast!')
 
         next_forecast = forecast_data['SiteRep']['DV']['Location']['Period'][0]['Rep'][0]
         forecast_date_string = forecast_data['SiteRep']['DV']['Location']['Period'][0]['value']
