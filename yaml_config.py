@@ -77,11 +77,6 @@ river = {
 'warn_sms_list': [],
 }}
 
-metoffice = {
-'req': ['api_url', 'api_key'],
-'opt': {
-}}
-
 clickatell = {
 'req': ['api_key'],
 'opt': {
@@ -100,6 +95,13 @@ system = {
 'load_warning_interval': 900,
 }}
 
+weather = {
+'req': ['api_key'],
+'opt': {
+'units': 'auto',
+'language': 'en',
+}}
+
 config_structure = {
 'megaio' : megaio,
 'relay': relay,
@@ -109,9 +111,9 @@ config_structure = {
 'bmv': bmv,
 'e3372': e3372,
 'river': river,
-'metoffice': metoffice,
 'clickatell': clickatell,
 'system': system,
+'weather': weather,
 }
 
 def load_config():
@@ -162,6 +164,11 @@ def load_config():
 
             else:
                 logger.warning('Unrecognised config block '+config_block_name+' not loaded!')
+
+        # Check if things are missing and warn if they are
+        for config_block in config_structure:
+            if config_block not in config:
+                logger.warning('Config block '+config_block+' missing from '+config_file)
 
         # This will disappear once other parts are rewritten
         # to use the config options rather than global_vars

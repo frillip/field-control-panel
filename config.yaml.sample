@@ -69,10 +69,6 @@ river:
     - '+447xxxxxxxxx'
     - '+447xxxxxxxxx'
 
-metoffice:
-  api_url: http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/351592
-  api_key: xxxx-xxxx-xxxx
-
 clickatell:
   api_key: xxxx-xxxx-xxxx
   sender_name: SHEEPNET
@@ -85,3 +81,6 @@ system:
   batt_voltage_critical: 11.3
   batt_warning_interval: 900
   load_warning_interval: 900
+
+weather:
+  api_key: xxxx-xxxx-xxxx

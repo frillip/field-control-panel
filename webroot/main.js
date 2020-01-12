@@ -202,7 +202,8 @@ function get_env_data()
     fetch("bme.json")
         .then(response => response.json())
         .then(data => {
-            document.querySelector(".env #t").innerHTML = data.t + String.fromCharCode(176) + "C"
+// Now fed from weather data
+//            document.querySelector(".env #t").innerHTML = data.t + String.fromCharCode(176) + "C"
             document.querySelector(".env #p").innerHTML = data.p + "mb"
             document.querySelector(".env #h").innerHTML = data.h + "%"
         }).catch(error => {
@@ -257,27 +258,36 @@ function get_weather_data()
     fetch("weather.json")
         .then(response => response.json())
         .then(data => {
-            document.querySelector("#weather_type_icon").src = "/icon/weather/"+data.weather_type+".png";
-            document.querySelector("#weather_type_text").innerHTML = data.weather_type_text
+            document.querySelector(".env #t").innerHTML = data.current.temperature.toFixed(1) + String.fromCharCode(176) + "C"
+            document.querySelector("#weather_type_icon").src = "/icon/weather/"+data.hour.icon+".png";
+            document.querySelector("#weather_type_icon").alt = data.day.summary;
+            document.querySelector("#weather_type_text").innerHTML = data.hour.summary
             var wind_icon = ""
-            if (data.wind_speed == 0) {
+            if (data.current.wind_speed == 0) {
                 wind_icon = "wind0.png";
-            } else if (data.wind_speed < 3) {
+            } else if (data.current.wind_speed < 3) {
                 wind_icon = "wind1.png";
-            } else if (data.wind_speed < 63) {
-                wind_icon = "wind"+(Math.round(data.wind_speed / 5)*5)+".png";
-            } else if (data.wind_speed < 98) {
+            } else if (data.current.wind_speed < 63) {
+                wind_icon = "wind"+(Math.round(data.current.wind_speed / 5)*5)+".png";
+            } else if (data.current.wind_speed < 98) {
                 wind_icon = "wind60.png";
-            } else if (data.wind_speed < 108) {
-                wind_icon = "wind"+(Math.round(data.wind_speed / 5)*5)+".png";
+            } else if (data.current.wind_speed < 108) {
+                wind_icon = "wind"+(Math.round(data.current.wind_speed / 5)*5)+".png";
             } else {
                // We're in serious trouble if the wind is > 107mph...
                 wind_icon = "wind105.png";
             }
             document.querySelector("#wind_direction").src = "/icon/wind/"+wind_icon;
-            document.querySelector("#wind_direction").className = "wind"+data.wind_direction;
-            document.querySelector("#wind_speed").innerHTML = data.wind_speed+" mph";
-            document.querySelector("#precipitation_chance").innerHTML = data.precipitation_chance+"%";
+            var style_string = `
+                -webkit-transform: rotate(`+data.current.wind_bearing+`deg);
+                -moz-transform: rotate(`+data.current.wind_bearing+`deg);
+                -o-transform: rotate(`+data.current.wind_bearing+`deg);
+                -ms-transform: rotate(`+data.current.wind_bearing+`deg);
+                transform: rotate(`+data.current.wind_bearing+`deg);
+            `;
+            document.querySelector("#wind_direction").style = style_string;
+            document.querySelector("#wind_speed").innerHTML = Math.round(data.current.wind_speed)+" mph";
+            document.querySelector("#precipitation_chance").innerHTML = data.current.precip_probability+"%";
         }).catch(error => {
             console.log(error);
             // on error, stop execution
