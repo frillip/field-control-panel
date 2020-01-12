@@ -13,9 +13,9 @@ function create_switches()
     fetch("relay.json")
         .then(response => response.json())
         .then(data => {
-            for (relay in data) {
-                if (data[relay].enabled) {
-                    var relay_name = data[relay].name;
+            for (relay_id in data) {
+                if (data[relay_id].enabled) {
+                    var relay_name = data[relay_id].name;
                     var relays_div = document.getElementById('relays');
                     var title = document.createElement("h2");
                     var name = document.createTextNode(relay_name);
@@ -23,15 +23,15 @@ function create_switches()
                     var label = document.createElement("label");
                     label.className = "switch";
                     var input = document.createElement("input");
-                    input.setAttribute("relay_id",relay);
-                    input.setAttribute("relay_name",relay_name);
-                    input.id = "relay_"+relay+"_switch";
+                    input.setAttribute("relay-id",relay_id);
+                    input.setAttribute("relay-name",relay_name);
+                    input.id = "relay-"+relay_id+"-switch";
                     input.type = "checkbox";
                     input.setAttribute("onclick","change_relay_state(this)");
-                    g_ignore_relay_resp[relay] = false;
+                    g_ignore_relay_resp[relay_id] = false;
                     var slider = document.createElement("span");
                     slider.className = "slider round";
-                    if (data[relay].state) {
+                    if (data[relay_id].state) {
                           input.checked = true;
                     } else {
                           input.checked = false;
@@ -51,8 +51,8 @@ function create_switches()
 function change_relay_state(elem){
 
     var data = {};
-    var relay_name = elem.getAttribute("relay_name");
-    var relay_id = elem.getAttribute("relay_id");
+    var relay_name = elem.getAttribute("relay-name");
+    var relay_id = elem.getAttribute("relay-id");
     var relay_state = elem.checked ? 'on' : "off";
     data[relay_name] = relay_state;
     g_ignore_relay_resp[relay_id] = true;
@@ -74,16 +74,16 @@ function get_relay_data()
     fetch("relay.json")
         .then(response => response.json())
         .then(data => {
-            for (relay in data) {
-                if (data[relay].enabled) {
-                    if(!g_ignore_relay_resp[relay]) {
-                        var relay_switch = document.querySelector("#relay_"+relay+"_switch");
-                        if (data[relay].state) {
+            for (relay_id in data) {
+                if (data[relay_id].enabled) {
+                    if(!g_ignore_relay_resp[relay_id]) {
+                        var relay_switch = document.querySelector("#relay-"+relay_id+"-switch");
+                        if (data[relay_id].state) {
                             relay_switch.checked = true;
                         } else {
                             relay_switch.checked = false;
                         }
-                    } else { g_ignore_relay_resp[relay] = false; }
+                    } else { g_ignore_relay_resp[relay_id] = false; }
                 }
             }
         }).catch(error => {
@@ -97,8 +97,8 @@ function get_v_data()
     fetch("stats_ajax.json")
         .then(response => response.json())
         .then(data => {
-            document.querySelector(".battery #voltage").innerHTML = Number(data.bv).toFixed(2) + "V"
-            var battery_icon = document.querySelector(".battery #battery_charge_icon")
+            document.querySelector("#battery-voltage").innerHTML = Number(data.bv).toFixed(2) + "V"
+            var battery_icon = document.querySelector("#battery-charge-icon")
             if(data.bcs == "Fault") {
                 battery_icon.src= "/icon/battery_missing.png"
             } else if(data.bcs != "Not charging") {
@@ -116,12 +116,12 @@ function get_v_data()
             } else {
                 battery_icon.src= "/icon/battery_missing.png"
             }
-            document.querySelector(".battery #current").innerHTML = Number(data.bi).toFixed(2) + "A"
-            document.querySelector(".battery #cs").innerHTML = data.bcs + ": " + data.bsoc + "%"
-            document.querySelector(".pv #power").innerHTML = data.pvp + "W"
-            document.querySelector(".pv #voltage").innerHTML = data.pvv + "V"
-            document.querySelector(".pv #mppt").innerHTML = data.pvmppt
-            document.querySelector(".pv #yield").innerHTML = data.pvy + "Wh"
+            document.querySelector("#battery-current").innerHTML = Number(data.bi).toFixed(2) + "A"
+            document.querySelector("#battery-cs").innerHTML = data.bcs + ": " + data.bsoc + "%"
+            document.querySelector("#pv-power").innerHTML = data.pvp + "W"
+            document.querySelector("#pv-voltage").innerHTML = data.pvv + "V"
+            document.querySelector("#pv-mppt").innerHTML = data.pvmppt
+            document.querySelector("#pv-yield").innerHTML = data.pvy + "Wh"
         }).catch(error => {
             console.log(error);
             // on error, stop execution
@@ -160,8 +160,15 @@ function get_m_data()
     fetch("modem.json")
         .then(response => response.json())
         .then(data => {
-            document.querySelector(".lte #net").innerHTML = '<img id="ssi" src="" />' +data.network_type;
-            document.querySelector(".lte #ssi").src = "/icon/signal_"+data.signal_strength+".png";
+            var lte_ssi = document.createElement("img");
+            lte_ssi.id = "lte-ssi"
+            lte_ssi.className = "icon-large-left"
+            lte_ssi.src = "/icon/signal_"+data.signal_strength+".png";
+            var lte_net_type = document.createTextNode(data.network_type);
+            var lte_title = document.querySelector("#lte-net-type");
+            lte_title.innerHTML= "";
+            lte_title.appendChild(lte_ssi);
+            lte_title.appendChild(lte_net_type);
             g_up_mb = (data.data_usage.data_up /(1024*1024)).toFixed(2);
             g_down_mb = (data.data_usage.data_down /(1024*1024)).toFixed(2);
             var rate_up_kb = (data.data_usage.data_rate_up /1024).toFixed(2);
@@ -173,14 +180,14 @@ function get_m_data()
             if(g_modem_connected) {
                 if(g_conn_time %60 == 0) {
                     g_conn_time = data.connected_time;
-                    document.querySelector(".lte #data").innerHTML = "Connected: "+g_down_mb+"MB / "+g_up_mb+"MB - "+seconds2time(g_conn_time);
+                    document.querySelector("#lte-data").innerHTML = "Connected: "+g_down_mb+"MB / "+g_up_mb+"MB - "+seconds2time(g_conn_time);
                 }
-                document.querySelector(".lte #rate").innerHTML = "Speed: "+rate_down_kb+"kB/s / "+rate_up_kb+"kB/s";
+                document.querySelector("#lte-rate").innerHTML = "Speed: "+rate_down_kb+"kB/s / "+rate_up_kb+"kB/s";
             } else {
-                document.querySelector(".lte #data").innerHTML = "Not Connected!";
-                document.querySelector(".lte #rate").innerHTML = "";
+                document.querySelector("#lte-data").innerHTML = "Not Connected!";
+                document.querySelector("#lte-rate").innerHTML = "";
             }
-            document.querySelector(".lte #total_data").innerHTML = "Total: "+total_down_gb+"GB / "+total_up_gb+"GB - "+total_data_percent+"% of 24GB";
+            document.querySelector("#lte-total-data").innerHTML = "Total: "+total_down_gb+"GB / "+total_up_gb+"GB - "+total_data_percent+"% of 24GB";
         }).catch(error => {
             console.log(error);
             // on error, stop execution
@@ -191,9 +198,9 @@ function update_conn_time()
 {
     g_conn_time++;
     if(g_modem_connected) {
-        document.querySelector(".lte #data").innerHTML = "Connected: "+g_down_mb+"MB / "+g_up_mb+"MB - "+seconds2time(g_conn_time);
+        document.querySelector("#lte-data").innerHTML = "Connected: "+g_down_mb+"MB / "+g_up_mb+"MB - "+seconds2time(g_conn_time);
     } else {
-        document.querySelector(".lte #data").innerHTML = "Not Connected!";
+        document.querySelector("#lte-data").innerHTML = "Not Connected!";
     }
 }
 
@@ -204,8 +211,8 @@ function get_env_data()
         .then(data => {
 // Now fed from weather data
 //            document.querySelector(".env #t").innerHTML = data.t + String.fromCharCode(176) + "C"
-            document.querySelector(".env #p").innerHTML = data.p + "mb"
-            document.querySelector(".env #h").innerHTML = data.h + "%"
+            document.querySelector("#pressure").innerHTML = data.p + "mb"
+            document.querySelector("#humidity").innerHTML = data.h + "%"
         }).catch(error => {
             console.log(error);
             // on error, stop execution
@@ -218,22 +225,22 @@ function get_sun_data()
         .then(response => response.json())
         .then(data => {
             if(data.state == "day") {
-                document.querySelector(".pv #pv_mppt_icon").src = "/icon/solar_panel_sun.png"
+                document.querySelector("#pv-mppt-icon").src = "/icon/solar_panel_sun.png"
             } else {
-                document.querySelector(".pv #pv_mppt_icon").src = "/icon/solar_panel.png"
+                document.querySelector("#pv-mppt-icon").src = "/icon/solar_panel.png"
             }
-            document.querySelector(".pv #sunrise").innerHTML = data.sunrise.slice(11, 16)
+            document.querySelector("#sunrise-time").innerHTML = data.sunrise.slice(11, 16)
             g_sunrise_datetime = new Date(data.sunrise)
-            document.querySelector(".pv #sunset").innerHTML = data.sunset.slice(11, 16)
-            document.querySelector(".pv #elevation").innerHTML = data.solar_elevation + String.fromCharCode(176)
+            document.querySelector("#sunset-time").innerHTML = data.sunset.slice(11, 16)
+            document.querySelector("#solar-elevation").innerHTML = data.solar_elevation + String.fromCharCode(176)
             if(data.time_to_sunrise > 0) {
-                document.querySelector(".pv #sun_timer_icon").src = "/icon/sunrise.png";
+                document.querySelector("#sun-timer-icon").src = "/icon/sunrise.png";
                 g_sun_timer = data.time_to_sunrise
             } else {
-                document.querySelector(".pv #sun_timer_icon").src = "/icon/sunset.png";
+                document.querySelector(".pv #sun-timer-icon").src = "/icon/sunset.png";
                 g_sun_timer = data.time_to_sunset
             }
-            document.querySelector(".pv #sun_timer").innerHTML = seconds2time(g_sun_timer)
+            document.querySelector(".pv #sun-timer").innerHTML = seconds2time(g_sun_timer)
         }).catch(error => {
             console.log(error);
             // on error, stop execution
@@ -249,7 +256,7 @@ function update_sun_timer()
     } else if(g_sun_timer < 0) {
         get_sun_data();
     } else {
-        document.querySelector(".pv #sun_timer").innerHTML = seconds2time(g_sun_timer);
+        document.querySelector("#sun-timer").innerHTML = seconds2time(g_sun_timer);
     }
 }
 
@@ -258,10 +265,10 @@ function get_weather_data()
     fetch("weather.json")
         .then(response => response.json())
         .then(data => {
-            document.querySelector(".env #t").innerHTML = data.current.temperature.toFixed(1) + String.fromCharCode(176) + "C"
-            document.querySelector("#weather_type_icon").src = "/icon/weather/"+data.hour.icon+".png";
-            document.querySelector("#weather_type_icon").title = data.day.summary;
-            document.querySelector("#weather_type_text").innerHTML = data.hour.summary
+            document.querySelector("#temperature").innerHTML = data.current.temperature.toFixed(1) + String.fromCharCode(176) + "C"
+            document.querySelector("#weather-type-icon").src = "/icon/weather/"+data.hour.icon+".png";
+            document.querySelector("#weather-type-icon").title = data.day.summary;
+            document.querySelector("#weather-type-text").innerHTML = data.hour.summary
             var wind_icon = ""
             if (data.current.wind_speed == 0) {
                 wind_icon = "wind0.png";
@@ -277,7 +284,7 @@ function get_weather_data()
                // We're in serious trouble if the wind is > 107mph...
                 wind_icon = "wind105.png";
             }
-            document.querySelector("#wind_direction").src = "/icon/wind/"+wind_icon;
+            document.querySelector("#wind-direction").src = "/icon/wind/"+wind_icon;
             var style_string = `
                 -webkit-transform: rotate(`+data.current.wind_bearing+`deg);
                 -moz-transform: rotate(`+data.current.wind_bearing+`deg);
@@ -285,9 +292,9 @@ function get_weather_data()
                 -ms-transform: rotate(`+data.current.wind_bearing+`deg);
                 transform: rotate(`+data.current.wind_bearing+`deg);
             `;
-            document.querySelector("#wind_direction").style = style_string;
-            document.querySelector("#wind_speed").innerHTML = Math.round(data.current.wind_speed)+" mph";
-            document.querySelector("#precipitation_chance").innerHTML = data.hour.precip_probability+"%";
+            document.querySelector("#wind-direction").style = style_string;
+            document.querySelector("#wind-speed").innerHTML = Math.round(data.current.wind_speed)+" mph";
+            document.querySelector("#precipitation-chance").innerHTML = data.hour.precip_probability+"%";
         }).catch(error => {
             console.log(error);
             // on error, stop execution
@@ -299,24 +306,37 @@ function get_river_data()
     fetch("river.json")
         .then(response => response.json())
         .then(data => {
-            document.querySelector(".river #name").innerHTML = '<img id="icon" src="" />' + data.name;
-            document.querySelector(".river #icon").src = "/icon/river.png"; // Will change colour based on level in the future
+            var river_icon = document.createElement("img");
+            river_icon.id = "river-icon"
+            river_icon.className = "icon-large-left"
+            river_icon.src = "/icon/river.png";
+            var river_name = document.createTextNode(data.name);
+            var river_title = document.querySelector("#river-name")
+            river_title.innerHTML= "";
+            river_title.appendChild(river_icon);
+            river_title.appendChild(river_name);
+            var river_warning = document.createElement("img");
+            river_warning.id = "river-warning"
+            river_warning.className = "icon-large-right"
             if (data.level > data.high_warn) {
-                document.querySelector(".river #name").innerHTML += '<img id="warn" src="" />';
-                document.querySelector(".river #warn").src = "/icon/alert.png";
+                river_warning.src = "/icon/alert.png";
+                river_title.appendChild(river_warning);
             } else if (data.level > data.high) {
-                document.querySelector(".river #name").innerHTML += '<img id="warn" src="" />';
-                document.querySelector(".river #warn").src = "/icon/warning.png";
+                river_warning.src = "/icon/warning.png";
+                river_title.appendChild(river_warning);
             }
+            var river_status = document.createElement("img");
+            river_status.id = "river-status"
+            river_status.className = "icon-large-right"
             if (data.status =="rising") {
-                document.querySelector(".river #name").innerHTML += '<img id="status" src="" />';
-                document.querySelector(".river #status").src = "/icon/arrow_up.png";
+                river_status.src = "/icon/arrow_up.png";
+                river_title.appendChild(river_status);
             } else if (data.status =="falling") {
-                document.querySelector(".river #name").innerHTML += '<img id="status" src="" />';
-                document.querySelector(".river #status").src = "/icon/arrow_down.png";
+                river_status.src = "/icon/arrow_down.png";
+                river_title.appendChild(river_status);
             }
-            document.querySelector(".river #level").innerHTML = "Current level: " + data.level + "m @ "+data.timestamp
-            document.querySelector(".river #last_high").innerHTML = "Last high: " + data.last_high_level + "m @ "+data.last_high
+            document.querySelector("#river-level").innerHTML = "Current level: " + data.level + "m @ "+data.timestamp
+            document.querySelector("#river-last-high").innerHTML = "Last high: " + data.last_high_level + "m @ "+data.last_high
         }).catch(error => {
             console.log(error);
             // on error, stop execution

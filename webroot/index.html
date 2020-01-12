@@ -15,73 +15,72 @@
         </div>
         <div class="column">
             <div class="env">
-                <h2>Weather</h2>
+                <h2 id="weather-title">Weather</h2>
                 <div class="row">
                     <div class="column">
-                    <img src="/icon/temperature.png">
-                    <div id="t"></div>
-                    <img src="/icon/pressure.png">
-                    <div id="p"></div>
-                    <img src="/icon/humidity.png">
-                    <div id="h"></div>
+                    <img class="icon-small-left" src="/icon/temperature.png">
+                    <div id="temperature"></div>
+                    <img class="icon-small-left" src="/icon/pressure.png">
+                    <div id="pressure"></div>
+                    <img class="icon-small-left" src="/icon/humidity.png">
+                    <div id="humidity"></div>
                     </div>
                     <div class="column">
-                    <img id="weather_type_icon" src="">
-                    <div id="weather_type_text"></div>
-                    <img id="wind_direction" src="">
-                    <div id="wind_speed"></div>
-                    <img id="precipitation_icon" src="/icon/weather/precipitation_chance.png">
-                    <div id="precipitation_chance"></div>
+                    <img class="icon-small-left" id="weather-type-icon" src="/icon/weather/clear_day.png">
+                    <div id="weather-type-text"></div>
+                    <img class="icon-small-left" id="wind-direction" src="/icon/wind/wind0.png">
+                    <div id="wind-speed"></div>
+                    <img class="icon-small-left" id="precipitation-icon" src="/icon/weather/precipitation_chance.png">
+                    <div id="precipitation-chance"></div>
                     </div>
                 </div>
             </div>
             <div class="battery">
-                <h2>Battery</h2>
-                <img id="battery_voltage_icon" src="/icon/battery_voltage.png">
-                <div id="voltage"></div>
-                <img id="battery_current_icon" src="/icon/electrical.png">
-                <div id="current"></div>
-                <img id="battery_charge_icon" src="/icon/battery_3.png">
-                <div id="cs"></div>
+                <h2 id="battery-title">Battery</h2>
+                <img class="icon-small-left" id="battery-voltage-icon" src="/icon/battery_voltage.png">
+                <div id="battery-voltage"></div>
+                <img class="icon-small-left" id="battery-current-icon" src="/icon/electrical.png">
+                <div id="battery-current"></div>
+                <img class="icon-small-left" id="battery-charge-icon" src="/icon/battery_3.png">
+                <div id="battery-cs"></div>
             </div>
             <div class="pv">
-                <h2>Solar</h2>
+                <h2 id="solar-title">Solar</h2>
                 <div class="row">
                     <div class="column">
-                    <img id="pv_voltage_icon" src="/icon/voltage.png">
-                    <div id="voltage"></div>
-                    <img id="pv_power_icon" src="/icon/solar_energy.png">
-                    <div id="power"></div>
-                    <img id="pv_mppt_icon" src="/icon/solar_panel.png">
-                    <div id="mppt"></div>
-                    <img id="pv_yield_icon" src="/icon/energy.png">
-                    <div id="yield"></div>
+                    <img class="icon-small-left" id="pv-voltage-icon" src="/icon/voltage.png">
+                    <div id="pv-voltage"></div>
+                    <img class="icon-small-left" id="pv-power-icon" src="/icon/solar_energy.png">
+                    <div id="pv-power"></div>
+                    <img class="icon-small-left" id="pv-mppt-icon" src="/icon/solar_panel.png">
+                    <div id="pv-mppt"></div>
+                    <img class="icon-small-left" id="pv-yield-icon" src="/icon/energy.png">
+                    <div id="pv-yield"></div>
                     </div>
                     <div class="column">
-                    <img id="sunrise_icon" src="/icon/sunrise.png">
-                    <div id="sunrise"></div>
-                    <img id="sunset_icon" src="/icon/sunset.png">
-                    <div id="sunset"></div>
-                    <img id="elevation_icon" src="/icon/solar_elevation.png">
-                    <div id="elevation"></div>
-                    <img id="sun_timer_icon" src="">
-                    <div id="sun_timer"></div>
+                    <img class="icon-small-left" id="sunrise-icon" src="/icon/sunrise.png">
+                    <div id="sunrise-time"></div>
+                    <img class="icon-small-left" id="sunset-icon" src="/icon/sunset.png">
+                    <div id="sunset-time"></div>
+                    <img class="icon-small-left" id="elevation-icon" src="/icon/solar_elevation.png">
+                    <div id="solar-elevation"></div>
+                    <img class="icon-small-left" id="sun-timer-icon" src="">
+                    <div id="sun-timer"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="lte">
-        <div id="net"><img id="ssi" src=""/></div>
-        <div id="data"></div>
-        <div id="rate"></div>
-        <div id="total_data"></div>
+    <div class="bottom-section">
+        <div class="bottom-title" id="lte-net-type"><img class="icon-large-left" id="lte-ssi" src=""/></div>
+        <div id="lte-data"></div>
+        <div id="lte-rate"></div>
+        <div id="lte-total-data"></div>
     </div>
-    <div class="river">
-        <div id="name"><img id="icon" src=""/><img id="status" src=""/></div>
-        <div id="level"></div>
-        <div id="last_high"></div>
+    <div class="bottom-section">
+        <div class="bottom-title" id="river-name"><img class="icon-large-left" id="river-icon" src=""/><img class="icon-large-right" id="river-warning" src=""/><img class="icon-large-right" id="river-status" src=""/></div>
+        <div id="river-level"></div>
+        <div id="river-last-high"></div>
     </div>
 </body>
-</html> 
-
+</html>

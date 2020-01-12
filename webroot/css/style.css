@@ -1,56 +1,48 @@
 body {
-	text-align: left;
-	font-family: sans-serif;
+        text-align: left;
+        font-family: sans-serif;
 }
 
 h1 {
-	text-align: center;
-	font-size: 2em;
+        text-align: center;
+        font-size: 2em;
 }
 
 h2 {
-  text-transform: capitalize; 
+  text-transform: capitalize;
 }
 
 p {
-	font-size: 12px;
+        font-size: 12px;
 }
 
-.env img {
-  width: 15px;
-  height: 15px;
-  padding-right: 2px;
-  display:inline-block;
-  float: left;
-}
-
-.battery img {
-  width: 15px;
-  height: 15px;
-  padding-right: 2px;
-  display:inline-block;
-  float: left;
-}
-
-.pv img {
-  width: 15px;
-  height: 15px;
-  padding-right: 2px;
-  display:inline-block;
-  float: left;
-}
-
-.lte {
+.bottom-section {
   padding-top: 20px;
   font-size: 12px;
 }
 
-.lte #net {
+.bottom-title {
   font-size: 2em;
   font-weight: bold;
 }
 
-.lte #ssi {
+img.icon-small-left {
+  width: 15px;
+  height: 15px;
+  padding-right: 2px;
+  display:inline-block;
+  float: left;
+}
+
+img.icon-medium-left {
+  height: 20px;
+  padding-right: 8px;
+  vertical-align:middle;
+  position: relative;
+  top:-2px;
+}
+
+img.icon-large-left {
   height: 30px;
   padding-right: 8px;
   vertical-align:middle;
@@ -58,33 +50,7 @@ p {
   top:-2px;
 }
 
-.river {
-  padding-top: 20px;
-  font-size: 12px;
-}
-
-.river #name {
-  font-size: 2em;
-  font-weight: bold;
-}
-
-.river #icon {
-  height: 30px;
-  padding-right: 8px;
-  vertical-align:middle;
-  position: relative;
-  top:-2px;
-}
-
-.river #status {
-  height: 30px;
-  padding-left: 2px;
-  vertical-align:middle;
-  position: relative;
-  top:-4px;
-}
-
-.river #warn {
+img.icon-large-right {
   height: 30px;
   padding-left: 2px;
   vertical-align:middle;
@@ -108,7 +74,7 @@ p {
   height: 34px;
 }
 
-.switch input { 
+.switch input {
   opacity: 0;
   width: 0;
   height: 0;
@@ -160,3 +126,4 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
