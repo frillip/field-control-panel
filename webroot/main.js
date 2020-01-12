@@ -260,7 +260,7 @@ function get_weather_data()
         .then(data => {
             document.querySelector(".env #t").innerHTML = data.current.temperature.toFixed(1) + String.fromCharCode(176) + "C"
             document.querySelector("#weather_type_icon").src = "/icon/weather/"+data.hour.icon+".png";
-            document.querySelector("#weather_type_icon").alt = data.day.summary;
+            document.querySelector("#weather_type_icon").title = data.day.summary;
             document.querySelector("#weather_type_text").innerHTML = data.hour.summary
             var wind_icon = ""
             if (data.current.wind_speed == 0) {
