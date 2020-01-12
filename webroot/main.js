@@ -287,7 +287,7 @@ function get_weather_data()
             `;
             document.querySelector("#wind_direction").style = style_string;
             document.querySelector("#wind_speed").innerHTML = Math.round(data.current.wind_speed)+" mph";
-            document.querySelector("#precipitation_chance").innerHTML = data.current.precip_probability+"%";
+            document.querySelector("#precipitation_chance").innerHTML = data.hour.precip_probability+"%";
         }).catch(error => {
             console.log(error);
             // on error, stop execution
