@@ -155,7 +155,7 @@ function seconds2time (seconds) {
     return time;
 }
 
-function get_m_data()
+function get_modem_data()
 {
     fetch("modem.json")
         .then(response => response.json())
@@ -164,7 +164,7 @@ function get_m_data()
             lte_ssi.id = "lte-ssi"
             lte_ssi.className = "icon-large-left"
             lte_ssi.src = "/icon/signal_"+data.signal_strength+".png";
-            var lte_net_type = document.createTextNode(data.network_type);
+            var lte_net_type = document.createTextNode(data.network_name + " - " + data.network_type);
             var lte_title = document.querySelector("#lte-net-type");
             lte_title.innerHTML= "";
             lte_title.appendChild(lte_ssi);
@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function()
     get_env_data();
     get_v_data();
     create_switches();
-    get_m_data();
+    get_modem_data();
     get_river_data();
     get_sun_data();
     get_weather_data();
@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function()
         counter++;
         if(counter%3 == 0) {
             get_v_data();
-            get_m_data();
+            get_modem_data();
         }
         if(counter==300) {
             counter=0;
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function()
 window.onfocus = function() {
     get_v_data();
     get_env_data();
-    get_m_data();
+    get_modem_data();
     get_river_data();
     get_sun_data();
     get_weather_data();

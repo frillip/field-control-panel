@@ -96,6 +96,7 @@ def send_reboot_req():
 def get_modem_data():
 
     get_dev_info_api_url="http://" + config['e3372']['dongle_ip'] + "/api/device/information"
+    get_net_name_api_url="http://" + config['e3372']['dongle_ip'] + "/api/net/current-plmn"
     get_mon_stat_api_url="http://" + config['e3372']['dongle_ip'] + "/api/monitoring/status"
     get_mon_traf_api_url="http://" + config['e3372']['dongle_ip'] + "/api/monitoring/traffic-statistics"
 
@@ -109,9 +110,18 @@ def get_modem_data():
         if "DeviceName" in dev_info_resp.text:
             dev_info = xmltodict.parse(dev_info_resp.content)['response']
 
-            global_vars.modem_data["name"] = dev_info["DeviceName"]
+            global_vars.modem_data["device_name"] = dev_info["DeviceName"]
         else:
             logger.error("Modem task failed: could not retrieve " + get_dev_info_api_url)
+
+        net_name_resp = requests.get(get_net_name_api_url, headers=headers)
+
+        if "FullName" in net_name_resp.text:
+            net_name = xmltodict.parse(net_name_resp.content)['response']
+
+            global_vars.modem_data["network_name"] = net_name["FullName"]
+        else:
+            logger.error("Modem task failed: could not retrieve " + get_net_name_api_url)
 
         mon_stat_resp = requests.get(get_mon_stat_api_url, headers=headers)
 
