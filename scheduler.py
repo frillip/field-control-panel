@@ -3,7 +3,7 @@ import schedule
 from vedirect_interface import check_load_state,check_batt_voltage
 from megaio_get_data import get_relay_data
 from megaio_set_relays import relay_auto_timeout
-from e3372_interface import get_modem_data,connection_checker
+from huawei_interface import get_modem_data,connection_checker
 from bme_env_data import get_bme_data
 from environment_agency import init_river,check_river
 from sun import get_new_sun_data,update_sun_data

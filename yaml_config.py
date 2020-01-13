@@ -63,7 +63,7 @@ bmv = {
 'warn_sms_list': [],
 }}
 
-e3372 = {
+huawei = {
 'req': ['dongle_ip'],
 'opt': {
 }}
@@ -109,7 +109,7 @@ config_structure = {
 'bme': bme,
 'mppt': mppt,
 'bmv': bmv,
-'e3372': e3372,
+'huawei': huawei,
 'river': river,
 'clickatell': clickatell,
 'system': system,

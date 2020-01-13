@@ -4,7 +4,7 @@ import signal
 import sys
 import global_vars
 import scheduler
-from e3372_interface import get_modem_data,send_connection_req,net_connected
+from huawei_interface import get_modem_data,send_connection_req,net_connected
 import panel_web_app
 import vedirect_interface
 import yaml_save_state
