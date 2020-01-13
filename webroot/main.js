@@ -265,10 +265,26 @@ function get_weather_data()
     fetch("weather.json")
         .then(response => response.json())
         .then(data => {
-            document.querySelector("#temperature").innerHTML = data.current.temperature.toFixed(1) + String.fromCharCode(176) + "C"
+            document.querySelector("#temperature").innerHTML = data.current.temperature.toFixed(1) + String.fromCharCode(176) + "C";
+            var weather_title = document.getElementById("weather-title");
+            weather_title.innerHTML = "Weather ";
+            if ( data.alert.severity ) {
+                var weather_warning_icon = document.createElement("img");
+                weather_warning_icon.className = "icon-large-right"
+                weather_warning_icon.id = "weather-warning-icon"
+                weather_warning_icon.title = data.alert.title;
+                if ( data.alert.colour == 'red' ) {
+                    weather_warning_icon.src = "/icon/alert.png";
+                } else if ( data.alert.colour == 'yellow' ) {
+                    weather_warning_icon.src = "/icon/warning.png";
+                } else {
+                    weather_warning_icon.src = "/icon/information.png";
+                }
+                weather_title.appendChild(weather_warning_icon);
+            }
             document.querySelector("#weather-type-icon").src = "/icon/weather/"+data.hour.icon+".png";
             document.querySelector("#weather-type-icon").title = data.day.summary;
-            document.querySelector("#weather-type-text").innerHTML = data.hour.summary
+            document.querySelector("#weather-type-text").innerHTML = data.hour.summary;
             var wind_icon = ""
             if (data.current.wind_speed == 0) {
                 wind_icon = "wind0.png";

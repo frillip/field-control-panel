@@ -16,6 +16,7 @@ weather_data['site'] = {}
 weather_data['current'] = {}
 weather_data['hour'] = {}
 weather_data['day'] = {}
+weather_data['alert'] = {}
 
 # There's a lot of data we aren't interested in
 interesting_items = [
@@ -54,6 +55,12 @@ percentage_items = [
 'humidity'
 ]
 
+alert_items = [
+'title',
+'severity',
+'description',
+]
+
 def get_weather_forecast():
     try:
         if not len(weather_data['site']):
@@ -67,7 +74,7 @@ def get_weather_forecast():
             config['field']['longitude'],
             lang=config['weather']['language'],
             units=config['weather']['units'],
-            exclude=[weather.MINUTELY, weather.ALERTS],
+            exclude=[weather.MINUTELY, weather.FLAGS],
             timezone=config['field']['timezone'],
         )
 
@@ -81,6 +88,7 @@ def get_weather_forecast():
         'day': forecast.daily.data[0].__dict__,
         }
 
+        # And the weather for the day
         for time_period in all_weather:
             for forecast_item in all_weather[time_period]:
                 if forecast_item in interesting_items:
@@ -91,6 +99,21 @@ def get_weather_forecast():
                         weather_data[time_period][forecast_item] = int(all_weather[time_period][forecast_item] * 100)
                     else:
                         weather_data[time_period][forecast_item] = all_weather[time_period][forecast_item]
+
+        if forecast.alerts:
+            for item in alert_items:
+                weather_data['alert'][item] = forecast.alerts[0].__dict__[item]
+            if 'red' in weather_data['alert']['title'].lower():
+                weather_data['alert']['colour'] = 'red'
+            elif 'yellow' in weather_data['alert']['title'].lower():
+                weather_data['alert']['colour'] = 'yellow'
+            else:
+                weather_data['alert']['colour'] = 'info'
+        else:
+            weather_data['alert']['title'] = None
+            weather_data['alert']['colour'] = None
+            weather_data['alert']['severity'] = None
+            weather_data['alert']['description'] = None
 
     except Exception as e:
         logger.error('Unhandled exception in retrieving weather forecast: ' + str(e))
