@@ -60,12 +60,3 @@ relay_data[8] = {}
 relay_map = {}
 relay_timestamp = {}
 
-# Below will be irrelevenat once other functions use yaml config
-
-# Megaio boards can have different stack IDs (0-3), ours is 0.
-megaio_stack_id = 0
-
-timezone = 'Europe/London'
-field_latitude = 52.553
-field_longitude = -1.171
-field_elevation = 0

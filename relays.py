@@ -12,8 +12,35 @@ logger = colorlog.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(global_vars.log_level)
 
-# Get megaio stack id, will be from yaml config eventually
-megaio_stack_id = global_vars.megaio_stack_id
+# Bit mask dict for reading individual relays
+relay_mask = { 1 : 0x01,
+               2 : 0x02,
+               3 : 0x04,
+               4 : 0x08,
+               5 : 0x10,
+               6 : 0x20,
+               7 : 0x40,
+               8 : 0x80 }
+
+# Function that gets ALL the relay states
+def get_relay_data():
+
+    try:
+        # For some reason, you can only read ALL of the relay states as a single byte, so do this
+        relay_byte=megaio.get_relays(config['megaio']['stack_id'])
+        # Then for each relay
+        for relay_id in global_vars.relay_data:
+            # And if it's enabled
+            if config['relay'][relay_id]['enabled']:
+                # Bitmask it to get the raw state
+                global_vars.relay_data[relay_id]['raw_state'] = bool(relay_byte & relay_mask[relay_id])
+                # And invert to get the 'true' state if required
+                global_vars.relay_data[relay_id]['state'] = global_vars.relay_data[relay_id]['raw_state'] ^ config['relay'][relay_id]['invert']
+
+    except Exception as e:
+        # Error has occurred, log it
+        logger.error("Relay data task failed: " + str(e))
+
 
 def relay_handle_request(request):
     try:
@@ -51,6 +78,7 @@ def relay_handle_request(request):
     # And as a catch all, frustrate Samual L Jackson some more
     return "Ah-ah-ah! You didn't say the magic word!"
 
+
 def relay_auto_timeout():
     # Get current unix timestamp
     unix_time_int = int(time.time())
@@ -74,7 +102,6 @@ def relay_auto_timeout():
             # Log an error if one has occurred
             logger.error("Failed to auto switch " + config['relay'][relay_id]['name'] + "relay: " + str(e))
 
-    pass
 
 def set_relay_state(relay_id, new_state):
     # Get current ISO timestamp for JSON and unix timestamp for timeout
@@ -87,7 +114,7 @@ def set_relay_state(relay_id, new_state):
         # XOR with the 'invert' attribute to get the new_raw_state
         new_raw_state = new_state ^ config['relay'][relay_id]['invert']
         # Set the relay via megaio library
-        megaio.set_relay(megaio_stack_id,relay_id,new_raw_state)
+        megaio.set_relay(config['megaio']['stack_id'],relay_id,new_raw_state)
         # Update the relay data immediately, rather than waiting for get_relay_data() to run
         global_vars.relay_data[relay_id]['state'] = new_state
         global_vars.relay_data[relay_id]['raw_state'] = new_raw_state
@@ -102,4 +129,3 @@ def set_relay_state(relay_id, new_state):
         # Log an error if one has occurred
         logger.error("Error setting relay state: " + str(e))
 
-    pass

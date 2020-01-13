@@ -2,7 +2,7 @@ import asyncio
 from time import sleep
 from aiohttp import web
 import json
-from megaio_set_relays import relay_handle_request
+from relays import relay_handle_request
 import global_vars
 from weather import weather_data
 import logging

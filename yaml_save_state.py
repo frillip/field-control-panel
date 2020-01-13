@@ -2,7 +2,7 @@ import yaml
 from os import path
 import global_vars
 from yaml_config import config
-from megaio_set_relays import set_relay_state
+from relays import set_relay_state
 from datetime import datetime
 import system_status
 import logging
