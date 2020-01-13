@@ -285,6 +285,9 @@ function get_weather_data()
                 if ( data.alert.colour == 'red' ) {
                     weather_warning_icon.src = "/icon/alert.png";
                     weather_warning_text.className = "weather-warning-red";
+                } else if ( data.alert.colour == 'amber' ) {
+                    weather_warning_icon.src = "/icon/warning_amber.png";
+                    weather_warning_text.className = "weather-warning-amber";
                 } else if ( data.alert.colour == 'yellow' ) {
                     weather_warning_icon.src = "/icon/warning.png";
                     weather_warning_text.className = "weather-warning-yellow";

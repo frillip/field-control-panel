@@ -74,6 +74,14 @@ img.icon-large-right {
   background-color:lightyellow;
 }
 
+.weather-warning-amber {
+  border-style: solid;
+  border-width: 1px;
+  margin-top: -20px;
+  padding: 4px;
+  background-color:moccasin;
+}
+
 .weather-warning-red {
   border-style: solid;
   border-width: 1px;
