@@ -58,6 +58,30 @@ img.icon-large-right {
   top:-4px;
 }
 
+.weather-warning-other {
+  border-style: solid;
+  border-width: 1px;
+  margin-top: -20px;
+  padding: 4px;
+  background-color:aliceblue;
+}
+
+.weather-warning-yellow {
+  border-style: solid;
+  border-width: 1px;
+  margin-top: -20px;
+  padding: 4px;
+  background-color:lightyellow;
+}
+
+.weather-warning-red {
+  border-style: solid;
+  border-width: 1px;
+  margin-top: -20px;
+  padding: 4px;
+  background-color:lightcoral;
+}
+
 .column {
   float: left;
   width: 50%;

@@ -273,12 +273,24 @@ function get_weather_data()
                 weather_warning_icon.className = "icon-large-right"
                 weather_warning_icon.id = "weather-warning-icon"
                 weather_warning_icon.title = data.alert.title;
+                weather_warning_icon.setAttribute("onclick","toggle_weather_warning_text()");
+                var weather_warning_text = document.getElementById("weather-warning-text");
+                if (! weather_warning_text) {
+                    weather_warning_text=document.createElement("p");
+                    weather_title.after(weather_warning_text);
+                    weather_warning_text.id="weather-warning-text";
+                    weather_warning_text.style.display = "none";
+                }
+                weather_warning_text.innerHTML = data.alert.title;
                 if ( data.alert.colour == 'red' ) {
                     weather_warning_icon.src = "/icon/alert.png";
+                    weather_warning_text.className = "weather-warning-red";
                 } else if ( data.alert.colour == 'yellow' ) {
                     weather_warning_icon.src = "/icon/warning.png";
+                    weather_warning_text.className = "weather-warning-yellow";
                 } else {
                     weather_warning_icon.src = "/icon/information.png";
+                    weather_warning_text.className = "weather-warning-other";
                 }
                 weather_title.appendChild(weather_warning_icon);
             }
@@ -315,6 +327,15 @@ function get_weather_data()
             console.log(error);
             // on error, stop execution
         });
+}
+
+function toggle_weather_warning_text() {
+    var weather_warning_text = document.getElementById("weather-warning-text");
+    if (weather_warning_text.style.display === "none") {
+        weather_warning_text.style.display = "block";
+    } else {
+        weather_warning_text.style.display = "none";
+    }
 }
 
 function get_river_data()
