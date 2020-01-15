@@ -60,7 +60,11 @@ function change_relay_state(elem){
     fetch("buttons", {
         method: 'POST',
         body: JSON.stringify(data) })
-        .then((response) => response.text())
+        .then((response) => {
+            if(response.status!==200) {
+                throw new Error(response.status)
+            }
+        response.text()})
         .then((data) => {
             console.log('Success:', data);
         })
