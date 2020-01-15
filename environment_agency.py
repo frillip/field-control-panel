@@ -82,7 +82,7 @@ def check_river():
             now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
             if global_vars.river_data["level"] > global_vars.river_data["last_high_level"]:
                 global_vars.river_data["last_high_level"] = global_vars.river_data["level"]
-                global_vars.river_data["last_high"] = now_iso_stamp
+                global_vars.river_data["last_high"] = global_vars.river_data["timestamp"]
 
             if config['river']['warn_enable']:
                 if global_vars.river_data["level"] > global_vars.river_data["high_warn"]:
