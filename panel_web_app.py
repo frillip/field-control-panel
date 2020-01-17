@@ -6,6 +6,7 @@ from relays import relay_handle_request,generate_relay_json
 import global_vars
 from environment_agency import river_data
 from weather import weather_data
+from sun import sun_data
 import logging
 import colorlog
 
@@ -72,7 +73,7 @@ def run_web_app():
         status_data['bmv'] = global_vars.bmv_data
         status_data['modem'] = global_vars.modem_data
         status_data['river'] = river_data
-        status_data['sun'] = global_vars.sun_data
+        status_data['sun'] = sun_data
         status_data['weather'] = weather_data
         return web.json_response(status_data)
 
@@ -95,7 +96,7 @@ def run_web_app():
         return web.json_response(river_data)
 
     async def sun_json(request):
-        return web.json_response(global_vars.sun_data)
+        return web.json_response(sun_data)
 
     async def weather_json(request):
         return web.json_response(weather_data)

@@ -26,12 +26,6 @@ config_loaded = False
 last_state_loaded = False
 
 # Set up dicts for holding data
-sun_data = {}
-sun_data['next'] = {}
-
-weather_data = {}
-weather_data['site'] = {}
-
 bme_data = {}
 
 mppt_data = {}
