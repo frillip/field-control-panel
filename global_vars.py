@@ -46,5 +46,3 @@ bmv_data["stats"] = {}
 modem_data = {}
 modem_data["data_usage"] = {}
 
-river_data = {}
-

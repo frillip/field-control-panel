@@ -380,7 +380,7 @@ function get_river_data()
                 river_title.appendChild(river_status);
             }
             document.querySelector("#river-level").innerHTML = "Current level: " + data.level + "m @ "+data.timestamp
-            document.querySelector("#river-last-high").innerHTML = "Last high: " + data.last_high_level + "m @ "+data.last_high
+            document.querySelector("#river-last-high").innerHTML = "Last high: " + data.last.high_level + "m @ "+data.last.high
         }).catch(error => {
             console.log(error);
             // on error, stop execution

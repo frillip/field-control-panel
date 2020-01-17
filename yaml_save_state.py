@@ -3,6 +3,7 @@ from os import path
 import global_vars
 from yaml_config import config
 from relays import get_relay_data,set_relay_state,relay_state
+from environment_agency import river_data
 from datetime import datetime
 import time
 import system_status
@@ -85,7 +86,11 @@ def save_running_state():
         save_data['river'] = {}
         logger.info("Saving river data")
         for attr in river_save_list:
-           save_data['river'][attr]=global_vars.river_data[attr]
+           if attr.startswith('last_'):
+               last_attr = attr[5:]
+               save_data['river'][attr]=river_data['last'][last_attr]
+           else:
+               save_data['river'][attr]=river_data[attr]
 
         # Do the same for the river data
         save_data['system'] = {}
@@ -165,11 +170,19 @@ def load_last_saved_state():
                 for attr in river_save_list:
                     # Restore them if they're expected
                     if attr in last_saved_state['river']:
-                        global_vars.river_data[attr] = last_saved_state['river'][attr]
+                        if attr.startswith('last_'):
+                            last_attr = attr[5:]
+                            river_data['last'][last_attr] = last_saved_state['river'][attr]
+                        else:
+                            river_data[attr] = last_saved_state['river'][attr]
                     # Load default if not
                     else:
-                        global_vars.river_data[attr] = river_save_list[attr]
                         logger.warning('Missing data in river save state, loading default: ' + str(attr)+' : '+str(river_save_list[attr]))
+                        if attr.startswith('last_'):
+                            last_attr = attr[5:]
+                            river_data['last'][last_attr] = river_save_list[attr]
+                        else:
+                            river_data['last'][attr] = river_save_list[attr]
 
             # For system data
             elif save_block == 'system':
