@@ -104,7 +104,7 @@ weather = {
 
 config_structure = {
 'megaio' : megaio,
-'relay': relay,
+'relay': { 1: relay, 2: relay, 3: relay, 4: relay, 5: relay, 6: relay, 7: relay, 8: relay },
 'field': field,
 'bme': bme,
 'mppt': mppt,
@@ -141,7 +141,7 @@ def load_config():
             # Relays are special because they have moar levels
             if config_block_name == 'relay':
             # For each relay
-                for relay_id in global_vars.relay_data:
+                for relay_id in config_structure['relay']:
                     try:
                         # If it's enabled in the config, load the data
                         if loaded_yaml['relay'][relay_id]['enabled']:
@@ -154,9 +154,6 @@ def load_config():
                     except KeyError:
                         logger.error('Relay '+str(relay_id)+' not properly configured!')
                         pass
-
-                # Loaded all relay data, so generate the mapping
-                generate_relay_map()
 
             # All the other config blocks can be loaded in the same way
             elif config_block_name in config_structure:
@@ -173,7 +170,6 @@ def load_config():
         # This will disappear once other parts are rewritten
         # to use the config options rather than global_vars
         # hence why it is is separate to the above
-        global_vars.relay_data = config['relay']
 
         # If we get here we have successfully loaded the config!
         config['loaded'] = True
@@ -207,16 +203,3 @@ def load_config_block(config_name, config_params, config_block):
             logger.warning('Unexpected option in '+config_name+' config: '+attr)
 
     return loaded_config_block
-
-def generate_relay_map():
-    try:
-        logger.info('Generating relay mappings')
-        for relay_id in config['relay']:
-            if config['relay'][relay_id]['enabled']:
-                relay_name = config['relay'][relay_id]['name']
-                global_vars.relay_map[relay_name] = relay_id
-                global_vars.relay_timestamp[relay_id] = 0
-    except Exception as e:
-        # Error has occurred, log it
-        logger.error('Failed to generate relay mapping: ' + str(e))
-

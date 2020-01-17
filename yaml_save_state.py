@@ -2,8 +2,9 @@ import yaml
 from os import path
 import global_vars
 from yaml_config import config
-from relays import set_relay_state
+from relays import get_relay_data,set_relay_state,relay_state
 from datetime import datetime
+import time
 import system_status
 import logging
 import colorlog
@@ -15,6 +16,7 @@ logger.addHandler(handler)
 logger.setLevel(global_vars.log_level)
 
 now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
+unix_time_int = int(time.time())
 
 # Filename for save state file
 save_state_file = 'save_state.yaml'
@@ -24,7 +26,7 @@ last_state_loaded = False
 # What we are expecting to save / load
 relay_save_list = {
 'last_state_change': now_iso_stamp,
-'state': False,
+'state_change_timestamp': unix_time_int,
 }
 
 river_save_list = {
@@ -64,20 +66,18 @@ def save_running_state():
         # Create the relay dict
         save_data['relay'] = {}
         logger.info("Saving relay data")
-        for relay_id in global_vars.relay_data:
+        for relay_id in config['relay']:
             # Create a dict for each individual relay
             save_data['relay'][relay_id] = {}
 
             # Not used but might be useful for interrogation
-            save_data['relay'][relay_id]['enabled'] = global_vars.relay_data[relay_id]['enabled']
+            save_data['relay'][relay_id]['enabled'] = config['relay'][relay_id]['enabled']
 
             # Save the attributes if the relay is enabled
-            if global_vars.relay_data[relay_id]['enabled']:
+            if config['relay'][relay_id]['enabled']:
                 logger.info("Relay "+str(relay_id)+" enabled, saving")
                 for attr in relay_save_list:
-                    save_data['relay'][relay_id][attr] = global_vars.relay_data[relay_id][attr]
-                # Save the auto timeout timestamp too
-                save_data['relay'][relay_id]['state_change_timestamp'] = global_vars.relay_timestamp[relay_id]
+                    save_data['relay'][relay_id][attr] = relay_state[relay_id][attr]
             else:
                 logger.info("Relay "+str(relay_id)+" disabled, skipping")
 
@@ -125,6 +125,10 @@ def load_last_saved_state():
             # For relays
             if save_block == 'relay':
                 logger.info("Restoring relay data")
+                # Current relay state is remembered by megaio
+                # board so get current relay state first
+                logger.info("Getting current relay state")
+                get_relay_data()
                 if not last_saved_state.get('relay'):
                     logger.warning('Missing relay data block in save state')
                     last_saved_state['relay'] = {}
@@ -141,18 +145,13 @@ def load_last_saved_state():
                         for attr in relay_save_list:
                             # Check if they exist in the list of things that we're expecting
                             if attr in last_saved_state['relay'][relay_id]:
-                                 global_vars.relay_data[relay_id][attr] = last_saved_state['relay'][relay_id][attr]
-                            # Or if they're the special auto timeout timestamp
-                            elif attr == 'state_change_timestamp':
-                                global_vars.relay_timestamp[relay_id] = last_saved_state['relay'][relay_id]['state_change_timestamp']
+                                 relay_state[relay_id][attr] = last_saved_state['relay'][relay_id][attr]
                             # We ignore the 'enabled' option as config is master, and ignore (but warn) if there is unrecognised data
                             elif attr == 'enabled':
                                 pass
                             else:
                                 logger.warning('Missing data in relay save state, loading default: ' + str(attr)+' : '+str(relay_save_list[attr]))
-                                global_vars.relay_data[relay_id][attr] = relay_save_list[attr]
-                        # Assert the saved relay state
-                        set_relay_state(relay_id,global_vars.relay_data[relay_id]['state'])
+                                relay_state[relay_id][attr] = relay_save_list[attr]
                     else:
                         logger.info("Relay "+str(relay_id)+" disabled, skipping")
 

@@ -48,15 +48,3 @@ modem_data["data_usage"] = {}
 
 river_data = {}
 
-relay_data = {}
-relay_data[1] = {}
-relay_data[2] = {}
-relay_data[3] = {}
-relay_data[4] = {}
-relay_data[5] = {}
-relay_data[6] = {}
-relay_data[7] = {}
-relay_data[8] = {}
-relay_map = {}
-relay_timestamp = {}
-
