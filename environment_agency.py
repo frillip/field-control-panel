@@ -28,35 +28,10 @@ def init_river():
             global_vars.river_data["high_warn"] = resp.json()["items"]["stageScale"]["typicalRangeHigh"]
             global_vars.river_data["high"] = global_vars.river_data["high_warn"] - 0.15 # 0.15 is generally a good guess for hysteresis
 
-        # If this hasn't been restored from save state data
-        # Move to yaml_save_state in the future maybe
-        now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
-        if not global_vars.river_data.get("last_high"):
-            global_vars.river_data["last_high"] = now_iso_stamp
-        if not global_vars.river_data.get("last_high_level"):
-            global_vars.river_data["last_high_level"] = 0.0
-        if not global_vars.river_data.get("last_high_warn"):
-            global_vars.river_data["last_high_warn"] = 0.0
-        if not global_vars.river_data.get("last_level"):
-            global_vars.river_data["last_level"] = now_iso_stamp
-        if not global_vars.river_data.get("last_timestamp"):
-            global_vars.river_data["last_timestamp"] = now_iso_stamp
-        if not global_vars.river_data.get("last_warn"):
-            global_vars.river_data["last_warn"] = now_iso_stamp
-        if not global_vars.river_data.get("last_warn_level"):
-            global_vars.river_data["last_warn_level"] = 0.0
-        if not global_vars.river_data.get("warning_active"):
-            global_vars.river_data["warning_active"] = False
-        if not global_vars.river_data.get("status"):
-            global_vars.river_data["status"] = "steady"
-
         check_river()
-
-        pass
 
     except Exception as e:
         logger.error("River init failed: " + str(e))
-        pass
 
 
 def check_river():
