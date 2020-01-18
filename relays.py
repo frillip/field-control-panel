@@ -50,9 +50,9 @@ def relay_handle_request(request):
         # Theoretically we can switch multiple relays in one request, so handle them individually
         for relay in request:
             # Check if the relay name is in the relay map
-            if relay in config['relay']['map']:
+            if relay in relay_map:
                 # Get the corresponding relay_id
-                relay_id = config['relay']['map'][relay]
+                relay_id = relay_map[relay]
                 # If it's a request to turn it on, do so, and return some text saying so
                 if request[relay] == "on":
                     logger.warning("Manual " + relay + " on")
