@@ -276,7 +276,6 @@ function get_weather_data()
                 var weather_warning_icon = document.createElement("img");
                 weather_warning_icon.className = "icon-large-right"
                 weather_warning_icon.id = "weather-warning-icon"
-                weather_warning_icon.title = data.alert.title;
                 weather_warning_icon.setAttribute("onclick","toggle_weather_warning_text()");
                 var weather_warning_text = document.getElementById("weather-warning-text");
                 if (! weather_warning_text) {
@@ -302,8 +301,7 @@ function get_weather_data()
                 weather_title.appendChild(weather_warning_icon);
             }
             document.querySelector("#weather-type-icon").src = "/icon/weather/"+data.hour.icon+".png";
-            document.querySelector("#weather-type-icon").title = data.day.summary;
-            document.querySelector("#weather-type-text").innerHTML = data.hour.summary;
+            document.querySelector("#weather-type-text").innerHTML = data.day.summary;
             var wind_icon = ""
             if (data.current.wind_speed == 0) {
                 wind_icon = "wind0.png";
