@@ -3,7 +3,7 @@ var g_ignore_relay_resp = {}
 var g_sunrise_datetime = new Date("1970-01-01T00:00:00");
 var g_sun_timer = 0
 
-var g_modem_connected = true
+var g_modem_connected = false
 var g_up_mb = 0
 var g_down_mb = 0
 var g_conn_time = 0
@@ -200,11 +200,13 @@ function get_modem_data()
 
 function update_conn_time()
 {
-    g_conn_time++;
-    if(g_modem_connected) {
-        document.querySelector("#lte-data").innerHTML = "Connected: "+g_down_mb+"MB / "+g_up_mb+"MB - "+seconds2time(g_conn_time);
-    } else {
-        document.querySelector("#lte-data").innerHTML = "Not Connected!";
+    if(g_conn_time && g_modem_connected) {
+        g_conn_time++;
+        if(g_modem_connected) {
+            document.querySelector("#lte-data").innerHTML = "Connected: "+g_down_mb+"MB / "+g_up_mb+"MB - "+seconds2time(g_conn_time);
+        } else {
+            document.querySelector("#lte-data").innerHTML = "Not Connected!";
+        }
     }
 }
 
