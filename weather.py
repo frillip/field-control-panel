@@ -107,6 +107,8 @@ def get_weather_forecast():
                 weather_data['alert']['colour'] = 'red'
             elif 'amber' in weather_data['alert']['title'].lower():
                 weather_data['alert']['colour'] = 'amber'
+            elif 'orange' in weather_data['alert']['title'].lower():
+                weather_data['alert']['colour'] = 'amber'
             elif 'yellow' in weather_data['alert']['title'].lower():
                 weather_data['alert']['colour'] = 'yellow'
             else:
