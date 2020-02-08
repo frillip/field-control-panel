@@ -222,8 +222,6 @@ def send_sms(dest,message):
         return False
 
 
-#def read_sms(message_no) # future function to read SMS from device for balance notification and other useful things
-
 def net_connected():
     try:
         if global_vars.modem_data["connected"] and global_vars.modem_data["connected_time"]:
@@ -239,3 +237,18 @@ def connection_checker():
         logger.warning("Modem is not connected!")
         send_connection_req()
     pass
+
+
+# If this file is run directly, check and keep the lte connection alive
+
+def main():
+    load_config()
+
+    while True:
+        sleep(5)
+        get_modem_data()
+        connection_checker()
+
+if __name__ == '__main__':
+    from yaml_config import load_config
+    main()
