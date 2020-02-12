@@ -128,7 +128,6 @@ def check_batt_voltage():
 
 # If the load is off warn, will only be triggered if Pi is moved onto a UPS of course...
 def check_load_state():
-
     try:
         human_datetime = datetime.now().strftime("%d/%m/%Y %H:%M")
         now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
@@ -141,13 +140,13 @@ def check_load_state():
             else:
                 warn_sms_text = human_datetime + ": Load disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
                 logger.critical("Load disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-            system_state['load_state_sent_time'] = unix_time_int
+            system_state['last_load_state_time'] = unix_time_int
             send_sms(config['bmv']['warn_sms_list'], warn_sms_text)
 
-        if not global_vars.mppt_data["load"]["state"] and ( unix_time_int > system_state['last_load_state_time'] + config['system']['load_warning_interval'] ):
+        if not global_vars.mppt_data["load"]["state"] and ( unix_time_int > (system_state['last_load_state_time'] + config['system']['load_warning_interval'] )):
             warn_sms_text = human_datetime + ": Load disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V"
             logger.critical("Load disconnected! Battery voltage: " + str(global_vars.mppt_data["batt"]["v"]) + "V. Sending alert SMS")
-            system_state['load_state_sent_time'] = unix_time_int
+            system_state['last_load_state_time'] = unix_time_int
             send_sms(config['bmv']['warn_sms_list'], warn_sms_text)
 
         system_state['last_load_state'] = global_vars.mppt_data["load"]["state"]
