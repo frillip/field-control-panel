@@ -35,8 +35,8 @@ relay:
     enabled: false
 
 field:
-  latitude: 52.553
-  longitude: -1.171
+  latitude: 51.499583
+  longitude: -0.146517
   elevation: 0
   timezone: 'Europe/London'
 
@@ -60,8 +60,8 @@ huawei:
   dongle_ip: 192.168.8.1
 
 river:
-  api_url: https://environment.data.gov.uk/flood-monitoring/id/measures/4195-level-stage-i-15_min-mASD
-  api_station_url: https://environment.data.gov.uk/flood-monitoring/id/stations/4195
+  api_url: https://environment.data.gov.uk/flood-monitoring/id/measures/xxxx-level-stage-i-15_min-mASD
+  api_station_url: https://environment.data.gov.uk/flood-monitoring/id/stations/xxxx
   high: 0.95
   high_warn: 1.1
   warn_enable: False
@@ -84,3 +84,10 @@ system:
 
 weather:
   api_key: xxxx-xxxx-xxxx
+
+picoups:
+  i2c_port: 1
+  battery_type: li-ion
+  to92_enable: true
+  fan_enable: true
+  fan_threshold_temp: 35

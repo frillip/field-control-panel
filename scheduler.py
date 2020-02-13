@@ -6,6 +6,7 @@ from huawei_interface import get_modem_data,connection_checker
 from bme_env_data import get_bme_data
 from environment_agency import init_river,check_river
 from sun import get_new_sun_data,update_sun_data
+from pico_ups import setup_ups,get_ups_data
 from weather import get_weather_forecast
 import global_vars
 import logging
@@ -44,6 +45,9 @@ def setup_scheduler():
     logger.info("Starting weather forecast task")
     get_weather_forecast()
     schedule.every(15).minutes.do(get_weather_forecast)
+    logger.info("Starting PIco UPS data task")
+    setup_ups()
+    schedule.every().second.do(get_ups_data)
     logger.info("All tasks scheduled!")
     pass
 
@@ -57,6 +61,6 @@ def loop_scheduler():
             schedule.run_pending()
         except Exception as e:
             logger.error("Scheduled task failed: " + str(e))
-        time.sleep(0.1)
-    logger.warning("Scheduled tasks stopped") 
+        time.sleep(0.05)
+    logger.warning("Scheduled tasks stopped")
     pass

@@ -7,6 +7,7 @@ import global_vars
 from environment_agency import river_data
 from weather import weather_data
 from sun import sun_data
+from pico_ups import ups_data
 import logging
 import colorlog
 
@@ -74,6 +75,7 @@ def run_web_app():
         status_data['modem'] = global_vars.modem_data
         status_data['river'] = river_data
         status_data['sun'] = sun_data
+        status_data['ups'] = ups_data
         status_data['weather'] = weather_data
         return web.json_response(status_data)
 
@@ -98,6 +100,9 @@ def run_web_app():
     async def sun_json(request):
         return web.json_response(sun_data)
 
+    async def ups_json(request):
+        return web.json_response(ups_data)
+
     async def weather_json(request):
         return web.json_response(weather_data)
 
@@ -114,6 +119,7 @@ def run_web_app():
                     web.get('/modem.json', modem_json),
                     web.get('/river.json', river_json),
                     web.get('/sun.json', sun_json),
+                    web.get('/ups.json', ups_json),
                     web.get('/weather.json', weather_json)])
     runner = web.AppRunner(app, access_log=None)
     return runner
