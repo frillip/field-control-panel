@@ -24,6 +24,8 @@ megaio = {
 'req': [],
 'opt': {
 'stack_id': 0
+},
+'enum': {
 }}
 
 relay = {
@@ -33,6 +35,8 @@ relay = {
 'auto_off': False,
 'auto_on': False,
 'auto_timeout': 0,
+},
+'enum': {
 }}
 
 field = {
@@ -40,6 +44,8 @@ field = {
 'opt': {
 'elevation': 0,
 'timezone': 'Europe/London',
+},
+'enum': {
 }}
 
 bme = {
@@ -47,12 +53,16 @@ bme = {
 'opt': {
 'i2c_port': 1,
 'i2c_address': 0x76, # Most sensors are 0x76
+},
+'enum': {
 }}
 
 mppt = {
 'req': ['tty_dev'],
 'opt': {
 'baudrate': 19200, # Default VE.Direct speed
+},
+'enum': {
 }}
 
 bmv = {
@@ -61,11 +71,15 @@ bmv = {
 'baudrate': 19200, # Default VE.Direct speed
 'warn_enable': False,
 'warn_sms_list': [],
+},
+'enum': {
 }}
 
 huawei = {
 'req': ['dongle_ip'],
 'opt': {
+},
+'enum': {
 }}
 
 river = {
@@ -75,12 +89,16 @@ river = {
 'high_warn': 10.0,
 'warn_enable': False,
 'warn_sms_list': [],
+},
+'enum': {
 }}
 
 clickatell = {
 'req': ['api_key'],
 'opt': {
 'sender_name': 'SHEEPNET',
+},
+'enum': {
 }}
 
 system = {
@@ -93,6 +111,8 @@ system = {
 'batt_voltage_critical': 11.3,
 'batt_warning_interval': 900,
 'load_warning_interval': 900,
+},
+'enum': {
 }}
 
 weather = {
@@ -100,6 +120,20 @@ weather = {
 'opt': {
 'units': 'auto',
 'language': 'en',
+},
+'enum': {
+}}
+
+picoups = {
+'req': ['i2c_port'],
+'opt': {
+'battery_type': 'li-ion',
+'to92_enable': 'False',
+'fan_enable': 'False',
+'fan_threshold_temp': 35,
+},
+'enum': {
+'battery_type': {'li-ion': 0x49, 'lipo': 0x53, 'lifepo4':0x46},
 }}
 
 config_structure = {
@@ -114,6 +148,7 @@ config_structure = {
 'clickatell': clickatell,
 'system': system,
 'weather': weather,
+'picoups': picoups,
 }
 
 def load_config():
@@ -182,9 +217,22 @@ def load_config():
 def load_config_block(config_name, config_params, config_block):
     loaded_config_block = {}
 
+    # required attributes
     for attr in config_params['req']:
+        # Make sure it exists before blindly trying to load it
         if config_block.get(attr):
-            loaded_config_block[attr] = config_block[attr]
+            # Is it enumerated?
+            if attr in config_params['enum']:
+                # If it's enumerated correctly, load it
+                if config_block[attr] in config_params['enum'][attr]:
+                    loaded_config_block[attr] = config_params['enum'][attr][config_block[attr]]
+                # If not, raise an exception
+                else:
+                    raise Exception('Required enumerated configuration parameter in '+config_name+' is not  valid value: ' +attr)
+            # If not enumerated, just load it
+            else:
+                loaded_config_block[attr] = config_block[attr]
+        # If missing, raise an exception
         else:
             raise KeyError('Missing required configuration parameter in '+config_name+' config: '+attr)
 
@@ -192,12 +240,23 @@ def load_config_block(config_name, config_params, config_block):
     for attr in config_params['opt']:
         # If they exist populate the data
         if config_block.get(attr):
-            loaded_config_block[attr] = config_block[attr]
+            # Is it enumerated?
+            if attr in config_params['enum']:
+                # If enumerated correctly, load it
+                if config_block[attr] in config_params['enum'][attr]:
+                    loaded_config_block[attr] = config_params['enum'][attr][config_block[attr]]
+                # If not, populate the default, and warn
+                else:
+                    logger.warn('Unknown enumeration for '+config_name+' parameter: '+attr+'  Loading default instead')
+                    loaded_config_block[attr] = config_params['opt'][attr]
+            # If not enumerated, load it
+            else:
+                loaded_config_block[attr] = config_block[attr]
         # If not, populate the default
         else:
             loaded_config_block[attr] = config_params['opt'][attr]
 
-    # Check for options that aren't expected
+    # Check for options that aren't expected, warn if found
     for attr in config_block:
         if ( not attr in config_params['req']) and ( not attr in config_params['opt']):
             logger.warning('Unexpected option in '+config_name+' config: '+attr)
