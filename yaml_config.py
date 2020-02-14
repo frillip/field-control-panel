@@ -69,6 +69,8 @@ bmv = {
 'req': ['tty_dev'],
 'opt': {
 'baudrate': 19200, # Default VE.Direct speed
+'midpoint_enable': False,
+'temp_enable': False,
 'warn_enable': False,
 'warn_sms_list': [],
 },

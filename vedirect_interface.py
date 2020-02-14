@@ -171,10 +171,12 @@ def process_bmv_data_string(ve_string):
         global_vars.bmv_data["batt"]["v"] = int(field["data"]) / 1000.0
     elif field["label"] == "VM":
          # Battery  mid-point voltage, V
-        global_vars.bmv_data["batt"]["vm"] = int(field["data"]) / 1000.0
+        if config['bmv']['midpoint_enable']:
+            global_vars.bmv_data["batt"]["vm"] = int(field["data"]) / 1000.0
     elif field["label"] == "DM":
          # Battery mid-point voltage deviation, %
-        global_vars.bmv_data["batt"]["dm"] = int(field["data"]) / 1000.0
+        if config['bmv']['midpoint_enable']:
+            global_vars.bmv_data["batt"]["dm"] = int(field["data"]) / 1000.0
     elif field["label"] == "I":
         # Battery current, A, negative indicates discharge, positive indicates charge
         global_vars.bmv_data["batt"]["i"] = int(field["data"]) / 1000.0
@@ -184,7 +186,8 @@ def process_bmv_data_string(ve_string):
     elif field["label"] == "T":
         # Battery temperature, degC, may be replaced with midpoint voltage in the future
         # in which case BME280 temperature can be used as an estimate
-        global_vars.bmv_data["batt"]["t"] = int(field["data"])
+        if config['bmv']['temp_enable']:
+            global_vars.bmv_data["batt"]["t"] = int(field["data"])
     elif field["label"] == "SOC":
         # State of charge ,%
         global_vars.bmv_data["batt"]["soc"] = int(field["data"]) / 10.0
