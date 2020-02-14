@@ -51,6 +51,8 @@ mppt:
 bmv:
   tty_dev: /dev/ttyUSB0
   baudrate: 19200
+  midpoint_enable: true
+  temp_enable: false
   warn_enable: False
   warn_sms_list:
     - '+447xxxxxxxxx'
