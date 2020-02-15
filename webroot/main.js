@@ -302,6 +302,16 @@ function get_weather_data()
                 }
                 weather_title.appendChild(weather_warning_icon);
             }
+            var powered_by_dark_sky_icon = document.createElement("img")
+            powered_by_dark_sky_icon.id = "powered-by-dark-sky-icon"
+            powered_by_dark_sky_icon.className = "icon-small-right"
+            powered_by_dark_sky_icon.src = "https://darksky.net/dev/img/attribution/poweredby.png"
+            powered_by_dark_sky_icon.title = "Powered by Dark Sky"
+            var powered_by_dark_sky = document.createElement("a")
+            powered_by_dark_sky.href = "https://darksky.net/poweredby/"
+            powered_by_dark_sky.target = "_blank"
+            powered_by_dark_sky.appendChild(powered_by_dark_sky_icon)
+            weather_title.appendChild(powered_by_dark_sky)
             document.querySelector("#weather-type-icon").src = "/icon/weather/"+data.hour.icon+".png";
             document.querySelector("#weather-type-text").innerHTML = data.day.summary;
             var wind_icon = ""

@@ -27,16 +27,29 @@ p {
 }
 
 img.icon-small-left {
-  width: 15px;
   height: 15px;
   padding-right: 2px;
   display:inline-block;
   float: left;
 }
 
+img.icon-small-right {
+  height: 15px;
+  padding-left: 2px;
+  display:inline-block;
+}
+
 img.icon-medium-left {
   height: 20px;
   padding-right: 8px;
+  vertical-align:middle;
+  position: relative;
+  top:-2px;
+}
+
+img.icon-medium-right {
+  height: 20px;
+  padding-left: 2px;
   vertical-align:middle;
   position: relative;
   top:-2px;
