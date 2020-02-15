@@ -22,7 +22,7 @@ human_date = datetime.datetime.fromtimestamp(unix_time_int).strftime("%d/%m/%Y")
 human_time = datetime.datetime.fromtimestamp(unix_time_int).strftime("%H:%M:%S")
 
 status_resp = r.json()
-bme = status_resp["bme"]
+bme = status_resp["sensors"]["bme280"]
 mppt = status_resp["mppt"]
 bmv = status_resp["bmv"]
 load = mppt["load"]

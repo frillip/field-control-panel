@@ -48,13 +48,22 @@ field = {
 'enum': {
 }}
 
-bme = {
+sensors = {
 'req': [],
 'opt': {
 'i2c_port': 1,
-'i2c_address': 0x76, # Most sensors are 0x76
+'bme280_enable': False,
+'bme280_address': 0x76, # Most sensors are 0x76, Adafruit is 0x77
+'tsl2561_enable': False,
+'tsl2561_address': 0x39, # Default address is 0x39 if address line is left floating
+'tsl2561_gain': '1x',
+'tsl2561_integration_time': '13ms',
+'lis3dh_enable': False,
+'lis3dh_address': 0x19, #  Default address is 0x19
+'lis3dh_interrupt_pin': None,
+'gps_enable': False,
 },
-'enum': {
+'enum': { 'tsl2561_gain': { '1x':0, '16x':0 }, 'tsl2561_integration_time': { '13ms': 0x00, '101ms':0x01, '402ms':0x02},
 }}
 
 mppt = {
@@ -142,7 +151,7 @@ config_structure = {
 'megaio' : megaio,
 'relay': { 1: relay, 2: relay, 3: relay, 4: relay, 5: relay, 6: relay, 7: relay, 8: relay },
 'field': field,
-'bme': bme,
+'sensors': sensors,
 'mppt': mppt,
 'bmv': bmv,
 'huawei': huawei,

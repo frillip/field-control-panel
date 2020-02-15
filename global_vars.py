@@ -26,8 +26,6 @@ config_loaded = False
 last_state_loaded = False
 
 # Set up dicts for holding data
-bme_data = {}
-
 mppt_data = {}
 mppt_data["batt"] = {}
 mppt_data["load"] = {}

@@ -40,9 +40,18 @@ field:
   elevation: 0
   timezone: 'Europe/London'
 
-bme:
+sensors:
   i2c_port: 1
-  i2c_address: 0x76
+  bme280_enable: True
+  bme280_address: 0x76
+  tsl2561_enable: True
+  tsl2561_address: 0x39
+  tsl2561_gain: 1x
+  tsl2561_integration_time: 13ms
+  lis3dh_enable: False
+  lis3dh_address: 0x19
+  lis3dh_interrupt_pin: 17
+  gps_enable: True
 
 mppt:
   tty_dev: /dev/ttyUSB1
