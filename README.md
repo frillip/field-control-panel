@@ -14,11 +14,7 @@ The main index page and JSON outputs are presented using the aiohttp web server 
 
 ## Configuration
 
-The majority of this is done in `global_vars.py` however some other specific bits are specified in their respective files (such as USB serial device for the VE.Direct interfaces). This needs moving to a YAML file or similar in the future perhaps, but for now it is fine where it is.
-
-## Private user data
-
-This lives in `user_data.py` which is ignored by git. Currently it contains phone numbers for alerts and API keys for the clickatell SMS gateway.
+This is done in `config.yaml`. An example is provided. Some parameters are required, others are optional If missing from the yaml, the optional parameters will be populated with a default. Errors are thrown for missing required parameters, and the application will exit. Warnings are flagged for unrecognised options.
 
 ## VE.Direct interface
 
@@ -26,9 +22,9 @@ Currently there are functions to read information from Victron modules (currentl
 
 There are also functions to check the overall health of the system, but these are relatively simplistic and immature at time of writing. No doubt I'll come up with something better as time goes on. It alerts via SMS if bad things happen.
 
-## BME280
+## Sensors
 
-There's a BME280 sensor attached via i2c, used to monitor temperature, pressure, and humidity.
+There's a BME280 sensor attached via i2c, used to monitor temperature, pressure, and humidity. There is also a TSL2561 ambient light sensor present, and a GPS module, currently used for timekeeping, but maybe in the future for automatic detection of location for weather etc.
 
 ## MegaIO hat
 
@@ -46,9 +42,13 @@ By default if the internet is available, SMS messages are sent via the clickatel
 
 There is a river level monitoring station on the river in the field, data from this is acquired using the API from the environment agency. Alerts are sent if the river exceeds a specified level, and keeps warning if the river level continues to climb.
 
+## Weather <a href="https://darksky.net/poweredby/"><img src="https://darksky.net/dev/img/attribution/poweredby-oneline.png" align="center" width=150></img></a>
+
+Weather data used to be obtained from the met office, but their API proved to be unreliable with poor library support. Data is now obtained from darksky.net. This is based off the co-ordinates specified in the YAML, however they may be automatically obtained via GPS instead in the future.
+
 ## static/index.html
 
-Now has fancy toggle switches that reflect the current state of relays. Also shows PV/Battery/Environment data. Updates by pulling JSON every 1s for relays, 5s for PV/Battery, and only on load for temperature. 
+Now has fancy toggle switches that reflect the current state of relays. Also shows PV/Battery/Environment data. Updates by pulling JSON every 1s for relays, 5s for PV/Battery, and only on load for temperature/weather.
 
 ## static/style.css
 
