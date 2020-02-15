@@ -379,8 +379,8 @@ function get_river_data()
                 river_status.src = "/icon/arrow_down.png";
                 river_title.appendChild(river_status);
             }
-            document.querySelector("#river-level").innerHTML = "Current level: " + data.level + "m @ "+data.timestamp
-            document.querySelector("#river-last-high").innerHTML = "Last high: " + data.last.high_level + "m @ "+data.last.high
+            document.querySelector("#river-level").innerHTML = "Current level: " + Number(data.level).toFixed(3) + "m @ "+data.timestamp
+            document.querySelector("#river-last-high").innerHTML = "Last high: " + Number(data.last.high_level).toFixed(3) + "m @ "+data.last.high
         }).catch(error => {
             console.log(error);
             // on error, stop execution
