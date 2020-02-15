@@ -212,7 +212,7 @@ function update_conn_time()
 
 function get_env_data()
 {
-    fetch("bme.json")
+    fetch("bme280.json")
         .then(response => response.json())
         .then(data => {
 // Now fed from weather data
