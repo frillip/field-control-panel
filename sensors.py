@@ -1,6 +1,7 @@
 import smbus2
 import bme280
 import gpsd
+from timezonefinder import TimezoneFinder
 from tsl2561 import TSL2561
 import RPi.GPIO as GPIO
 # import LIS3DH
@@ -174,12 +175,14 @@ def get_gps_data():
             if ( gps_data['mode'] >= 2 ):
                 gps_data['time'] = packet.get_time().replace(tzinfo=None,microsecond=0).isoformat()
                 gps_data['time_local'] = packet.get_time(local_time=True).replace(tzinfo=None,microsecond=0).isoformat()
+                gps_data['timezone'] = TimezoneFinder().timezone_at(lng=packet.lon, lat=packet.lat)
                 gps_data['latitude'] = round(packet.lat,4)
                 gps_data['longitude'] = round(packet.lon,4)
                 gps_data['speed'] = int(packet.speed())
             else:
                 gps_data['time'] = None
                 gps_data['time_local'] = None
+                gps_data['timezone'] = None
                 gps_data['latitude'] = None
                 gps_data['longitude'] = None
                 gps_data['speed'] = None
