@@ -68,10 +68,12 @@ def get_weather_forecast():
             weather_data['site']['latitude'] = gps_data['latitude']
             weather_data['site']['longitude'] = gps_data['longitude']
             weather_data['site']['timezone'] = gps_data['timezone']
+            weather_data['site']['elevation'] = gps_data['altitude']
         else:
             weather_data['site']['latitude'] = config['field']['latitude']
             weather_data['site']['longitude'] = config['field']['longitude']
             weather_data['site']['timezone'] = config['field']['timezone']
+            weather_data['site']['elevation'] = config['field']['elevation']
 
         darksky = DarkSky(config['weather']['api_key'])
         forecast = darksky.get_forecast(
