@@ -1,6 +1,7 @@
 from darksky.api import DarkSky, DarkSkyAsync
 from darksky.types import languages, units, weather
 from yaml_config import config
+from sensors import gps_data
 import global_vars
 import logging
 import colorlog
@@ -63,19 +64,23 @@ alert_items = [
 
 def get_weather_forecast():
     try:
-        if not len(weather_data['site']):
+        if config['sensors']['gps_enable'] and ( gps_data['mode'] >= 2 ):
+            weather_data['site']['latitude'] = gps_data['latitude']
+            weather_data['site']['longitude'] = gps_data['longitude']
+            weather_data['site']['timezone'] = gps_data['timezone']
+        else:
             weather_data['site']['latitude'] = config['field']['latitude']
             weather_data['site']['longitude'] = config['field']['longitude']
             weather_data['site']['timezone'] = config['field']['timezone']
 
         darksky = DarkSky(config['weather']['api_key'])
         forecast = darksky.get_forecast(
-            config['field']['latitude'],
-            config['field']['longitude'],
+            weather_data['site']['latitude'],
+            weather_data['site']['longitude'],
             lang=config['weather']['language'],
             units=config['weather']['units'],
             exclude=[weather.MINUTELY, weather.FLAGS],
-            timezone=config['field']['timezone'],
+            timezone=weather_data['site']['timezone'],
         )
 
         # We're not interested in ALL the data
