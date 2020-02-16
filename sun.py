@@ -14,6 +14,7 @@ logger.addHandler(handler)
 logger.setLevel(global_vars.log_level)
 
 sun_data = {}
+sun_data['site'] = {}
 sun_data['next'] = {}
 
 
@@ -24,17 +25,17 @@ def get_new_sun_data():
 
         # Use the GPS data if enabled and available
         if config['sensors']['gps_enable'] and ( gps_data['mode'] >= 2 ):
-            field = astral.Location(('Field','Countesthorpe',gps_data['latitude'],gps_data['longitude'],gps_data['timezone'],gps_data['altitude']))
-            sun_data['latitude'] = gps_data['latitude']
-            sun_data['longitude'] = gps_data['longitude']
-            sun_data['timezone'] = config['field']['timezone']
-            sun_data['elevation'] = gps_data['altitude']
+            sun_data['site']['latitude'] = gps_data['latitude']
+            sun_data['site']['longitude'] = gps_data['longitude']
+            sun_data['site']['timezone'] = config['field']['timezone']
+            sun_data['site']['elevation'] = gps_data['altitude']
         else:
-            field = astral.Location(('Field','Countesthorpe',config['field']['latitude'],config['field']['longitude'],config['field']['timezone'],config['field']['elevation']))
-            sun_data['latitude'] = config['field']['latitude']
-            sun_data['longitude'] = config['field']['longitude']
-            sun_data['timezone'] = config['field']['timezone']
-            sun_data['elevation'] = config['field']['elevation']
+            sun_data['site']['latitude'] = config['field']['latitude']
+            sun_data['site']['longitude'] = config['field']['longitude']
+            sun_data['site']['timezone'] = config['field']['timezone']
+            sun_data['site']['elevation'] = config['field']['elevation']
+
+        field = astral.Location(('Field','Countesthorpe',sun_data['site']['latitude'],sun_data['site']['longitude'],sun_data['site']['timezone'],sun_data['site']['elevation']))
         sun = field.sun()
 
         for state in sun:
@@ -59,17 +60,17 @@ def update_sun_data():
 
         # Use the GPS data if enabled and available
         if config['sensors']['gps_enable'] and ( gps_data['mode'] >= 2 ):
-            field = astral.Location(('Field','Countesthorpe',gps_data['latitude'],gps_data['longitude'],gps_data['timezone'],gps_data['altitude']))
-            sun_data['latitude'] = gps_data['latitude']
-            sun_data['longitude'] = gps_data['longitude']
-            sun_data['timezone'] = config['field']['timezone']
-            sun_data['elevation'] = gps_data['altitude']
+            sun_data['site']['latitude'] = gps_data['latitude']
+            sun_data['site']['longitude'] = gps_data['longitude']
+            sun_data['site']['timezone'] = config['field']['timezone']
+            sun_data['site']['elevation'] = gps_data['altitude']
         else:
-            field = astral.Location(('Field','Countesthorpe',config['field']['latitude'],config['field']['longitude'],config['field']['timezone'],config['field']['elevation']))
-            sun_data['latitude'] = config['field']['latitude']
-            sun_data['longitude'] = config['field']['longitude']
-            sun_data['timezone'] = config['field']['timezone']
-            sun_data['elevation'] = config['field']['elevation']
+            sun_data['site']['latitude'] = config['field']['latitude']
+            sun_data['site']['longitude'] = config['field']['longitude']
+            sun_data['site']['timezone'] = config['field']['timezone']
+            sun_data['site']['elevation'] = config['field']['elevation']
+
+        field = astral.Location(('Field','Countesthorpe',sun_data['site']['latitude'],sun_data['site']['longitude'],sun_data['site']['timezone'],sun_data['site']['elevation']))
         sun = field.sun()
 
         if ( now > sun['sunrise'] ) and ( now < sun['sunset'] ):
