@@ -43,7 +43,7 @@ def setup_scheduler():
     schedule.every(5).seconds.do(check_load_state)
     logger.info("Starting river checking task")
     init_river()
-    schedule.every(15).minutes.do(check_river)
+    schedule.every(5).minutes.do(check_river)
     logger.info("Starting sun data tasks")
     schedule.every().day.at('00:00').do(get_new_sun_data)
     get_new_sun_data()

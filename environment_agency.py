@@ -62,27 +62,27 @@ def check_river():
                 river_data['last']['high_level'] = river_data['level']
                 river_data['last']['high'] = river_data['timestamp']
 
-            if config['river']['warn_enable']:
-                if river_data['level'] > river_data['high_warn']:
-                    if not river_data['warning_active'] or ( river_data['warning_active'] and river_data['level'] > ( river_data['last']['warn_level'] + 0.1) ):
-                        if not river_data['warning_active']:
-                            logger.critical('River level high! '+str(river_data['level'])+'m. Sending alert SMS!')
-                            warn_sms_text = human_datetime + ': River level high! '+str(river_data['level'])+'m'
-                        else:
-                            logger.critical('River level rising! '+str(river_data['level'])+'m. Sending alert SMS!')
-                            warn_sms_text = human_datetime + ': River level rising! '+str(river_data['level'])+'m'
-                        send_sms(config['river']['warn_sms_list'], warn_sms_text)
-                        logger.critical('Alerts sent')
-                        river_data['last']['warn_level'] = river_data['level']
-                        river_data['last']['high_level'] = river_data['level']
-                        river_data['warning_active'] = True
-                        river_data['last']['warn'] = now_iso_stamp
+        if config['river']['warn_enable']:
+            if river_data['level'] > river_data['high_warn']:
+                if not river_data['warning_active'] or ( river_data['warning_active'] and river_data['level'] > ( river_data['last']['warn_level'] + 0.1) ):
+                    if not river_data['warning_active']:
+                        logger.critical('River level high! '+str(river_data['level'])+'m. Sending alert SMS!')
+                        warn_sms_text = human_datetime + ': River level high! '+str(river_data['level'])+'m'
+                    else:
+                        logger.critical('River level rising! '+str(river_data['level'])+'m. Sending alert SMS!')
+                        warn_sms_text = human_datetime + ': River level rising! '+str(river_data['level'])+'m'
+                    send_sms(config['river']['warn_sms_list'], warn_sms_text)
+                    logger.critical('Alerts sent')
+                    river_data['last']['warn_level'] = river_data['level']
+                    river_data['last']['high_level'] = river_data['level']
+                    river_data['warning_active'] = True
+                    river_data['last']['warn'] = now_iso_stamp
 
-                if river_data['warning_active'] and river_data['level'] < river_data['high']:
-                    logger.warning('River returned to normal levels')
-                    normal_sms_text = human_datetime + ': River level returned to normal. '+str(river_data['level'])+'m'
-                    send_sms(config['river']['warn_sms_list'], normal_sms_text)
-                    river_data['warning_active'] = False
+            if river_data['warning_active'] and river_data['level'] < river_data['high']:
+                logger.warning('River returned to normal levels')
+                normal_sms_text = human_datetime + ': River level returned to normal. '+str(river_data['level'])+'m'
+                send_sms(config['river']['warn_sms_list'], normal_sms_text)
+                river_data['warning_active'] = False
         pass
 
     except Exception as e:
