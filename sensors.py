@@ -102,6 +102,8 @@ def init_sensors():
 
         if config['sensors']['gps_enable']:
             gps_data['enabled'] = True
+            gps_data['mode'] = 0
+            gps_data['mode_text'] = gps_mode_text[gps_data['mode']]
             # Connect to the GPSd daemon
             logger.info('Connecting to GPSd')
             gpsd.connect()
