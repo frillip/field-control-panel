@@ -28,7 +28,7 @@ ups_data['batt'] = {}
 ups_data['fan'] = {}
 
 ups_mode_text = {
-0x01: 'External',
+0x01: 'External power',
 0x02: 'Battery',
 }
 
@@ -104,6 +104,7 @@ def setup_ups():
 
 def get_ups_data():
     global pico_bus
+
     try:
         if not pico_bus:
             pico_bus = smbus2.SMBus(1)
@@ -135,7 +136,8 @@ def get_ups_data():
         # Read the battery data
         ups_data['batt']['v'] = float(format(pico_bus.read_word_data(0x69, 0x08),"04x"))/100
         # This might be current? Datasheet suggests it but might not be properly implemented
-        ups_data['batt']['i'] = float(format(pico_bus.read_word_data(0x69, 0x10),"04x"))/100
+        ups_data['batt']['i'] = 0
+        #ups_data['batt']['i'] = float(format(pico_bus.read_word_data(0x69, 0x10),"04x"))/100
         ups_data['batt']['p'] = round(ups_data['batt']['v'] * ups_data['batt']['i'],2)
         # Charger IC state, only reads enabled if the battery is actively been charged
         ups_data['batt']['charger_state'] = bool(pico_bus.read_word_data(0x69, 0x20))

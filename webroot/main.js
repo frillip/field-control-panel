@@ -132,6 +132,32 @@ function get_v_data()
         });
 }
 
+function get_ups_data()
+{
+    fetch("ups.json")
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector("#ups-voltage").innerHTML = Number(data.v).toFixed(1) + "V"
+            var battery_icon = document.querySelector("#ups-battery-icon")
+            if(data.batt.soc > 95) {
+                battery_icon.src= "/icon/battery_4.png"
+            } else if(data.batt.soc > 80) {
+                battery_icon.src= "/icon/battery_3.png"
+            } else if(data.batt.soc > 60) {
+                battery_icon.src= "/icon/battery_2.png"
+            } else if(data.batt.soc > 40) {
+                battery_icon.src= "/icon/battery_1.png"
+            } else {
+                battery_icon.src= "/icon/battery_0.png"
+            }
+            document.querySelector("#ups-mode").innerHTML = data.mode_text
+            document.querySelector("#ups-battery-voltage").innerHTML = data.batt.charger_state_text + ": " + data.batt.v + "V"
+        }).catch(error => {
+            console.log(error);
+            // on error, stop execution
+        });
+}
+
 function seconds2time (seconds) {
     var days    = Math.floor(seconds / 86400);
     var hours   = Math.floor((seconds - (days * 86400)) / 3600);
@@ -401,6 +427,7 @@ document.addEventListener('DOMContentLoaded', function()
 {
     get_env_data();
     get_v_data();
+    get_ups_data();
     create_switches();
     get_modem_data();
     get_river_data();
@@ -416,6 +443,7 @@ document.addEventListener('DOMContentLoaded', function()
         counter++;
         if(counter%3 == 0) {
             get_v_data();
+            get_ups_data();
             get_modem_data();
         }
         if(counter==300) {
@@ -429,6 +457,7 @@ document.addEventListener('DOMContentLoaded', function()
 
 window.onfocus = function() {
     get_v_data();
+    get_ups_data();
     get_env_data();
     get_modem_data();
     get_river_data();
