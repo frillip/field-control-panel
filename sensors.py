@@ -105,8 +105,12 @@ def init_sensors():
             # Connect to the GPSd daemon
             logger.info('Connecting to GPSd')
             gpsd.connect()
+            # Get gpsd mode first
+            packet = gpsd.get_current()
+            gps_data['mode'] = packet.mode
+            gps_data['mode_text'] = gps_mode_text[gps_data['mode']]
 
-            # Populate some data
+            # Then populate the rest of the data
             get_gps_data()
         else:
             gps_data['enabled'] = False
@@ -163,6 +167,10 @@ def get_gps_data():
 
     if config['sensors']['gps_enable']:
         try:
+            # Reinitialise gpsd connection if it's broken for some reason
+            if not gps_data['mode']:
+                gpsd.connect()
+
             # Read some data
             packet = gpsd.get_current()
             # Deposit it into the global dict
@@ -196,6 +204,10 @@ def get_gps_data():
         except Exception as e:
             # Error has occurred, log it
             logger.error("Failed to get GPS data: " + str(e))
+            gps_data.clear()
+            gps_data['enabled'] = True
+            gps_data['mode'] = 0
+            gps_data['mode_text'] = gps_mode_text[gps_data['mode']]
 
     else:
         logger.warn('Request to read GPS data, but not enabled in config')
