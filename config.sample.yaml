@@ -1,0 +1,104 @@
+megaio:
+  stack_id: 0
+
+relay:
+  1:
+    auto_off: false
+    auto_on: false
+    auto_timeout: 0
+    enabled: true
+    invert: true
+    name: fence
+  2:
+    auto_off: true
+    auto_on: false
+    auto_timeout: 300
+    enabled: true
+    invert: false
+    name: cameras
+  3:
+    auto_off: false
+    auto_on: false
+    auto_timeout: 0
+    enabled: true
+    invert: false
+    name: lighting
+  4:
+    enabled: false
+  5:
+    enabled: false
+  6:
+    enabled: false
+  7:
+    enabled: false
+  8:
+    enabled: false
+
+field:
+  latitude: 51.499583
+  longitude: -0.146517
+  elevation: 0
+  timezone: 'Europe/London'
+
+sensors:
+  i2c_port: 1
+  bme280_enable: True
+  bme280_address: 0x76
+  tsl2561_enable: True
+  tsl2561_address: 0x39
+  tsl2561_gain: 1x
+  tsl2561_integration_time: 13ms
+  lis3dh_enable: False
+  lis3dh_address: 0x19
+  lis3dh_interrupt_pin: 17
+  gps_enable: True
+
+mppt:
+  tty_dev: /dev/ttyUSB1
+  baudrate: 19200
+
+bmv:
+  tty_dev: /dev/ttyUSB0
+  baudrate: 19200
+  midpoint_enable: true
+  temp_enable: false
+  warn_enable: False
+  warn_sms_list:
+    - '+447xxxxxxxxx'
+    - '+447xxxxxxxxx'
+
+huawei:
+  dongle_ip: 192.168.8.1
+
+river:
+  api_url: https://environment.data.gov.uk/flood-monitoring/id/measures/xxxx-level-stage-i-15_min-mASD
+  api_station_url: https://environment.data.gov.uk/flood-monitoring/id/stations/xxxx
+  high: 0.95
+  high_warn: 1.1
+  warn_enable: False
+  warn_sms_list:
+    - '+447xxxxxxxxx'
+    - '+447xxxxxxxxx'
+
+clickatell:
+  api_key: xxxx-xxxx-xxxx
+  sender_name: SHEEPNET
+
+system:
+  batt_voltage_overvoltage: 15.9
+  batt_voltage_normal: 12.6
+  batt_voltage_low: 11.8
+  batt_voltage_very_low: 11.5
+  batt_voltage_critical: 11.3
+  batt_warning_interval: 900
+  load_warning_interval: 900
+
+weather:
+  api_key: xxxx-xxxx-xxxx
+
+picoups:
+  i2c_port: 1
+  battery_type: li-ion
+  to92_enable: true
+  fan_enable: true
+  fan_threshold_temp: 35

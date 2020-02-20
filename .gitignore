@@ -4,8 +4,9 @@ user_data.py
 # Ignore sample json for testing
 *.json
 
-# Ignore YAML
-*.yaml
+# Ignore specific YAMLs
+config.yaml
+save_state.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
