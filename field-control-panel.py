@@ -12,6 +12,7 @@ import yaml_config
 from relays import generate_relay_map
 import logging
 import colorlog
+import RPi.GPIO as GPIO
 
 handler = colorlog.StreamHandler()
 handler.setFormatter(global_vars.log_format)
@@ -70,6 +71,8 @@ def signal_handler(sig, frame):
     yaml_save_state.save_running_state()
     logger.warning("Stopping scheduled tasks")
     scheduler.run_scheduler = False
+    logger.warning("Cleaning up GPIO")
+    GPIO.cleanup()
     logger.warning("Stopping VE.Direct data loops")
     vedirect_interface.run_mppt_vedirect_loop = False
     vedirect_interface.run_bmv_vedirect_loop = False
