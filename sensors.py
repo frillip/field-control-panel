@@ -4,7 +4,9 @@ import gpsd
 from timezonefinder import TimezoneFinder
 from tsl2561 import TSL2561
 import RPi.GPIO as GPIO
-# import LIS3DH
+import LIS3DH
+from datetime import datetime
+import time
 import global_vars
 from yaml_config import config
 import logging
@@ -12,6 +14,7 @@ import colorlog
 
 i2c_bus = None
 tsl = None
+accel = None
 
 handler = colorlog.StreamHandler()
 handler.setFormatter(global_vars.log_format)
@@ -35,6 +38,7 @@ def init_sensors():
 
     global i2c_bus
     global tsl
+    global accel
 
     try:
         # Init the i2c bus
@@ -66,7 +70,6 @@ def init_sensors():
             lis3dh_data['enabled'] = True
             # Start the accelerometer and set up the interrupt
             logger.info('Starting LIS3DH accelerometer')
-            """
             accel = LIS3DH.Accelerometer('i2c',i2cAddress = config['sensors']['lis3dh_address'])
             accel.set_ODR(odr=50, powerMode='normal')
             accel.axis_enable(x='on',y='on',z='on')
@@ -93,9 +96,15 @@ def init_sensors():
                 accel.set_int1_duration(0)
                 # on INT1_CFG enable 6D positioning, X, Y & Z (H & L)
                 accel.set_int1_config(aoi=1, d6=1, zh=1, zl=1, yh=1, yl=1, xh=1, xl=1)
+                # Get some data
+                lis3dh_data['interrupt_state'] = False
+                lis3dh_data['interupt_count'] = 0
+                lis3dh_data['last_interrupt'] = 0
+                lis3dh_data['last_interrupt_timestamp'] = 0
             else:
                 info.warn('No interrput pin specified for accelerometer! Sensor will be polled but may miss events!')
-            """
+
+            get_lis3dh_data()
 
         else:
             lis3dh_data['enabled'] = False
@@ -158,11 +167,43 @@ def get_tsl2561_data():
 
 
 def get_lis3dh_data():
-    if config['sensors']['lis3dh_enable']:
-        pass
+    unix_time_int = int(time.time())
+    now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
 
+    if config['sensors']['lis3dh_enable']:
+        try:
+            lis3dh_data['x'] = accel.x_axis_reading()   
+            lis3dh_data['y']= accel.y_axis_reading()
+            lis3dh_data['z'] = accel.z_axis_reading()
+            lis3dh_data['interrupt'] = accel.get_int1_status()
+            if lis3dh_data['interrupt']:
+                if unix_time_int < ( lis3dh_data['last_interrupt'] + 3 ):
+                    lis3dh_data['interupt_count'] += 1
+                else:
+                    lis3dh_data['interupt_count'] = 0
+                lis3dh_data['last_interrupt'] = now_iso_stamp
+                lis3dh_data['last_interrupt_timestamp'] = unix_time_int
+
+        except Exception as e:
+            # Error has occurred, log it
+            logger.error("Failed to get data from LIS3DH: " + str(e))
     else:
         logger.warn('Request to read LIS3DH data, but not enabled in config')
+
+def accel_isr(channel):
+    unix_time_int = int(time.time())
+    now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
+
+    try:
+        if channel != config['sensors']['lis3dh_interrupt_pin']:
+            return
+
+        get_lis3dh_data()
+        logger.warn('Motion detected!') # Maybe do something more meaningful here eventually
+
+    except Exception as e:
+        # Error has occurred, log it
+        logger.error("LIS3DH interrupt triggered but ISR failed: " + str(e))
 
 
 def get_gps_data():
@@ -216,7 +257,11 @@ def get_gps_data():
 
 
 def get_sensor_data():
-    get_bme280_data()
-    get_tsl2561_data()
-    get_lis3dh_data()
-    get_gps_data()
+    if config['sensors']['bme280_enable']:
+        get_bme280_data()
+    if config['sensors']['tsl2561_enable']:
+        get_tsl2561_data()
+    if config['sensors']['lis3dh_enable']:
+        get_lis3dh_data()
+    if config['sensors']['gps_enable']:
+        get_gps_data()
