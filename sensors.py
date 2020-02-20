@@ -172,15 +172,15 @@ def get_lis3dh_data():
 
     if config['sensors']['lis3dh_enable']:
         try:
-            lis3dh_data['x'] = accel.x_axis_reading()   
+            lis3dh_data['x'] = accel.x_axis_reading()
             lis3dh_data['y']= accel.y_axis_reading()
             lis3dh_data['z'] = accel.z_axis_reading()
             lis3dh_data['interrupt'] = accel.get_int1_status()
             if lis3dh_data['interrupt']:
-                if unix_time_int < ( lis3dh_data['last_interrupt'] + 3 ):
-                    lis3dh_data['interupt_count'] += 1
+                if unix_time_int < ( lis3dh_data['last_interrupt_timestamp'] + 3 ):
+                    lis3dh_data['interrupt_count'] += 1
                 else:
-                    lis3dh_data['interupt_count'] = 0
+                    lis3dh_data['interrupt_count'] = 0
                 lis3dh_data['last_interrupt'] = now_iso_stamp
                 lis3dh_data['last_interrupt_timestamp'] = unix_time_int
 
