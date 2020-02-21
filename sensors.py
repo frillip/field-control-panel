@@ -7,6 +7,7 @@ import RPi.GPIO as GPIO
 import LIS3DH
 from datetime import datetime
 import time
+from sms_sender import send_sms
 import global_vars
 from yaml_config import config
 import logging
@@ -71,8 +72,9 @@ def init_sensors():
             # Start the accelerometer and set up the interrupt
             logger.info('Starting LIS3DH accelerometer')
             accel = LIS3DH.Accelerometer('i2c',i2cAddress = config['sensors']['lis3dh_address'])
-            accel.set_ODR(odr=50, powerMode='normal')
+            accel.set_ODR(odr=10, powerMode='normal')
             accel.axis_enable(x='on',y='on',z='on')
+            accel.set_highpass_filter('autoreset',0x01,0x00,0x00,0x00,0x01)
             accel.interrupt_high_low('low')
             accel.latch_interrupt('on')
             accel.set_BDU('on')
@@ -92,15 +94,16 @@ def init_sensors():
                 accel.set_int1_pin(click=0,aoi1=1, aoi2=0, drdy1=0, drdy2=0, wtm=0, overrun=0)
                 # set INT1_THS to 256mg
                 accel.set_int1_threshold(256)
-                # set INT1_DURATION  to 0ms
-                accel.set_int1_duration(0)
+                # set INT1_DURATION  to 100ms
+                accel.set_int1_duration(5)
                 # on INT1_CFG enable 6D positioning, X, Y & Z (H & L)
                 accel.set_int1_config(aoi=1, d6=1, zh=1, zl=1, yh=1, yl=1, xh=1, xl=1)
                 # Get some data
                 lis3dh_data['interrupt_state'] = False
-                lis3dh_data['interupt_count'] = 0
+                lis3dh_data['interrupt_count'] = 0
                 lis3dh_data['last_interrupt'] = 0
                 lis3dh_data['last_interrupt_timestamp'] = 0
+                lis3dh_data['motion_warn'] = False
             else:
                 info.warn('No interrput pin specified for accelerometer! Sensor will be polled but may miss events!')
 
@@ -176,14 +179,11 @@ def get_lis3dh_data():
             lis3dh_data['y']= accel.y_axis_reading()
             lis3dh_data['z'] = accel.z_axis_reading()
             lis3dh_data['interrupt'] = accel.get_int1_status()
-            if lis3dh_data['interrupt']:
-                if unix_time_int < ( lis3dh_data['last_interrupt_timestamp'] + 3 ):
-                    lis3dh_data['interrupt_count'] += 1
-                else:
-                    lis3dh_data['interrupt_count'] = 0
-                lis3dh_data['last_interrupt'] = now_iso_stamp
-                lis3dh_data['last_interrupt_timestamp'] = unix_time_int
-
+            if unix_time_int > ( lis3dh_data['last_interrupt_timestamp'] + 3 ) and lis3dh_data['interrupt_count']:
+                lis3dh_data['interrupt_state'] = False
+                lis3dh_data['motion_warn'] = False
+                lis3dh_data['last_interrupt_count'] = lis3dh_data['interrupt_count']
+                lis3dh_data['interrupt_count'] = 0
         except Exception as e:
             # Error has occurred, log it
             logger.error("Failed to get data from LIS3DH: " + str(e))
@@ -199,7 +199,20 @@ def accel_isr(channel):
             return
 
         get_lis3dh_data()
-        logger.warn('Motion detected!') # Maybe do something more meaningful here eventually
+        if unix_time_int < ( lis3dh_data['last_interrupt_timestamp'] + 3 ):
+            lis3dh_data['interrupt_count'] += 1
+        else:
+            lis3dh_data['interrupt_count'] = 1
+        lis3dh_data['interrupt_state'] = True
+        lis3dh_data['last_interrupt'] = now_iso_stamp
+        lis3dh_data['last_interrupt_timestamp'] = unix_time_int
+        if lis3dh_data['interrupt_count'] > 5 and not lis3dh_data['motion_warn']:
+            logger.critical('5 motion events detected!')
+            human_datetime = datetime.now().strftime('%d/%m/%Y %H:%M')
+            warn_sms_text = human_datetime + ': Motion event detected!'
+            send_sms(config['sensors']['lis3dh_sms_list'], warn_sms_text)
+            lis3dh_data['motion_warn'] = True
+
 
     except Exception as e:
         # Error has occurred, log it
