@@ -3,7 +3,7 @@ import schedule
 from vedirect_interface import check_load_state,check_batt_voltage
 from relays import relay_auto_timeout,get_relay_data
 from huawei_interface import get_modem_data,connection_checker
-from sensors import init_sensors,get_bme280_data,get_tsl2561_data,get_gps_data
+from sensors import init_sensors,get_sensor_data # ,get_bm280_data,get_tsl2561_data,get_lis3dh_data,get_gps_data
 from environment_agency import init_river,check_river
 from sun import get_new_sun_data,update_sun_data
 from pico_ups import setup_ups,get_ups_data
@@ -25,12 +25,18 @@ def setup_scheduler():
     schedule.every().second.do(get_modem_data)
     logger.info("Setting up sensors")
     init_sensors()
+    logger.info("Starting sensor task")
+    schedule.every().second.do(get_sensor_data)
+    """
     logger.info("Starting bme280 task")
     schedule.every().second.do(get_bme280_data)
     logger.info("Starting tsl2561 task")
     schedule.every().second.do(get_tsl2561_data)
+    logger.info("Starting lis3dh task")
+    schedule.every().second.do(get_lis3dh_data)
     logger.info("Starting gps task")
     schedule.every().second.do(get_gps_data)
+    """
     logger.info("Starting relay data task")
     schedule.every().second.do(get_relay_data)
     logger.info("Starting relay auto timeout task")
