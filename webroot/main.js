@@ -139,16 +139,24 @@ function get_ups_data()
         .then(data => {
             document.querySelector("#ups-voltage").innerHTML = Number(data.v).toFixed(1) + "V"
             var battery_icon = document.querySelector("#ups-battery-icon")
-            if(data.batt.soc > 95) {
-                battery_icon.src= "/icon/battery_4.png"
-            } else if(data.batt.soc > 80) {
-                battery_icon.src= "/icon/battery_3.png"
-            } else if(data.batt.soc > 60) {
-                battery_icon.src= "/icon/battery_2.png"
-            } else if(data.batt.soc > 40) {
-                battery_icon.src= "/icon/battery_1.png"
-            } else {
-                battery_icon.src= "/icon/battery_0.png"
+            if (data.batt.charger_state_text == "Charged") {
+                battery_icon.src= "/icon/battery_charging.png"
+            }
+            else if (data.batt.charger_state_text == "Charging") {
+                battery_icon.src= "/icon/battery_charging.png"
+            }
+            else {
+                if(data.batt.soc > 95) {
+                    battery_icon.src= "/icon/battery_4.png"
+                } else if(data.batt.soc > 80) {
+                    battery_icon.src= "/icon/battery_3.png"
+                } else if(data.batt.soc > 60) {
+                    battery_icon.src= "/icon/battery_2.png"
+                } else if(data.batt.soc > 40) {
+                    battery_icon.src= "/icon/battery_1.png"
+                } else {
+                    battery_icon.src= "/icon/battery_0.png"
+                }
             }
             document.querySelector("#ups-mode").innerHTML = data.mode_text
             document.querySelector("#ups-battery-voltage").innerHTML = data.batt.charger_state_text + ": " + data.batt.v + "V"
