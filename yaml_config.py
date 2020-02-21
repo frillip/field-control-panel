@@ -61,6 +61,7 @@ sensors = {
 'lis3dh_enable': False,
 'lis3dh_address': 0x19, #  Default address is 0x19
 'lis3dh_interrupt_pin': None,
+'lis3dh_sms_list': [],
 'gps_enable': False,
 },
 'enum': { 'tsl2561_gain': { '1x':0, '16x':0 }, 'tsl2561_integration_time': { '13ms': 0x00, '101ms':0x01, '402ms':0x02},

@@ -51,6 +51,9 @@ sensors:
   lis3dh_enable: False
   lis3dh_address: 0x19
   lis3dh_interrupt_pin: 17
+  lis3dh_sms_list:
+    - '+447xxxxxxxxx'
+    - '+447xxxxxxxxx'
   gps_enable: True
 
 mppt:
