@@ -9,16 +9,21 @@ h1 {
 }
 
 h2 {
-  text-transform: capitalize;
-}
+        text-transform: capitalize;
+        margin: 0.5em 0px 0.2em 0px;}
 
 p {
         font-size: 12px;
 }
 
+.panel-data {
+  margin: 2px;
+  font-size:13px
+}
+
 .bottom-section {
   padding-top: 20px;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .bottom-title {
@@ -74,7 +79,7 @@ img.icon-large-right {
 .weather-warning-other {
   border-style: solid;
   border-width: 1px;
-  margin-top: -20px;
+  margin-top: -0.5em;
   padding: 4px;
   background-color:aliceblue;
 }
@@ -82,7 +87,7 @@ img.icon-large-right {
 .weather-warning-yellow {
   border-style: solid;
   border-width: 1px;
-  margin-top: -20px;
+  margin-top: -0.5em;
   padding: 4px;
   background-color:lightyellow;
 }
@@ -90,7 +95,7 @@ img.icon-large-right {
 .weather-warning-amber {
   border-style: solid;
   border-width: 1px;
-  margin-top: -20px;
+  margin-top: -0.5em;
   padding: 4px;
   background-color:moccasin;
 }
@@ -98,7 +103,7 @@ img.icon-large-right {
 .weather-warning-red {
   border-style: solid;
   border-width: 1px;
-  margin-top: -20px;
+  margin-top: -0.5em;
   padding: 4px;
   background-color:lightcoral;
 }
@@ -117,6 +122,7 @@ img.icon-large-right {
   display: inline-block;
   width: 60px;
   height: 34px;
+  margin: 0.2em 0px 1em 0px;
 }
 
 .switch input {
