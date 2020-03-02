@@ -1,8 +1,8 @@
 # Field Control Panel
 
-Based on a Raspberry Pi 4 B, with a MegaIO hat. Goal is to have a web based interface that automatically populates with useful information and the state of the various systems. Also used to control various things on the field, eg, the electric fencing to the ~~velociraptor~~ horse/sheep paddocks, power supply to the IP cameras overseeing the ~~embryo storage fecility~~ field shelter, and exterior lighting around the ~~east dock~~ entrace gateway.
+Based on a Raspberry Pi 4 B, with a MegaIO hat. Goal is to have a web based interface that automatically populates with useful information and the state of the various systems. Also used to control various things on the field, eg, the electric fencing to the ~~velociraptor~~ horse/sheep paddocks, power supply to the IP cameras overseeing the ~~embryo storage fecility~~ field shelter, and exterior lighting around the ~~east dock~~ entrance gateway.
 
-Currently the control panel page is a static set of buttons and most useful data is outputted in JSON format.
+Currently the control panel page is a ~~static set of buttons~~ a fancy auto-updating readout of everything that is happening at the field, most useful data can be obtained programmatically via JSON if required.
 
 ## Scheduler
 
