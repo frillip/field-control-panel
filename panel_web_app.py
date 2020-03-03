@@ -48,6 +48,9 @@ def run_web_app():
     async def scriptresp(request):
         return web.FileResponse('./webroot/main.js')
 
+    async def styleresp(request):
+        return web.FileResponse('./webroot/style.css')
+
     async def stats_ajax_get(request):
         ajax_resp = {}
         ajax_resp['bv'] = global_vars.bmv_data['batt']['v']
@@ -132,6 +135,7 @@ def run_web_app():
     app = web.Application()
     app.add_routes([web.get('/', indexresp),
                     web.get('/main.js', scriptresp),
+                    web.get('/style.css', styleresp),
                     web.get('/stats_ajax.json', stats_ajax_get),
                     web.post('/buttons', buttonhandler),
                     web.get('/status.json', status_json),
