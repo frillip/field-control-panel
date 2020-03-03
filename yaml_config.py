@@ -1,5 +1,6 @@
 import yaml
 from os import path
+import sys
 import global_vars
 import logging
 import colorlog
@@ -16,8 +17,8 @@ config_file = 'config.yaml'
 # Initialise the config dict
 config = {}
 
-# Variable to track if config is loaded successfully or not
-config['loaded'] = False
+# Useful config loaded var
+config_loaded = False
 
 # Define what is required, and what is optional (as well as default value if it is missing)
 megaio = {
@@ -165,8 +166,9 @@ config_structure = {
 
 def load_config():
     global config
-    if True:
-#    try:
+    global config_loaded
+
+    try:
         logger.info('Loading config')
         # Check if the file exists first
         if path.exists(config_file):
@@ -219,12 +221,12 @@ def load_config():
         # hence why it is is separate to the above
 
         # If we get here we have successfully loaded the config!
-        config['loaded'] = True
+        config_loaded = True
 
-#    except Exception as e:
-#        logger.error('Unhandled exception whilst loading config: ' + str(e))
+    except Exception as e:
+        logger.error('Unhandled exception whilst loading config: ' + str(e))
+        sys.exit(1)
 
-    pass
 
 def load_config_block(config_name, config_params, config_block):
     loaded_config_block = {}

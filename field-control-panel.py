@@ -41,7 +41,7 @@ def main():
     logger.info("Registering SIGINT handler")
     signal.signal(signal.SIGINT, signal_handler)
     yaml_config.load_config()
-    if not yaml_config.config['loaded']:
+    if not yaml_config.config_loaded:
         logger.error("Config not loaded! Exiting...")
         sys.exit(1)
     generate_relay_map()
