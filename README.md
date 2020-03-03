@@ -24,7 +24,7 @@ There are also functions to check the overall health of the system, but these ar
 
 ## Sensors
 
-There's a BME280 sensor attached via i2c, used to monitor temperature, pressure, and humidity. There is also a TSL2561 ambient light sensor present, and a GPS module, currently used for timekeeping, but maybe in the future for automatic detection of location for weather etc.
+There's a BME280 sensor attached via i2c, used to monitor temperature, pressure, and humidity. There is also a TSL2561 ambient light sensor present, and a GPS module, currently used for timekeeping and for automatic detection of location for weather and solar position. There is also a LIS3DH accelerometer to alert on unexpected movement, this has its  interrupt pin tied to a GPIO on the Pi.
 
 ## MegaIO hat
 
