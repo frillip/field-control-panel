@@ -244,20 +244,22 @@ function update_conn_time()
     }
 }
 
+// Now fed from weather data
+/*
 function get_env_data()
 {
     fetch("bme280.json")
         .then(response => response.json())
         .then(data => {
-// Now fed from weather data
-//            document.querySelector(".env #t").innerHTML = data.t + String.fromCharCode(176) + "C"
-            document.querySelector("#pressure").innerHTML = data.p + "mb"
-            document.querySelector("#humidity").innerHTML = data.h + "%"
+            document.querySelector("#temperature").innerHTML = data.t.toFixed(1) + String.fromCharCode(176) + "C"
+            document.querySelector("#pressure").innerHTML = data.p.toFixed(1) + "mb"
+            document.querySelector("#humidity").innerHTML = data.h.toFixed(1) + "%"
         }).catch(error => {
             console.log(error);
             // on error, stop execution
         });
 }
+*/
 
 function get_sun_data()
 {
@@ -306,6 +308,8 @@ function get_weather_data()
         .then(response => response.json())
         .then(data => {
             document.querySelector("#temperature").innerHTML = data.current.temperature.toFixed(1) + String.fromCharCode(176) + "C";
+            document.querySelector("#pressure").innerHTML = data.current.pressure.toFixed(1) + "mb";
+            document.querySelector("#humidity").innerHTML = data.current.humidity + "%";
             var weather_title = document.getElementById("weather-title");
             weather_title.innerHTML = "Weather ";
             if ( data.alert.severity ) {
@@ -433,14 +437,14 @@ function get_river_data()
 
 document.addEventListener('DOMContentLoaded', function()
 {
-    get_env_data();
+//    get_env_data();
+    get_weather_data();
     get_v_data();
     get_ups_data();
     create_switches();
     get_modem_data();
     get_river_data();
     get_sun_data();
-    get_weather_data();
 
     var counter = 0;
     var i = setInterval(function ()
@@ -456,7 +460,7 @@ document.addEventListener('DOMContentLoaded', function()
         }
         if(counter==300) {
             counter=0;
-            get_env_data();
+//            get_env_data();
             get_river_data();
             get_weather_data();
         }
@@ -466,7 +470,7 @@ document.addEventListener('DOMContentLoaded', function()
 window.onfocus = function() {
     get_v_data();
     get_ups_data();
-    get_env_data();
+//    get_env_data();
     get_modem_data();
     get_river_data();
     get_sun_data();
