@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Field Control Panel - Sensors</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body style="max-width: 600px">
+    <h1>Sensors</h1>
+    <div class="row">
+        <div class="column">
+            <div class="bme280">
+                <h2 id="bme280-title">BME280</h2>
+                <img class="icon-small-left" src="/icon/temperature.png">
+                <div class="panel-data" id="temperature"> </div>
+                <img class="icon-small-left" src="/icon/pressure.png">
+                <div class="panel-data" id="pressure"> </div>
+                <img class="icon-small-left" src="/icon/humidity.png">
+                <div class="panel-data" id="humidity"> </div>
+            </div>
+            <div class="tsl2561">
+                <h2 id="tsl2561-title">TSL2561</h2>
+                <img class="icon-small-left" src="/icon/sun.png">
+                <div class="panel-data" id="lux"> </div>
+                <img class="icon-small-left" src="/icon/light.png">
+                <div class="panel-data" id="broad-counts"> </div>
+                <img class="icon-small-left" src="/icon/infrared-sensor.png">
+                <div class="panel-data" id="ir-counts"> </div>
+                <img class="icon-small-left" src="/icon/transistor.png">
+                <div class="panel-data" id="gain"> </div>
+            </div>
+            <div class="lis3dh">
+                <h2 id="lis3dh-title">LIS3DH</h2>
+                <img class="icon-small-left" src="/icon/3d.png">
+                <div class="panel-data" id="xyz-data"> </div>
+                <img class="icon-small-left" src="/icon/warning.png">
+                <div class="panel-data" id="motion-warn"> </div>
+                <img class="icon-small-left" src="/icon/accelerometer.png">
+                <div class="panel-data" id="last-interrupt"></div>
+                <img class="icon-small-left" src="/icon/counter.png">
+                <div class="panel-data" id="last-interrupt-count">0</div>
+            </div>
+        </div>
+        <div class="column">
+            <div class="gps">
+                <h2 id="gps-title">GPS</h2>
+                <img class="icon-small-left" id="gps-fix-icon" src="/icon/gps_fix">
+                <div class="panel-data" id="gps-fix"> </div>
+                <img class="icon-small-left" src="/icon/globe.png">
+                <div class="panel-data" id="lat-long"> </div>
+                <img class="icon-small-left" src="/icon/altitude.png">
+                <div class="panel-data" id="altitude"> </div>
+                <img class="icon-small-left" src="/icon/speed.png">
+                <div class="panel-data" id="speed"> </div>
+                <img class="icon-small-left" src="/icon/clock.png">
+                <div class="panel-data" id="time"> </div>
+                <img class="icon-small-left" src="/icon/timezone.png">
+                <div class="panel-data" id="local-time"> </div>
+                <img class="icon-small-left" src="/icon/satellite.png">
+                <div class="panel-data" id="satellites"> </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+var g_time = 0
+var g_time_local = 0
+var g_timezone = null
+
+function update_gps_time()
+{
+    if(g_time) {
+        g_time += 1000;
+        var new_time = new Date(g_time).toISOString().slice(0,19)
+        document.querySelector("#time").innerHTML = new_time + " UTC";
+    }
+    if(g_time_local) {
+        g_time_local += 1000;
+        var new_time_local = new Date(g_time_local).toISOString().slice(0,19)
+        document.querySelector("#local-time").innerHTML = new_time_local + " " + g_timezone
+    }
+}
+
+
+function get_sensor_data()
+{
+    fetch("sensors.json")
+        .then(response => response.json())
+        .then(data => {
+
+            // BME280 data
+            document.querySelector("#temperature").innerHTML = data.bme280.t.toFixed(1) + " " + String.fromCharCode(176) + "C"
+            document.querySelector("#pressure").innerHTML = data.bme280.p.toFixed(1) + " mb"
+            document.querySelector("#humidity").innerHTML = data.bme280.h.toFixed(1) + " %"
+
+            // TSL2561 data
+            document.querySelector("#lux").innerHTML = data.tsl2561.lux + " lx"
+            document.querySelector("#broad-counts").innerHTML = data.tsl2561.broad_counts + " counts"
+            document.querySelector("#ir-counts").innerHTML = data.tsl2561.ir_counts + " counts"
+            if(data.tsl2561.gain == 1) {
+                document.querySelector("#gain").innerHTML = "x16"
+            } else {
+                document.querySelector("#gain").innerHTML = "x1"
+            }
+
+            // LIS3DH data
+            document.querySelector("#xyz-data").innerHTML = "X: " + data.lis3dh.x + " Y: " + data.lis3dh.y + " Z: " + data.lis3dh.z
+            if(data.lis3dh.motion_warn) {          
+                document.querySelector("#motion-warn").innerHTML = "Motion warning!"
+            } else {
+                document.querySelector("#motion-warn").innerHTML = "No motion warning"
+            }
+            document.querySelector("#last-interrupt").innerHTML = "Last interrupt: " + data.lis3dh.last_interrupt
+            document.querySelector("#last-interrupt-count").innerHTML = data.lis3dh.interrupt_count + " events"
+
+            // GPS data
+            document.querySelector("#gps-fix").innerHTML = data.gps.mode_text
+            document.querySelector("#lat-long").innerHTML = data.gps.latitude + ", " + data.gps.longitude
+            document.querySelector("#altitude").innerHTML = data.gps.altitude + " m"
+            document.querySelector("#speed").innerHTML = data.gps.speed + " m/s"
+            document.querySelector("#time").innerHTML = data.gps.time + " UTC"
+            g_time = Date.parse(data.gps.time)
+            document.querySelector("#local-time").innerHTML = data.gps.time_local + " " + data.gps.timezone
+            g_time_local = Date.parse(data.gps.time_local)
+            g_timezone = data.gps.timezone
+            document.querySelector("#satellites").innerHTML = data.gps.sats + " (" + data.gps.sats_valid + " valid)"
+        }).catch(error => {
+            console.log(error);
+            // on error, stop execution
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function()
+{
+    get_sensor_data();
+
+    var counter = 0;
+    var i = setInterval(function ()
+    {
+        update_gps_time();
+        counter++;
+        if(counter%3 == 0) {
+            get_sensor_data()
+        }
+        if(counter==300) {
+            counter=0;
+        }
+    }, 1000);
+}, false);
+
+window.onfocus = function() {
+    get_sensor_data();
+}
+
+</script>
+</html>
