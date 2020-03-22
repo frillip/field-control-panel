@@ -62,6 +62,7 @@ sensors = {
 'lis3dh_enable': False,
 'lis3dh_address': 0x19, #  Default address is 0x19
 'lis3dh_interrupt_pin': None,
+'lis3dh_warn_enable': False,
 'lis3dh_sms_list': [],
 'gps_enable': False,
 },

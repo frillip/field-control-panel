@@ -206,7 +206,7 @@ def accel_isr(channel):
         lis3dh_data['interrupt_state'] = True
         lis3dh_data['last_interrupt'] = now_iso_stamp
         lis3dh_data['last_interrupt_timestamp'] = unix_time_int
-        if lis3dh_data['interrupt_count'] > 5 and not lis3dh_data['motion_warn']:
+        if lis3dh_data['interrupt_count'] > 5 and not lis3dh_data['motion_warn'] and config['sensors']['lis3dh_warn_enable']:
             logger.critical('5 motion events detected!')
             human_datetime = datetime.now().strftime('%d/%m/%Y %H:%M')
             warn_sms_text = human_datetime + ': Motion event detected!'
