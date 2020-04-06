@@ -66,6 +66,30 @@
 var g_time = 0
 var g_time_local = 0
 var g_timezone = null
+var g_timezone_diff = 0
+
+function diff2timezone (seconds) {
+    var sign = ""
+    if (seconds > 0) {
+        sign = "+"
+    } else {
+        sign = "-"
+        seconds = seconds  * -1
+    }
+    var hours   = Math.floor(seconds / 3600);
+    var minutes = Math.floor((seconds - (hours * 3600)) / 60);
+    var timezone = "";
+
+    timezone += sign;
+
+    hours = (hours < 10 && time !== "") ? "0"+hours : String(hours);
+    timezone += hours+":";
+
+    minutes = (minutes < 10 && time !== "") ? "0"+minutes : String(minutes);
+    timezone += minutes;
+
+    return timezone;
+}
 
 function update_gps_time()
 {
@@ -119,11 +143,19 @@ function get_sensor_data()
             document.querySelector("#altitude").innerHTML = data.gps.altitude + " m"
             document.querySelector("#speed").innerHTML = data.gps.speed + " m/s"
             document.querySelector("#time").innerHTML = data.gps.time + " UTC"
-            g_time = Date.parse(data.gps.time)
             document.querySelector("#local-time").innerHTML = data.gps.time_local + " " + data.gps.timezone
-            g_time_local = Date.parse(data.gps.time_local)
-            g_timezone = data.gps.timezone
             document.querySelector("#satellites").innerHTML = data.gps.sats + " (" + data.gps.sats_valid + " valid)"
+
+            // Javascript time handling is dumb
+            g_time = Date.parse(data.gps.time)
+            g_time_local = Date.parse(data.gps.time_local)
+            // Workout the offset
+            g_timezone_diff = (g_time_local-g_time)
+            // Recalculate UTC
+            g_time = Date.parse(data.gps.time+"Z")
+            // Apply the offset
+            g_time_local = g_time + g_timezone_diff
+            g_timezone = data.gps.timezone
         }).catch(error => {
             console.log(error);
             // on error, stop execution
