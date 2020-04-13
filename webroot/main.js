@@ -54,6 +54,8 @@ function change_relay_state(elem){
     var relay_name = elem.getAttribute("relay-name");
     var relay_id = elem.getAttribute("relay-id");
     var relay_state = elem.checked ? 'on' : "off";
+    var att = document.createAttribute("disabled");
+    elem.setAttributeNode(att);
     data[relay_name] = relay_state;
     g_ignore_relay_resp[relay_id] = true;
     console.log(data);
@@ -84,8 +86,14 @@ function get_relay_data()
                         var relay_switch = document.querySelector("#relay-"+relay_id+"-switch");
                         if (data[relay_id].state) {
                             relay_switch.checked = true;
+                            if (relay_switch.hasAttribute("disabled")) {
+                                relay_switch.removeAttribute("disabled");
+                            }
                         } else {
                             relay_switch.checked = false;
+                            if (relay_switch.hasAttribute("disabled")) {
+                                relay_switch.removeAttribute("disabled");
+                            }
                         }
                     } else { g_ignore_relay_resp[relay_id] = false; }
                 }
@@ -468,6 +476,11 @@ document.addEventListener('DOMContentLoaded', function()
 }, false);
 
 window.onfocus = function() {
+    for (relay_id in g_ignore_relay_resp) {
+        var relay_switch = document.querySelector("#relay-"+relay_id+"-switch");
+        var att = document.createAttribute("disabled");
+        relay_switch.setAttributeNode(att);
+    }
     get_v_data();
     get_ups_data();
 //    get_env_data();

@@ -156,6 +156,10 @@ img.icon-large-right {
   transition: .2s;
 }
 
+input:disabled + .slider {
+  background-color: #808080 !important;
+}
+
 input:checked + .slider {
   background-color: #4CAF50;
 }
