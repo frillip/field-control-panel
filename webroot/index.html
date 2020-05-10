@@ -8,11 +8,19 @@
 </head>
 <body>
     <h1>Field Control Panel</h1>
+    <div class="tab">
+        <button class="tablinks" onclick="opentab(event, 'relays')" id="defaulttab">Relays</button>
+        <button class="tablinks" onclick="opentab(event, 'status')">Status</button>
+        <button class="tablinks" onclick="opentab(event, 'sensors')">Sensors</button>
+    </div>
+    <div id="relays" class="tabcontent">
     <div class="row">
         <div class="column">
             <div id="relays"></div>
         </div>
-        <div class="column">
+    </div>
+    </div>
+    <div id="status" class="tabcontent">
             <div class="env">
                 <h2 id="weather-title">Weather</h2>
                 <div class="row">
@@ -60,6 +68,8 @@
                 <h2 id="solar-title">Solar</h2>
                 <div class="row">
                     <div class="column">
+                <div class="row">
+                    <div class="column">
                     <img class="icon-small-left" id="pv-voltage-icon" src="/icon/voltage.png">
                     <div class="panel-data" id="pv-voltage"></div>
                     <img class="icon-small-left" id="pv-power-icon" src="/icon/solar_energy.png">
@@ -80,9 +90,67 @@
                     <div class="panel-data" id="sun-timer"></div>
                     </div>
                 </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+    </div>
+    <div id="sensors" class="tabcontent">
+    <div class="row">
+        <div class="column">
+            <div class="bme280">
+                <h2 id="bme280-title">BME280</h2>
+                <img class="icon-small-left" src="/icon/temperature.png">
+                <div class="panel-data" id="bme-temperature"> </div>
+                <img class="icon-small-left" src="/icon/pressure.png">
+                <div class="panel-data" id="bme-pressure"> </div>
+                <img class="icon-small-left" src="/icon/humidity.png">
+                <div class="panel-data" id="bme-humidity"> </div>
+            </div>
+            <div class="tsl2561">
+                <h2 id="tsl2561-title">TSL2561</h2>
+                <img class="icon-small-left" src="/icon/sun.png">
+                <div class="panel-data" id="lux"> </div>
+                <img class="icon-small-left" src="/icon/light.png">
+                <div class="panel-data" id="broad-counts"> </div>
+                <img class="icon-small-left" src="/icon/infrared-sensor.png">
+                <div class="panel-data" id="ir-counts"> </div>
+                <img class="icon-small-left" src="/icon/transistor.png">
+                <div class="panel-data" id="gain"> </div>
+            </div>
+            <div class="lis3dh">
+                <h2 id="lis3dh-title">LIS3DH</h2>
+                <img class="icon-small-left" src="/icon/3d.png">
+                <div class="panel-data" id="xyz-data"> </div>
+                <img class="icon-small-left" src="/icon/warning.png">
+                <div class="panel-data" id="motion-warn"> </div>
+                <img class="icon-small-left" src="/icon/accelerometer.png">
+                <div class="panel-data" id="last-interrupt"></div>
+                <img class="icon-small-left" src="/icon/counter.png">
+                <div class="panel-data" id="last-interrupt-count">0</div>
+            </div>
+        </div>
+        <div class="column">
+            <div class="gps">
+                <h2 id="gps-title">GPS</h2>
+                <img class="icon-small-left" id="gps-fix-icon" src="/icon/gps_fix">
+                <div class="panel-data" id="gps-fix"> </div>
+                <img class="icon-small-left" src="/icon/globe.png">
+                <div class="panel-data" id="lat-long"> </div>
+                <img class="icon-small-left" src="/icon/altitude.png">
+                <div class="panel-data" id="altitude"> </div>
+                <img class="icon-small-left" src="/icon/speed.png">
+                <div class="panel-data" id="speed"> </div>
+                <img class="icon-small-left" src="/icon/clock.png">
+                <div class="panel-data" id="time"> </div>
+                <img class="icon-small-left" src="/icon/timezone.png">
+                <div class="panel-data" id="local-time"> </div>
+                <img class="icon-small-left" src="/icon/satellite.png">
+                <div class="panel-data" id="satellites"> </div>
             </div>
         </div>
     </div>
+    </div>    
     <div class="bottom-section">
         <div class="bottom-title" id="lte-net-type"><img class="icon-large-left" id="lte-ssi" src=""/></div>
         <div id="lte-data"></div>

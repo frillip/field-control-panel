@@ -8,6 +8,11 @@ var g_up_mb = 0
 var g_down_mb = 0
 var g_conn_time = 0
 
+var g_time = 0
+var g_time_local = 0
+var g_timezone = null
+var g_timezone_diff = 0
+
 function create_switches()
 {
     fetch("relay.json")
@@ -443,9 +448,103 @@ function get_river_data()
         });
 }
 
+
+function diff2timezone (seconds) {
+    var sign = ""
+    if (seconds > 0) {
+        sign = "+"
+    } else {
+        sign = "-"
+        seconds = seconds  * -1
+    }
+    var hours   = Math.floor(seconds / 3600);
+    var minutes = Math.floor((seconds - (hours * 3600)) / 60);
+    var timezone = "";
+
+    timezone += sign;
+
+    hours = (hours < 10 && time !== "") ? "0"+hours : String(hours);
+    timezone += hours+":";
+
+    minutes = (minutes < 10 && time !== "") ? "0"+minutes : String(minutes);
+    timezone += minutes;
+
+    return timezone;
+}
+
+function update_gps_time()
+{
+    if(g_time) {
+        g_time += 1000;
+        var new_time = new Date(g_time).toISOString().slice(0,19)
+        document.querySelector("#time").innerHTML = new_time + " UTC";
+    }
+    if(g_time_local) {
+        g_time_local += 1000;
+        var new_time_local = new Date(g_time_local).toISOString().slice(0,19)
+        document.querySelector("#local-time").innerHTML = new_time_local + " " + g_timezone
+    }
+}
+
+
+function get_sensor_data()
+{
+    fetch("sensors.json")
+        .then(response => response.json())
+        .then(data => {
+
+            // BME280 data
+            document.querySelector("#bme-temperature").innerHTML = data.bme280.t.toFixed(1) + " " + String.fromCharCode(176) + "C"
+            document.querySelector("#bme-pressure").innerHTML = data.bme280.p.toFixed(1) + " mb"
+            document.querySelector("#bme-humidity").innerHTML = data.bme280.h.toFixed(1) + " %"
+
+            // TSL2561 data
+            document.querySelector("#lux").innerHTML = data.tsl2561.lux + " lx"
+            document.querySelector("#broad-counts").innerHTML = data.tsl2561.broad_counts + " counts"
+            document.querySelector("#ir-counts").innerHTML = data.tsl2561.ir_counts + " counts"
+            if(data.tsl2561.gain == 1) {
+                document.querySelector("#gain").innerHTML = "x16"
+            } else {
+                document.querySelector("#gain").innerHTML = "x1"
+            }
+
+            // LIS3DH data
+            document.querySelector("#xyz-data").innerHTML = "X: " + data.lis3dh.x + " Y: " + data.lis3dh.y + " Z: " + data.lis3dh.z
+            if(data.lis3dh.motion_warn) {
+                document.querySelector("#motion-warn").innerHTML = "Motion warning!"
+            } else {
+                document.querySelector("#motion-warn").innerHTML = "No motion warning"
+            }
+            document.querySelector("#last-interrupt").innerHTML = "Last interrupt: " + data.lis3dh.last_interrupt
+            document.querySelector("#last-interrupt-count").innerHTML = data.lis3dh.interrupt_count + " events"
+
+            // GPS data
+            document.querySelector("#gps-fix").innerHTML = data.gps.mode_text
+            document.querySelector("#lat-long").innerHTML = data.gps.latitude + ", " + data.gps.longitude
+            document.querySelector("#altitude").innerHTML = data.gps.altitude + " m"
+            document.querySelector("#speed").innerHTML = data.gps.speed + " m/s"
+            document.querySelector("#time").innerHTML = data.gps.time + " UTC"
+            document.querySelector("#local-time").innerHTML = data.gps.time_local + " " + data.gps.timezone
+            document.querySelector("#satellites").innerHTML = data.gps.sats + " (" + data.gps.sats_valid + " valid)"
+
+            // Javascript time handling is dumb
+            g_time = Date.parse(data.gps.time)
+            g_time_local = Date.parse(data.gps.time_local)
+            // Workout the offset
+            g_timezone_diff = (g_time_local-g_time)
+            // Recalculate UTC
+            g_time = Date.parse(data.gps.time+"Z")
+            // Apply the offset
+            g_time_local = g_time + g_timezone_diff
+            g_timezone = data.gps.timezone
+        }).catch(error => {
+            console.log(error);
+            // on error, stop execution
+        });
+}
+
 document.addEventListener('DOMContentLoaded', function()
 {
-//    get_env_data();
     get_weather_data();
     get_v_data();
     get_ups_data();
@@ -453,6 +552,8 @@ document.addEventListener('DOMContentLoaded', function()
     get_modem_data();
     get_river_data();
     get_sun_data();
+    get_sensor_data();
+    document.getElementById("defaulttab").click();
 
     var counter = 0;
     var i = setInterval(function ()
@@ -460,15 +561,16 @@ document.addEventListener('DOMContentLoaded', function()
         get_relay_data();
         update_sun_timer();
         update_conn_time();
+        update_gps_time();
         counter++;
         if(counter%3 == 0) {
             get_v_data();
             get_ups_data();
             get_modem_data();
+            get_sensor_data();
         }
         if(counter==300) {
             counter=0;
-//            get_env_data();
             get_river_data();
             get_weather_data();
         }
@@ -483,9 +585,23 @@ window.onfocus = function() {
     }
     get_v_data();
     get_ups_data();
-//    get_env_data();
     get_modem_data();
     get_river_data();
     get_sun_data();
     get_weather_data();
+    get_sensor_data();
+}
+
+function opentab(evt, tabname) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(tabname).style.display = "block";
+  evt.currentTarget.className += " active";
 }
