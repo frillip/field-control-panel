@@ -109,6 +109,16 @@ function get_relay_data()
         });
 }
 
+function refresh_relay_data()
+{
+    for (relay_id in g_ignore_relay_resp) {
+        var relay_switch = document.querySelector("#relay-"+relay_id+"-switch");
+        var att = document.createAttribute("disabled");
+        relay_switch.setAttributeNode(att);
+    }
+    get_relay_data();
+}
+
 function get_v_data()
 {
     fetch("stats_ajax.json")
@@ -578,11 +588,7 @@ document.addEventListener('DOMContentLoaded', function()
 }, false);
 
 window.onfocus = function() {
-    for (relay_id in g_ignore_relay_resp) {
-        var relay_switch = document.querySelector("#relay-"+relay_id+"-switch");
-        var att = document.createAttribute("disabled");
-        relay_switch.setAttributeNode(att);
-    }
+    refresh_relay_data();
     get_v_data();
     get_ups_data();
     get_modem_data();
@@ -604,4 +610,15 @@ function opentab(evt, tabname) {
   }
   document.getElementById(tabname).style.display = "block";
   evt.currentTarget.className += " active";
+
+  if (tabname == "relays") {
+    refresh_relay_data();
+  } else if (tabname == "status") {
+    get_v_data();
+    get_ups_data();
+    get_sun_data();
+    get_weather_data();
+  } else if (tabname == "sensors") {
+    get_sensor_data();
+  }
 }
