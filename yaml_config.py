@@ -59,6 +59,8 @@ sensors = {
 'tsl2561_address': 0x39, # Default address is 0x39 if address line is left floating
 'tsl2561_gain': '1x',
 'tsl2561_integration_time': '13ms',
+'tsl2561_warn_enable': False,
+'tsl2561_sms_list': [],
 'lis3dh_enable': False,
 'lis3dh_address': 0x19, #  Default address is 0x19
 'lis3dh_interrupt_pin': None,

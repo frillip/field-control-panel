@@ -512,6 +512,13 @@ function get_sensor_data()
             document.querySelector("#lux").innerHTML = data.tsl2561.lux + " lx"
             document.querySelector("#broad-counts").innerHTML = data.tsl2561.broad_counts + " counts"
             document.querySelector("#ir-counts").innerHTML = data.tsl2561.ir_counts + " counts"
+            if (data.tsl2561.door_open) {
+                document.querySelector("#door-open-warn").innerHTML = "Door open!"
+            } else {
+                document.querySelector("#door-open-warn").innerHTML = "Door closed"
+            }
+            document.querySelector("#last-door-open").innerHTML = "Last door open: " + data.tsl2561.last_door_open
+            document.querySelector("#last-door-open-count").innerHTML = data.tsl2561.door_open_count + " counts"
             if(data.tsl2561.gain == 1) {
                 document.querySelector("#gain").innerHTML = "x16"
             } else {

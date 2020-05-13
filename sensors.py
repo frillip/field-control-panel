@@ -62,6 +62,13 @@ def init_sensors():
             logger.info('Starting TSL2561 ambient light sensor')
             tsl = TSL2561(gain=config['sensors']['tsl2561_gain'],integration_time=config['sensors']['tsl2561_integration_time'])
 
+            tsl2561_data['door_open'] = False
+            tsl2561_data['door_open_count'] = 0
+            tsl2561_data['last_door_open_count'] = 0
+            tsl2561_data['last_door_open'] = 0
+            tsl2561_data['last_door_open_timestamp'] = 0
+            tsl2561_data['door_open_warn'] = False
+
             # Populate some data
             get_tsl2561_data()
         else:
@@ -95,12 +102,13 @@ def init_sensors():
                 # set INT1_THS to 256mg
                 accel.set_int1_threshold(256)
                 # set INT1_DURATION  to 100ms
-                accel.set_int1_duration(5)
+                accel.set_int1_duration(0)
                 # on INT1_CFG enable 6D positioning, X, Y & Z (H & L)
-                accel.set_int1_config(aoi=1, d6=1, zh=1, zl=1, yh=1, yl=1, xh=1, xl=1)
+                accel.set_int1_config(aoi=0, d6=1, zh=1, zl=1, yh=1, yl=1, xh=1, xl=1)
                 # Get some data
                 lis3dh_data['interrupt_state'] = False
                 lis3dh_data['interrupt_count'] = 0
+                lis3dh_data['last_interrupt_count'] = 0
                 lis3dh_data['last_interrupt'] = 0
                 lis3dh_data['last_interrupt_timestamp'] = 0
                 lis3dh_data['motion_warn'] = False
@@ -153,6 +161,9 @@ def get_bme280_data():
 
 
 def get_tsl2561_data():
+    unix_time_int = int(time.time())
+    now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
+
     if config['sensors']['tsl2561_enable']:
         try:
             tsl2561_data['lux'] = tsl.lux()
@@ -160,6 +171,30 @@ def get_tsl2561_data():
             tsl2561_data['gain'] = tsl.gain
             if not tsl2561_data['gain']:
                 tsl2561_data['gain'] = 1
+
+            if unix_time_int > ( tsl2561_data['last_door_open_timestamp'] + 3 ) and tsl2561_data['door_open_count']:
+                tsl2561_data['door_open'] = False
+                tsl2561_data['door_open_warn'] = False
+                tsl2561_data['last_door_open_count'] = tsl2561_data['door_open_count']
+                tsl2561_data['door_open_count'] = 0
+
+            if tsl2561_data['lux'] > 10:
+                tsl2561_data['door_open'] = True
+
+                if unix_time_int < ( tsl2561_data['last_door_open_timestamp'] + 3 ):
+                    tsl2561_data['door_open_count'] += 1
+                else:
+                    tsl2561_data['door_open_count'] = 1
+
+                tsl2561_data['last_door_open'] = now_iso_stamp
+                tsl2561_data['last_door_open_timestamp'] = unix_time_int
+
+                if tsl2561_data['door_open_count'] > 5 and not tsl2561_data['door_open_warn'] and config['sensors']['tsl2561_warn_enable']:
+                    logger.critical('5 lux measurements exceed door open conditions!')
+                    human_datetime = datetime.now().strftime('%d/%m/%Y %H:%M')
+                    warn_sms_text = human_datetime + ': Door open event detected!'
+                    send_sms(config['sensors']['tsl2561_sms_list'], warn_sms_text)
+                    tsl2561_data['door_open_warn'] = True
 
         except Exception as e:
             # Error has occurred, log it
@@ -199,19 +234,20 @@ def accel_isr(channel):
             return
 
         get_lis3dh_data()
-        if unix_time_int < ( lis3dh_data['last_interrupt_timestamp'] + 3 ):
-            lis3dh_data['interrupt_count'] += 1
-        else:
-            lis3dh_data['interrupt_count'] = 1
-        lis3dh_data['interrupt_state'] = True
-        lis3dh_data['last_interrupt'] = now_iso_stamp
-        lis3dh_data['last_interrupt_timestamp'] = unix_time_int
-        if lis3dh_data['interrupt_count'] > 5 and not lis3dh_data['motion_warn'] and config['sensors']['lis3dh_warn_enable']:
-            logger.critical('5 motion events detected!')
-            human_datetime = datetime.now().strftime('%d/%m/%Y %H:%M')
-            warn_sms_text = human_datetime + ': Motion event detected!'
-            send_sms(config['sensors']['lis3dh_sms_list'], warn_sms_text)
-            lis3dh_data['motion_warn'] = True
+        if lis3dh_data['interrupt']:
+            if unix_time_int < ( lis3dh_data['last_interrupt_timestamp'] + 3 ):
+                lis3dh_data['interrupt_count'] += 1
+            else:
+                lis3dh_data['interrupt_count'] = 1
+            lis3dh_data['interrupt_state'] = True
+            lis3dh_data['last_interrupt'] = now_iso_stamp
+            lis3dh_data['last_interrupt_timestamp'] = unix_time_int
+            if lis3dh_data['interrupt_count'] > 5 and not lis3dh_data['motion_warn'] and config['sensors']['lis3dh_warn_enable']:
+                logger.critical('5 motion events detected!')
+                human_datetime = datetime.now().strftime('%d/%m/%Y %H:%M')
+                warn_sms_text = human_datetime + ': Motion event detected!'
+                send_sms(config['sensors']['lis3dh_sms_list'], warn_sms_text)
+                lis3dh_data['motion_warn'] = True
 
 
     except Exception as e:
