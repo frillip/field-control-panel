@@ -45,9 +45,6 @@ def run_web_app():
     async def indexresp(request):
         return web.FileResponse('./webroot/index.html')
 
-    async def sensorsresp(request):
-        return web.FileResponse('./webroot/sensors.html')
-
     async def scriptresp(request):
         return web.FileResponse('./webroot/main.js')
 
@@ -137,7 +134,6 @@ def run_web_app():
 
     app = web.Application()
     app.add_routes([web.get('/', indexresp),
-                    web.get('/sensors.html', sensorsresp),
                     web.get('/main.js', scriptresp),
                     web.get('/style.css', styleresp),
                     web.get('/stats_ajax.json', stats_ajax_get),

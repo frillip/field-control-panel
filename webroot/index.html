@@ -1,178 +1,261 @@
 <!DOCTYPE html>
 <html>
-<head>
+
+  <head>
     <title>Field Control Panel</title>
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
     <script src="main.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
-    <h1>Field Control Panel</h1>
-    <div class="tab">
-        <button class="tablinks" onclick="opentab(event, 'relaytab')" id="defaulttab">Relays</button>
-        <button class="tablinks" onclick="opentab(event, 'sensortab')">Sensors</button>
-        <button class="tablinks" onclick="opentab(event, 'statustab')">Status</button>
+  </head>
+
+  <body>
+    <div class="banner">
+      <div id="maintenance-banner" onclick="window.alert('Maintenance mode disabled')">Maintenance mode is currently ACTIVE. Tap banner to disable</div>
+      <div class="weather-warning-none" id="weather-alert-banner" onclick="toggle_weather_alert_text()">
+        <div id="weather-alert-title">
+        </div>
+        <div id="weather-alert-text" style="display: none;">
+        </div>
+      </div>
     </div>
-    <div id="relaytab" class="tabcontent">
-    <div class="row">
-        <div class="column">
+    <h1>Field control panel</h1>
+    <div id="tabs">
+      <button class="tablink" onclick="openPage('relaytab', this)" id="defaultOpen">Relays</button>
+      <button class="tablink" onclick="openPage('weathertab', this)">Weather</button>
+      <button class="tablink" onclick="openPage('sensorstab', this)">Sensors</button>
+      <button class="tablink" onclick="openPage('statustab', this)">Status</button>
+
+      <div id="relaytab" class="tabcontent">
+        <div class="row">
+          <div class="column">
             <div id="relays"></div>
+          </div>
         </div>
-    </div>
-    </div>
-    <div id="sensortab" class="tabcontent">
-    <div class="row">
-        <div class="column">
-            <div class="bme280">
-                <h2 id="bme280-title">BME280</h2>
-                <img class="icon-small-left" src="/icon/temperature.png">
-                <div class="panel-data" id="bme-temperature"> </div>
-                <img class="icon-small-left" src="/icon/pressure.png">
-                <div class="panel-data" id="bme-pressure"> </div>
-                <img class="icon-small-left" src="/icon/humidity.png">
-                <div class="panel-data" id="bme-humidity"> </div>
-            </div>
-            <div class="tsl2561">
-                <h2 id="tsl2561-title">TSL2561</h2>
-                <div class="row">
-                    <div class="column">
-                        <img class="icon-small-left" src="/icon/sun.png">
-                        <div class="panel-data" id="lux"> </div>
-                        <img class="icon-small-left" src="/icon/light.png">
-                        <div class="panel-data" id="broad-counts"> </div>
-                        <img class="icon-small-left" src="/icon/infrared-sensor.png">
-                        <div class="panel-data" id="ir-counts"> </div>
-                        <img class="icon-small-left" src="/icon/transistor.png">
-                        <div class="panel-data" id="gain"> </div>
-                    </div>
-                    <div class="column">
-                        <img class="icon-small-left" src="/icon/warning.png">
-                        <div class="panel-data" id="door-open-warn"> </div>
-                        <img class="icon-small-left" src="/icon/accelerometer.png">
-                        <div class="panel-data" id="last-door-open"> </div>
-                        <img class="icon-small-left" src="/icon/counter.png">
-                        <div class="panel-data" id="last-door-open-count"> </div>
-                    </div>
-                </div>
-            </div>
-            <div class="lis3dh">
-                <h2 id="lis3dh-title">LIS3DH</h2>
-                <img class="icon-small-left" src="/icon/3d.png">
-                <div class="panel-data" id="xyz-data"> </div>
-                <img class="icon-small-left" src="/icon/warning.png">
-                <div class="panel-data" id="motion-warn"> </div>
-                <img class="icon-small-left" src="/icon/accelerometer.png">
-                <div class="panel-data" id="last-interrupt"></div>
-                <img class="icon-small-left" src="/icon/counter.png">
-                <div class="panel-data" id="last-interrupt-count">0</div>
-            </div>
+      </div>
+
+      <div id="weathertab" class="tabcontent">
+        <div id="weather-alert">
         </div>
-        <div class="column">
-            <div class="gps">
-                <h2 id="gps-title">GPS</h2>
-                <img class="icon-small-left" id="gps-fix-icon" src="/icon/gps_fix">
-                <div class="panel-data" id="gps-fix"> </div>
-                <img class="icon-small-left" src="/icon/globe.png">
-                <div class="panel-data" id="lat-long"> </div>
-                <img class="icon-small-left" src="/icon/altitude.png">
-                <div class="panel-data" id="altitude"> </div>
-                <img class="icon-small-left" src="/icon/speed.png">
-                <div class="panel-data" id="speed"> </div>
-                <img class="icon-small-left" src="/icon/clock.png">
-                <div class="panel-data" id="time"> </div>
-                <img class="icon-small-left" src="/icon/timezone.png">
-                <div class="panel-data" id="local-time"> </div>
-                <img class="icon-small-left" src="/icon/satellite.png">
-                <div class="panel-data" id="satellites"> </div>
+        <div id="weather-current">
+          <h2 class="weather-title">Current</h2>
+          <div class="row">
+            <div class="column">
+              <img class="icon-small-left" src="/icon/temperature.png">
+              <div class="panel-data temperature">-</div>
+              <img class="icon-small-left" src="/icon/pressure.png">
+              <div class="panel-data pressure">-</div>
+              <img class="icon-small-left" src="/icon/humidity.png">
+              <div class="panel-data humidity">-</div>
             </div>
+            <div class="column">
+              <img class="icon-small-left weather-type-icon" src="/icon/weather/clear-day.png">
+              <div class="panel-data weather-type-text">-</div>
+              <img class="icon-small-left wind-direction" src="/icon/wind/wind0.png">
+              <div class="panel-data wind-speed">-</div>
+              <img class="icon-small-left precipitation-icon" src="/icon/weather/precipitation_chance.png">
+              <div class="panel-data precipitation-chance">-</div>
+            </div>
+          </div>
         </div>
-    </div>
-    </div>    
-    <div id="statustab" class="tabcontent">
-            <div class="env">
-                <h2 id="weather-title">Weather</h2>
-                <div class="row">
-                    <div class="column">
-                    <img class="icon-small-left" src="/icon/temperature.png">
-                    <div class="panel-data" id="temperature"></div>
-                    <img class="icon-small-left" src="/icon/pressure.png">
-                    <div class="panel-data" id="pressure"></div>
-                    <img class="icon-small-left" src="/icon/humidity.png">
-                    <div class="panel-data" id="humidity"></div>
-                    </div>
-                    <div class="column">
-                    <img class="icon-small-left" id="weather-type-icon" src="/icon/weather/clear-day.png">
-                    <div class="panel-data" id="weather-type-text"></div>
-                    <img class="icon-small-left" id="wind-direction" src="/icon/wind/wind0.png">
-                    <div class="panel-data" id="wind-speed"></div>
-                    <img class="icon-small-left" id="precipitation-icon" src="/icon/weather/precipitation_chance.png">
-                    <div class="panel-data" id="precipitation-chance"></div>
-                    </div>
-                </div>
+        <div id="weather-hour">
+          <h2 class="weather-title">Next hour</h2>
+          <div class="row">
+            <div class="column">
+              <img class="icon-small-left" src="/icon/temperature.png">
+              <div class="panel-data temperature">-</div>
+              <img class="icon-small-left" src="/icon/pressure.png">
+              <div class="panel-data pressure">-</div>
+              <img class="icon-small-left" src="/icon/humidity.png">
+              <div class="panel-data humidity">-</div>
             </div>
-            <div class="battery">
-                <div class="row">
-                    <div class="column">
-                    <h2 id="battery-title">Battery</h2>
-                    <img class="icon-small-left" id="battery-voltage-icon" src="/icon/battery_voltage.png">
-                    <div class="panel-data" id="battery-voltage"></div>
-                    <img class="icon-small-left" id="battery-current-icon" src="/icon/electrical.png">
-                    <div class="panel-data" id="battery-current"></div>
-                    <img class="icon-small-left" id="battery-charge-icon" src="/icon/battery_3.png">
-                    <div class="panel-data" id="battery-cs"></div>
-                    </div>
-                    <div class="column">
-                    <h2 id="ups-title">UPS</h2>
-                    <img class="icon-small-left" id="ups-mode-icon" src="/icon/power.png"></dimg>
-                    <div class="panel-data" id="ups-mode"></div>
-                    <img class="icon-small-left" id="ups-voltage-icon" src="/icon/voltage.png"></img>
-                    <div class="panel-data" id="ups-voltage"></div>
-                    <img class="icon-small-left" id="ups-battery-icon" src="/icon/battery_4.png"></img>
-                    <div class="panel-data" id="ups-battery-voltage"></div>
-                    </div>
-                </div>
+            <div class="column">
+              <img class="icon-small-left weather-type-icon" src="/icon/weather/clear-day.png">
+              <div class="panel-data weather-type-text">-</div>
+              <img class="icon-small-left wind-direction" src="/icon/wind/wind0.png">
+              <div class="panel-data wind-speed">-</div>
+              <img class="icon-small-left precipitation-icon" src="/icon/weather/precipitation_chance.png">
+              <div class="panel-data precipitation-chance">-</div>
             </div>
-            <div class="pv">
-                <h2 id="solar-title">Solar</h2>
-                <div class="row">
-                    <div class="column">
-                <div class="row">
-                    <div class="column">
-                    <img class="icon-small-left" id="pv-voltage-icon" src="/icon/voltage.png">
-                    <div class="panel-data" id="pv-voltage"></div>
-                    <img class="icon-small-left" id="pv-power-icon" src="/icon/solar_energy.png">
-                    <div class="panel-data" id="pv-power"></div>
-                    <img class="icon-small-left" id="pv-mppt-icon" src="/icon/solar_panel.png">
-                    <div class="panel-data" id="pv-mppt"></div>
-                    <img class="icon-small-left" id="pv-yield-icon" src="/icon/energy.png">
-                    <div class="panel-data" id="pv-yield"></div>
-                    </div>
-                    <div class="column">
-                    <img class="icon-small-left" id="sunrise-icon" src="/icon/sunrise.png">
-                    <div class="panel-data" id="sunrise-time"></div>
-                    <img class="icon-small-left" id="sunset-icon" src="/icon/sunset.png">
-                    <div class="panel-data" id="sunset-time"></div>
-                    <img class="icon-small-left" id="elevation-icon" src="/icon/solar_elevation.png">
-                    <div class="panel-data" id="solar-elevation"></div>
-                    <img class="icon-small-left" id="sun-timer-icon" src="">
-                    <div class="panel-data" id="sun-timer"></div>
-                    </div>
-                </div>
-                    </div>
-                </div>
+          </div>
+        </div>
+        <div id="weather-day">
+          <h2 class="weather-title">Coming day</h2>
+          <div class="row">
+            <div class="column">
+              <img class="icon-small-left" src="/icon/temperature.png">
+              <div class="panel-data temperature">-</div>
+              <img class="icon-small-left" src="/icon/pressure.png">
+              <div class="panel-data pressure">-</div>
+              <img class="icon-small-left" src="/icon/humidity.png">
+              <div class="panel-data humidity">-</div>
             </div>
+            <div class="column">
+              <img class="icon-small-left weather-type-icon" src="/icon/weather/clear-day.png">
+              <div class="panel-data weather-type-text">-</div>
+              <img class="icon-small-left wind-direction" src="/icon/wind/wind0.png">
+              <div class="panel-data wind-speed">-</div>
+              <img class="icon-small-left precipitation-icon" src="/icon/weather/precipitation_chance.png">
+              <div class="panel-data precipitation-chance">-</div>
+            </div>
+          </div>
+        </div>
+        <div id="powered-by-dark-sky" style="text-align: center; margin-top: 3px;">
+          <a href="https://darksky.net/poweredby/" target="_blank"><img id="powered-by-dark-sky-icon" src="https://darksky.net/dev/img/attribution/poweredby.png" title="Powered by Dark Sky"></a>
+        </div>
+      </div>
+
+      <div id="sensorstab" class="tabcontent">
+        <div class="row">
+          <div class="bme280">
+            <h2 id="bme280-title">BME280</h2>
+            <img class="icon-small-left" src="/icon/temperature.png">
+            <div class="panel-data" id="bme-temperature">-</div>
+            <img class="icon-small-left" src="/icon/pressure.png">
+            <div class="panel-data" id="bme-pressure">-</div>
+            <img class="icon-small-left" src="/icon/humidity.png">
+            <div class="panel-data" id="bme-humidity">-</div>
+          </div>
+          <div class="tsl2561">
+            <h2 id="tsl2561-title">TSL2561</h2>
+            <img class="icon-small-left" src="/icon/sun.png">
+            <div class="panel-data" id="lux">-</div>
+            <img class="icon-small-left" src="/icon/light.png">
+            <div class="panel-data" id="broad-counts">-</div>
+            <img class="icon-small-left" src="/icon/infrared-sensor.png">
+            <div class="panel-data" id="ir-counts">-</div>
+            <img class="icon-small-left" src="/icon/transistor.png">
+            <div class="panel-data" id="gain">-</div>
+            <img class="icon-small-left" src="/icon/warning.png">
+            <div class="panel-data" id="door-open-warn">-</div>
+            <img class="icon-small-left" src="/icon/accelerometer.png">
+            <div class="panel-data" id="last-door-open">-</div>
+            <img class="icon-small-left" src="/icon/counter.png">
+            <div class="panel-data" id="last-door-open-count">-</div>
+          </div>
+          <div class="lis3dh">
+            <h2 id="lis3dh-title">LIS3DH</h2>
+            <img class="icon-small-left" src="/icon/3d.png">
+            <div class="panel-data" id="xyz-data">-</div>
+            <img class="icon-small-left" src="/icon/warning.png">
+            <div class="panel-data" id="motion-warn">-</div>
+            <img class="icon-small-left" src="/icon/accelerometer.png">
+            <div class="panel-data" id="last-interrupt">-</div>
+            <img class="icon-small-left" src="/icon/counter.png">
+            <div class="panel-data" id="last-interrupt-count">-</div>
+          </div>
+          <div class="gps">
+            <h2 id="gps-title">GPS</h2>
+            <img class="icon-small-left" id="gps-fix-icon" src="/icon/gps_fix">
+            <div class="panel-data" id="gps-fix">-</div>
+            <img class="icon-small-left" src="/icon/globe.png">
+            <div class="panel-data" id="lat-long">-</div>
+            <img class="icon-small-left" src="/icon/altitude.png">
+            <div class="panel-data" id="altitude">-</div>
+            <img class="icon-small-left" src="/icon/speed.png">
+            <div class="panel-data" id="speed">-</div>
+            <img class="icon-small-left" src="/icon/clock.png">
+            <div class="panel-data" id="time">-</div>
+            <img class="icon-small-left" src="/icon/timezone.png">
+            <div class="panel-data" id="local-time">-</div>
+            <img class="icon-small-left" src="/icon/satellite.png">
+            <div class="panel-data" id="satellites">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="statustab" class="tabcontent">
+        <div class="battery">
+          <div class="row">
+            <div class="column">
+              <h2 id="battery-title">Battery</h2>
+              <img class="icon-small-left" id="battery-voltage-icon" src="/icon/battery_voltage.png">
+              <div class="panel-data" id="battery-voltage">-</div>
+              <img class="icon-small-left" id="battery-current-icon" src="/icon/electrical.png">
+              <div class="panel-data" id="battery-current">-</div>
+              <img class="icon-small-left" id="battery-charge-icon" src="/icon/battery_3.png">
+              <div class="panel-data" id="battery-cs">-</div>
+              <h2 id="ups-title">UPS</h2>
+              <img class="icon-small-left" id="ups-mode-icon" src="/icon/power.png">
+              <div class="panel-data" id="ups-mode">-</div>
+              <img class="icon-small-left" id="ups-voltage-icon" src="/icon/voltage.png">
+              <div class="panel-data" id="ups-voltage">-</div>
+              <img class="icon-small-left" id="ups-battery-icon" src="/icon/battery_4.png">
+              <div class="panel-data" id="ups-battery-voltage">-</div>
+            </div>
+            <div class="column">
+            </div>
+          </div>
+        </div>
+        <div class="pv">
+          <h2 id="solar-title">Solar</h2>
+          <div class="row">
+            <div class="column">
+              <div class="row">
+                <div class="column">
+                  <img class="icon-small-left" id="pv-voltage-icon" src="/icon/voltage.png">
+                  <div class="panel-data" id="pv-voltage">-</div>
+                  <img class="icon-small-left" id="pv-power-icon" src="/icon/solar_energy.png">
+                  <div class="panel-data" id="pv-power">-</div>
+                  <img class="icon-small-left" id="pv-mppt-icon" src="/icon/solar_panel.png">
+                  <div class="panel-data" id="pv-mppt">-</div>
+                  <img class="icon-small-left" id="pv-yield-icon" src="/icon/energy.png">
+                  <div class="panel-data" id="pv-yield">-</div>
+                </div>
+                <div class="column">
+                  <img class="icon-small-left" id="sunrise-icon" src="/icon/sunrise.png">
+                  <div class="panel-data" id="sunrise-time">-</div>
+                  <img class="icon-small-left" id="sunset-icon" src="/icon/sunset.png">
+                  <div class="panel-data" id="sunset-time">-</div>
+                  <img class="icon-small-left" id="elevation-icon" src="/icon/solar_elevation.png">
+                  <div class="panel-data" id="solar-elevation">-</div>
+                  <img class="icon-small-left" id="sun-timer-icon" src="">
+                  <div class="panel-data" id="sun-timer">-</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <h2 id="log-title">Log</h2>
+        <div id="log-contents">
+          <div class="log-entry" id="log-entry-0">MOAR</div>
+          <div class="log-entry" id="log-entry-1">MOAR</div>
+          <div class="log-entry" id="log-entry-2">MOAR</div>
+          <div class="log-entry" id="log-entry-3">MOAR</div>
+          <div class="log-entry" id="log-entry-4">MOAR</div>
+          <div class="log-entry" id="log-entry-5">MOAR</div>
+          <div class="log-entry" id="log-entry-6">MOAR</div>
+          <div class="log-entry" id="log-entry-7">MOAR</div>
+          <div class="log-entry" id="log-entry-8">MOAR</div>
+          <div class="log-entry" id="log-entry-9">MOAR</div>
+          <div class="log-entry" id="log-entry-10">MOAR</div>
+          <div class="log-entry" id="log-entry-11">MOAR</div>
+          <div class="log-entry" id="log-entry-12">MOAR</div>
+          <div class="log-entry" id="log-entry-13">MOAR</div>
+          <div class="log-entry" id="log-entry-14">MOAR</div>
+          <div class="log-entry" id="log-entry-15">MOAR</div>
+          <div class="log-entry" id="log-entry-16">MOAR</div>
+          <div class="log-entry" id="log-entry-17">MOAR</div>
+          <div class="log-entry" id="log-entry-18">MOAR</div>
+          <div class="log-entry" id="log-entry-19">MOAR</div>
+        </div>
+      </div>
     </div>
+
+    <div class="footer">
+      <div class="footer-section">
+        <div class="footer-title" id="lte-net-type"><img class="icon-large-left" id="lte-ssi" src="" /></div>
+        <div id="lte-data">-</div>
+        <div id="lte-rate">-</div>
+        <div id="lte-total-data">-</div>
+      </div>
+      <div class="footer-section">
+        <div class="footer-title" id="river-name"><img class="icon-large-left" id="river-icon" src="" /><img class="icon-large-right" id="river-warning" src="" /><img class="icon-large-right" id="river-status" src="" />-</div>
+        <div id="river-level">-</div>
+        <div id="river-last-high">-</div>
+      </div>
     </div>
-    <div class="bottom-section">
-        <div class="bottom-title" id="lte-net-type"><img class="icon-large-left" id="lte-ssi" src=""/></div>
-        <div id="lte-data"></div>
-        <div id="lte-rate"></div>
-        <div id="lte-total-data"></div>
-    </div>
-    <div class="bottom-section">
-        <div class="bottom-title" id="river-name"><img class="icon-large-left" id="river-icon" src=""/><img class="icon-large-right" id="river-warning" src=""/><img class="icon-large-right" id="river-status" src=""/></div>
-        <div id="river-level"></div>
-        <div id="river-last-high"></div>
-    </div>
-</body>
+
+  </body>
+
 </html>
+
