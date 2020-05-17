@@ -20,10 +20,6 @@ logger = colorlog.getLogger("main")
 logger.setLevel(global_vars.log_level)
 logger.addHandler(handler)
 
-mppt_loop_thread = Thread(target=vedirect_interface.mppt_loop)
-bmv_loop_thread = Thread(target=vedirect_interface.bmv_loop)
-scheduler_thread = Thread(target=scheduler.loop_scheduler)
-web_app_thread = Thread(target=panel_web_app.run_server, args=(panel_web_app.run_web_app(),))
 
 def main():
     print("*******************************************************************************************\n\n\n")
@@ -54,6 +50,11 @@ def main():
         get_modem_data()
 
     logger.info("Connected!")
+
+    mppt_loop_thread = Thread(target=vedirect_interface.mppt_loop)
+    bmv_loop_thread = Thread(target=vedirect_interface.bmv_loop)
+    scheduler_thread = Thread(target=scheduler.loop_scheduler)
+    web_app_thread = Thread(target=panel_web_app.run_server, args=(panel_web_app.run_web_app(),))
 
     mppt_loop_thread.start()
     bmv_loop_thread.start()

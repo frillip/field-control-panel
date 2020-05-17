@@ -131,6 +131,19 @@ system = {
 'enum': {
 }}
 
+remote = {
+'req': [],
+'opt': {
+'hostname': 'sheepnet',
+'base_url': 'https://sheep.frillip.net/panel/',
+'canary_url': 'canary',
+'canary_string': 'Serinus canarius domesticus',
+'interval': 15,
+'timeout': 60,
+},
+'enum': {
+}}
+
 weather = {
 'req': ['api_key'],
 'opt': {
@@ -163,6 +176,7 @@ config_structure = {
 'river': river,
 'clickatell': clickatell,
 'system': system,
+'remote': remote,
 'weather': weather,
 'picoups': picoups,
 }

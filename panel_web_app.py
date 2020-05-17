@@ -9,6 +9,7 @@ from environment_agency import river_data
 from weather import weather_data
 from sun import sun_data
 from pico_ups import ups_data
+from yaml_config import config
 import logging
 import colorlog
 
@@ -50,6 +51,9 @@ def run_web_app():
 
     async def styleresp(request):
         return web.FileResponse('./webroot/style.css')
+
+    async def canaryresp(request):
+        return web.Response(text=config['remote']['canary_string'])
 
     async def stats_ajax_get(request):
         ajax_resp = {}
@@ -136,6 +140,7 @@ def run_web_app():
     app.add_routes([web.get('/', indexresp),
                     web.get('/main.js', scriptresp),
                     web.get('/style.css', styleresp),
+                    web.get('/'+config['remote']['canary_url'], canaryresp),
                     web.get('/stats_ajax.json', stats_ajax_get),
                     web.post('/buttons', buttonhandler),
                     web.get('/status.json', status_json),
