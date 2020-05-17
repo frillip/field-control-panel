@@ -48,6 +48,9 @@ sensors:
   tsl2561_address: 0x39
   tsl2561_gain: 1x
   tsl2561_integration_time: 13ms
+  tsl2561_warn_enable: True
+  tsl2561_sms_list:
+    - '+447xxxxxxxxx'
   lis3dh_enable: False
   lis3dh_address: 0x19
   lis3dh_interrupt_pin: 17
