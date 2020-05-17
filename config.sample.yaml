@@ -107,6 +107,11 @@ remote:
   canary_string: Serinus canarius domesticus
   interval: 15
   timeout: 60
+  basic_user: user
+  basic_pass: pass
+  warn_enable: False
+  warn_sms_list:
+    - '+447xxxxxxxxx'
 
 weather:
   api_key: xxxx-xxxx-xxxx

@@ -140,6 +140,10 @@ remote = {
 'canary_string': 'Serinus canarius domesticus',
 'interval': 15,
 'timeout': 60,
+'basic_user': '',
+'basic_pass': '',
+'warn_enable': False,
+'warn_sms_list': [],
 },
 'enum': {
 }}
@@ -157,8 +161,8 @@ picoups = {
 'req': ['i2c_port'],
 'opt': {
 'battery_type': 'li-ion',
-'to92_enable': 'False',
-'fan_enable': 'False',
+'to92_enable': False,
+'fan_enable': False,
 'fan_threshold_temp': 35,
 },
 'enum': {
