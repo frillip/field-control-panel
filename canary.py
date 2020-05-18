@@ -27,6 +27,8 @@ class Canary(object):
         self.url = url
         self.string = None
         self.alive = True
+        self.interval = 5
+        self.timeout = 60
         self.last_successful_request = '1970-01-01T00:00:00'
         self.last_successful_request_timestamp = 0
         self.connection_fail_count = 0
@@ -34,8 +36,16 @@ class Canary(object):
         self.credentials = None
 
 
-    def auth(self,user,password):
+    def set_auth(self,user,password):
         self.credentials = HTTPBasicAuth(user,password)
+
+
+    def set_interval(self,interval):
+        self.interval = interval
+
+
+    def set_timeout(self,timeout):
+        self.timeout = timeout
 
 
     def set_string(self, canary_string):
@@ -84,7 +94,7 @@ class Canary(object):
             self.stats['fail'] += 1
             self.connection_fail_count += 1
             if self.alive and self.last_successful_request_timestamp:
-                if (unix_time_int - self.last_successful_request_timestamp) > config['remote']['timeout']:
+                if (unix_time_int - self.last_successful_request_timestamp) > self.timeout:
                     self.alive = False
                     logger.error(self.hostname + " offline! Sending warning SMS!")
                     warn_sms_text = human_datetime + ": " + self.hostname + " has disconnected from Darksky!"
@@ -141,12 +151,14 @@ def main():
 
     if config['remote']['basic_user']:
         if config['remote']['basic_pass']:
-            sheepnet.auth(config['remote']['basic_user'], config['remote']['basic_pass'])
+            sheepnet.set_auth(config['remote']['basic_user'], config['remote']['basic_pass'])
         else:
             print("Using username from config.yaml: " + config['remote']['basic_user'])
             password = getpass()
-            sheepnet.auth(config['remote']['basic_user'], password)
+            sheepnet.set_auth(config['remote']['basic_user'], password)
 
+    sheepnet.set_interval(config['remote']['interval'])
+    sheepnet.set_timeout(config['remote']['timeout'])
     sheepnet.set_string = config['remote']['canary_string']
 
     if sheepnet.test():
