@@ -10,7 +10,7 @@
 
   <body>
     <div class="banner">
-      <div id="maintenance-banner" onclick="window.alert('Maintenance mode disabled')">Maintenance mode is currently ACTIVE. Tap banner to disable</div>
+      <div id="maintenance-banner" style="display: none;" onclick="document.getElementById('maintenance-switch').click()">Maintenance mode is currently ACTIVE. Tap banner to disable</div>
       <div class="weather-warning-none" id="weather-alert-banner" onclick="toggle_weather_alert_text()">
         <div id="weather-alert-title">
         </div>
@@ -183,6 +183,8 @@
               <div class="panel-data" id="ups-battery-voltage">-</div>
             </div>
             <div class="column">
+              <h2 id="maintenance-title">Maintenance mode</h2>
+              <label class="switch"><input id="maintenance-switch" type="checkbox" onclick="toggle_maintenance_mode(this)"><span class="slider round"></span></label>
             </div>
           </div>
         </div>

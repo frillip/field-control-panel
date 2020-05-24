@@ -1,4 +1,5 @@
 var g_ignore_relay_resp = {}
+var g_ignore_maintenance_resp = false
 
 var g_sunrise_datetime = new Date("1970-01-01T00:00:00");
 var g_sun_timer = 0
@@ -546,6 +547,92 @@ function get_sensor_data() {
     });
 }
 
+function get_system_data() {
+  fetch("system.json")
+    .then(response => response.json())
+    .then(data => {
+      var maintenance_switch = document.getElementById("maintenance-switch")
+      var maintenance_banner = document.getElementById("maintenance-banner")
+      if (!g_ignore_maintenance_resp) {
+        if (data.maintenance_mode) {
+          maintenance_switch.checked = true;
+          maintenance_banner.style.display = "block";
+        } else {
+          maintenance_switch.checked = false;
+          maintenance_banner.style.display = "none";
+        }
+      } else {
+        maintenance_switch.removeAttribute("disabled");
+        if (maintenance_switch.checked) {
+          maintenance_banner.style.display = "block";
+        } else {
+          maintenance_banner.style.display = "none";
+        }
+        g_ignore_maintenance_resp = false;
+      }
+    }).catch(error => {
+      console.log(error);
+      // on error, stop execution
+    });
+}
+
+function toggle_maintenance_mode(elem) {
+  var data = {};
+  if (elem.checked) {
+    enable_maintenance_mode();
+  } else {
+    disable_maintenance_mode();
+  }
+}
+
+function enable_maintenance_mode() {
+  var data = {};
+  data.maintenance_mode = "on"
+  var att = document.createAttribute("disabled");
+  document.getElementById("maintenance-switch").setAttributeNode(att);
+  g_ignore_maintenance_resp = true;
+  fetch("maintenance", {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+    .then((response) => {
+      if (response.status !== 200) {
+        throw new Error(response.status)
+      }
+      response.text()
+    })
+    .then((data) => {
+      console.log('Success:', data);
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+}
+
+function disable_maintenance_mode() {
+  var data = {};
+  data.maintenance_mode = "off"
+  var att = document.createAttribute("disabled");
+  document.getElementById("maintenance-switch").setAttributeNode(att);
+  g_ignore_maintenance_resp = true;
+  fetch("maintenance", {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+    .then((response) => {
+      if (response.status !== 200) {
+        throw new Error(response.status)
+      }
+      response.text()
+    })
+    .then((data) => {
+      console.log('Success:', data);
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   get_weather_data();
   get_v_data();
@@ -555,6 +642,7 @@ document.addEventListener('DOMContentLoaded', function() {
   get_river_data();
   get_sun_data();
   get_sensor_data();
+  get_system_data();
 
   // Get the element with id="defaultOpen" and click on it
   document.getElementById("defaultOpen").click();
@@ -572,6 +660,7 @@ document.addEventListener('DOMContentLoaded', function() {
       get_ups_data();
       get_modem_data();
       get_sensor_data();
+      get_system_data();
     }
     if (counter == 300) {
       counter = 0;
@@ -590,6 +679,7 @@ window.onfocus = function() {
   get_sun_data();
   get_weather_data();
   get_sensor_data();
+  get_system_data();
 }
 
 function openPage(tabname, elmnt) {
@@ -614,6 +704,7 @@ function openPage(tabname, elmnt) {
     get_weather_data();
   } else if (tabname == "sensors") {
     get_sensor_data();
+    get_system_data();
   }
 }
 
