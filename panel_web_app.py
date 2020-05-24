@@ -168,7 +168,7 @@ def run_web_app():
                     web.get('/modem.json', modem_json),
                     web.get('/river.json', river_json),
                     web.get('/sun.json', sun_json),
-                    web.get('/system.json', system_state),
+                    web.get('/system.json', system_json),
                     web.get('/ups.json', ups_json),
                     web.get('/weather.json', weather_json)])
     runner = web.AppRunner(app, access_log=None)

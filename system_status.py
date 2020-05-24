@@ -25,7 +25,7 @@ batt_warning_stage_text = {
 system_state = {}
 system_state['maintenance_mode'] = False
 
-def maintenance_request(request):
+def maintenance_handle_request(request):
     try:
         # Some basic validation
         for key in request:
@@ -37,7 +37,7 @@ def maintenance_request(request):
                     logger.warning("Maintenance mode now on!")
                     return "Maintenance mode now ON"
 
-                elif request[key] == 'on':
+                elif request[key] == 'off':
                     # If it's a request to turn it off, do so, and return some text saying so
                     system_state['maintenance_mode'] = False
                     logger.warning("Maintenance mode now off!")
