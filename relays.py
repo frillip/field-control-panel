@@ -55,19 +55,21 @@ def relay_handle_request(request):
                 relay_id = relay_map[relay]
                 # If it's a request to turn it on, do so, and return some text saying so
                 if request[relay] == "on":
-                    logger.warning("Manual " + relay + " on")
                     set_relay_state(relay_id,True)
+                    logger.warning("Manual " + relay + " on")
                     return relay+" now ON"
 
                 elif request[relay] == "off":
                     # If it's a request to turn it off, do so, and return some text saying so
-                    logger.warning("Manual " + relay + " off")
                     set_relay_state(relay_id,False)
+                    logger.warning("Manual " + relay + " off")
                     return relay+" now OFF"
+
                 else:
                     # If it's neither, log an error, and return some text saying so
                     logger.error("Garbled relay request, no valid state: "+str(request))
                     return "Ah-ah-ah! You didn't say the magic word!"
+                    
             else:
                 # If it's a not a valid relay name, log an error, and return some text saying so
                 logger.error("Garbled relay request, no valid relay: "+str(request))
