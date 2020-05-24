@@ -23,6 +23,44 @@ batt_warning_stage_text = {
 
 
 system_state = {}
+system_state['maintenance_mode'] = False
+
+def maintenance_request(request):
+    try:
+        # Some basic validation
+        for key in request:
+            # Check if maintenance is the thing we're trying to change
+            if key == 'maintenance_mode':
+                if request[key] == 'on':
+                    # If it's a request to turn it off, do so, and return some text saying so
+                    system_state['maintenance_mode'] = True
+                    logger.warning("Maintenance mode now on!")
+                    return "Maintenance mode now ON"
+
+                elif request[key] == 'on':
+                    # If it's a request to turn it off, do so, and return some text saying so
+                    system_state['maintenance_mode'] = False
+                    logger.warning("Maintenance mode now off!")
+                    return "Maintenance mode now OFF"
+
+                else:
+                    # If it's neither, log an error, and return some text saying so
+                    logger.error("Garbled request, no valid input: "+str(request))
+                    return "Ah-ah-ah! You didn't say the magic word!"
+
+            else:
+                # If it's a not a valid relay name, log an error, and return some text saying so
+                logger.error("Garbled request, no valid input: "+str(request))
+                return "Ah-ah-ah! You didn't say the magic word!"
+
+    except Exception as e:
+        # Something else has gone wrong, log the error
+        logger.error("Failed to set maintenance mode state: " + str(e))
+        return "Something went wrong! Check the log... and the velociraptor paddock..."
+
+    # And as a catch all, frustrate Samual L Jackson some more
+    return "Ah-ah-ah! You didn't say the magic word!"
+
 
 # This needs to be rewritten to use new BMV data
 
@@ -34,6 +72,10 @@ def check_batt_voltage():
     unix_time_int = int(time.time())
     warn_sms_text = ""
     last_batt_state = system_state['batt_state']
+
+    if not global_vars.mppt_data["batt"].get("v"):
+        logger.warning("MPPT data not yet populated!")
+        return
 
     try:
         # First, a plausibility check...
@@ -120,14 +162,16 @@ def check_batt_voltage():
             system_state['batt_state_sent_time'] = unix_time_int
             send_sms(config['bmv']['warn_sms_list'], warn_sms_text)
 
-        pass
-
     except Exception as e:
         logger.error("MPPT battery voltage check failed: " + str(e))
-        pass
+
 
 # If the load is off warn, will only be triggered if Pi is moved onto a UPS of course...
 def check_load_state():
+    if not global_vars.mppt_data["batt"].get("v"):
+        logger.warning("MPPT data not yet populated!")
+        return
+
     try:
         human_datetime = datetime.now().strftime("%d/%m/%Y %H:%M")
         now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
@@ -150,8 +194,6 @@ def check_load_state():
             send_sms(config['bmv']['warn_sms_list'], warn_sms_text)
 
         system_state['last_load_state'] = global_vars.mppt_data["load"]["state"]
-        pass
 
     except Exception as e:
         logger.error("MPPT load state check failed: " + str(e))
-        pass

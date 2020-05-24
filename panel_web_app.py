@@ -3,6 +3,7 @@ from time import sleep
 from aiohttp import web
 import json
 from relays import relay_handle_request,generate_relay_json
+from system_status import maintenance_handle_request,system_state
 import global_vars
 from sensors import bme280_data,tsl2561_data,lis3dh_data,gps_data
 from environment_agency import river_data
@@ -74,6 +75,13 @@ def run_web_app():
         resp=relay_handle_request(relay_req)
         return web.Response(text=resp)
 
+    async def maintenancetoggle(request):
+        logger.info("Maintenance mode state change requested")
+        data = await request.text()
+        maintenance_req=json.loads(data)
+        resp=maintenance_handle_request(maintenance_req)
+        return web.Response(text=resp)
+
     async def status_json(request):
         status_data = {}
         status_data['relay'] = generate_relay_json()
@@ -88,6 +96,7 @@ def run_web_app():
         status_data['modem'] = global_vars.modem_data
         status_data['river'] = river_data
         status_data['sun'] = sun_data
+        status_data['system'] = system_state
         status_data['ups'] = ups_data
         status_data['weather'] = weather_data
         return web.json_response(status_data)
@@ -127,6 +136,9 @@ def run_web_app():
     async def river_json(request):
         return web.json_response(river_data)
 
+    async def system_json(request):
+        return web.json_response(system_state)
+
     async def sun_json(request):
         return web.json_response(sun_data)
 
@@ -143,6 +155,7 @@ def run_web_app():
                     web.get('/'+config['remote']['canary_url'], canaryresp),
                     web.get('/stats_ajax.json', stats_ajax_get),
                     web.post('/buttons', buttonhandler),
+                    web.post('/maintenance', maintenancetoggle),
                     web.get('/status.json', status_json),
                     web.get('/relay.json', relay_json),
                     web.get('/bme280.json', bme280_json),
@@ -155,6 +168,7 @@ def run_web_app():
                     web.get('/modem.json', modem_json),
                     web.get('/river.json', river_json),
                     web.get('/sun.json', sun_json),
+                    web.get('/system.json', system_state),
                     web.get('/ups.json', ups_json),
                     web.get('/weather.json', weather_json)])
     runner = web.AppRunner(app, access_log=None)
