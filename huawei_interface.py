@@ -206,8 +206,8 @@ def get_modem_data():
             global_vars.modem_data["data_usage"]["current"]["rate_down"] = int(mon_traf["CurrentDownloadRate"])
             global_vars.modem_data["data_usage"]["current"]["connected_time"] = int(mon_traf["CurrentConnectTime"])
 
-            global_vars.modem_data["data_usage"]["total"]["data_total_up"] = int(mon_traf["TotalUpload"])
-            global_vars.modem_data["data_usage"]["total"]["data_total_down"] = int(mon_traf["TotalDownload"])
+            global_vars.modem_data["data_usage"]["total"]["up"] = int(mon_traf["TotalUpload"])
+            global_vars.modem_data["data_usage"]["total"]["down"] = int(mon_traf["TotalDownload"])
             global_vars.modem_data["data_usage"]["total"]["connected_time"] = int(mon_traf["TotalConnectTime"])
 
         else:
