@@ -8,6 +8,7 @@ import LIS3DH
 from datetime import datetime
 import time
 from sms_sender import send_sms
+from system_status import system_state
 import global_vars
 from yaml_config import config
 import logging
@@ -191,10 +192,13 @@ def get_tsl2561_data():
 
                 if tsl2561_data['door_open_count'] > 5 and not tsl2561_data['door_open_warn'] and config['sensors']['tsl2561_warn_enable']:
                     logger.critical('5 lux measurements exceed door open conditions!')
-                    human_datetime = datetime.now().strftime('%d/%m/%Y %H:%M')
-                    warn_sms_text = human_datetime + ': Door open event detected!'
-                    send_sms(config['sensors']['tsl2561_sms_list'], warn_sms_text)
                     tsl2561_data['door_open_warn'] = True
+                    if not system_state['maintenance_mode']:
+                        human_datetime = datetime.now().strftime('%d/%m/%Y %H:%M')
+                        warn_sms_text = human_datetime + ': Door open event detected!'
+                        send_sms(config['sensors']['tsl2561_sms_list'], warn_sms_text)
+                    else:
+                        logger.warning("System in maintenance mode, no warning SMS sent")
 
         except Exception as e:
             # Error has occurred, log it
@@ -244,10 +248,13 @@ def accel_isr(channel):
             lis3dh_data['last_interrupt_timestamp'] = unix_time_int
             if lis3dh_data['interrupt_count'] > 5 and not lis3dh_data['motion_warn'] and config['sensors']['lis3dh_warn_enable']:
                 logger.critical('5 motion events detected!')
-                human_datetime = datetime.now().strftime('%d/%m/%Y %H:%M')
-                warn_sms_text = human_datetime + ': Motion event detected!'
-                send_sms(config['sensors']['lis3dh_sms_list'], warn_sms_text)
                 lis3dh_data['motion_warn'] = True
+                if not system_state['maintenance_mode']:
+                    human_datetime = datetime.now().strftime('%d/%m/%Y %H:%M')
+                    warn_sms_text = human_datetime + ': Motion event detected!'
+                    send_sms(config['sensors']['lis3dh_sms_list'], warn_sms_text)
+                else:
+                    logger.warning("System in maintenance mode, no warning SMS sent")
 
 
     except Exception as e:
