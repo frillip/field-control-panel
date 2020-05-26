@@ -93,12 +93,40 @@ def send_reboot_req():
         logger.error("Modem reboot request failed: " + str(e))
 
 
+def send_reset_stats():
+
+    req_clear_traffic_api_url="http://" + config['huawei']['dongle_ip'] + "/api/monitoring/clear-traffic"
+    clear_traffic_req_xml = '<?xml version="1.0" encoding="UTF-8"?><request><ClearTraffic>1</ClearTraffic></request>'
+
+    try:
+        logger.warning("Sending traffic statis reset request to modem")
+        auth_data=get_auth_data()
+        if auth_data:
+            headers = construct_auth_headers(auth_data)
+
+        post_req = requests.post(req_clear_traffic_api_url, headers=headers, data=clear_traffic_req_xml)
+
+        if "OK" in post_req.text:
+            logger.warning("Traffic stats cleared!")
+            return True
+        else:
+            logger.error("Traffic stats reset request failed: " + post_req.text)
+            return False
+
+    except Exception as e:
+        logger.error("Traffic stats reset request failed: " + str(e))
+
+
+
+
 def get_modem_data():
 
     get_dev_info_api_url="http://" + config['huawei']['dongle_ip'] + "/api/device/information"
     get_net_name_api_url="http://" + config['huawei']['dongle_ip'] + "/api/net/current-plmn"
     get_mon_stat_api_url="http://" + config['huawei']['dongle_ip'] + "/api/monitoring/status"
     get_mon_traf_api_url="http://" + config['huawei']['dongle_ip'] + "/api/monitoring/traffic-statistics"
+    get_mon_data_plan_api_url="http://" + config['huawei']['dongle_ip'] + "/api/monitoring/start_date"
+    get_mon_data_stats_api_url="http://" + config['huawei']['dongle_ip'] + "/api/monitoring/month_statistics"
 
     try:
         auth_data=get_auth_data()
