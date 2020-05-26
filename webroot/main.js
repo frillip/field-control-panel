@@ -222,29 +222,35 @@ function get_modem_data() {
       lte_ssi.className = "icon-large-left"
       lte_ssi.src = "/icon/signal_" + data.signal_strength + ".png";
       var lte_net_type = document.createTextNode(data.network_name + " - " + data.network_type);
-      var lte_title = document.querySelector("#lte-net-type");
+      var lte_title = document.getElementById("lte-net-type");
       lte_title.innerHTML = "";
       lte_title.appendChild(lte_ssi);
       lte_title.appendChild(lte_net_type);
-      g_up_mb = (data.data_usage.data_up / (1024 * 1024)).toFixed(2);
-      g_down_mb = (data.data_usage.data_down / (1024 * 1024)).toFixed(2);
-      var rate_up_kb = (data.data_usage.data_rate_up / 1024).toFixed(2);
-      var rate_down_kb = (data.data_usage.data_rate_down / 1024).toFixed(2);
-      var total_up_gb = (data.data_usage.data_total_up / (1024 * 1024 * 1024)).toFixed(2);
-      var total_down_gb = (data.data_usage.data_total_down / (1024 * 1024 * 1024)).toFixed(2);
-      var total_data_percent = (((data.data_usage.data_total_up + data.data_usage.data_total_down) / (24 * 1024 * 1024 * 1024)) * 100).toFixed(1);
+      g_up_mb = (data.data_usage.current.up / (1024 * 1024)).toFixed(2);
+      g_down_mb = (data.data_usage.current.down / (1024 * 1024)).toFixed(2);
+      var rate_up_kb = (data.data_usage.current.rate_up / 1024).toFixed(2);
+      var rate_down_kb = (data.data_usage.current.rate_down / 1024).toFixed(2);
+
+      var month_up_gb = (data.data_usage.month.up / (1024 * 1024 * 1024)).toFixed(2);
+      var month_down_gb = (data.data_usage.month.down / (1024 * 1024 * 1024)).toFixed(2);
+      var month_limit_gb = data.data_usage.month.limit / (1024 * 1024 * 1024);
+
+      var total_up_gb = (data.data_usage.total.up / (1024 * 1024 * 1024)).toFixed(2);
+      var total_down_gb = (data.data_usage.total.down / (1024 * 1024 * 1024)).toFixed(2);
+      var month_data_percent = (((data.data_usage.month.up + data.data_usage.month.down) / (data.data_usage.month.limit)) * 100).toFixed(1);
       g_modem_connected = data.connected;
       if (g_modem_connected) {
         if (g_conn_time % 60 == 0) {
-          g_conn_time = data.connected_time;
-          document.querySelector("#lte-data").innerHTML = "Connected: " + g_down_mb + "MB / " + g_up_mb + "MB - " + seconds2time(g_conn_time);
+          g_conn_time = data.data_usage.current.connected_time;
+          document.getElementById("lte-data").innerHTML = "Connected: " + g_down_mb + "MB / " + g_up_mb + "MB - " + seconds2time(g_conn_time);
         }
-        document.querySelector("#lte-rate").innerHTML = "Speed: " + rate_down_kb + "kB/s / " + rate_up_kb + "kB/s";
+        document.getElementById("lte-rate").innerHTML = "Speed: " + rate_down_kb + "kB/s / " + rate_up_kb + "kB/s";
       } else {
-        document.querySelector("#lte-data").innerHTML = "Not Connected!";
-        document.querySelector("#lte-rate").innerHTML = "";
+        document.getElementById("lte-data").innerHTML = "Not Connected!";
+        document.getElementById("lte-rate").innerHTML = "";
       }
-      document.querySelector("#lte-total-data").innerHTML = "Total: " + total_down_gb + "GB / " + total_up_gb + "GB - " + total_data_percent + "% of 24GB";
+      document.getElementById("lte-month-data").innerHTML = "Month: " + month_down_gb + "GB / " + month_up_gb + "GB - " + month_data_percent + "% of " + month_limit_gb + "GB";
+      document.getElementById("lte-total-data").innerHTML = "Total: " + total_down_gb + "GB / " + total_up_gb + "GB";
     }).catch(error => {
       console.log(error);
       // on error, stop execution
@@ -255,9 +261,9 @@ function update_conn_time() {
   if (g_conn_time && g_modem_connected) {
     g_conn_time++;
     if (g_modem_connected) {
-      document.querySelector("#lte-data").innerHTML = "Connected: " + g_down_mb + "MB / " + g_up_mb + "MB - " + seconds2time(g_conn_time);
+      document.getElementById("lte-data").innerHTML = "Connected: " + g_down_mb + "MB / " + g_up_mb + "MB - " + seconds2time(g_conn_time);
     } else {
-      document.querySelector("#lte-data").innerHTML = "Not Connected!";
+      document.getElementById("lte-data").innerHTML = "Not Connected!";
     }
   }
 }
