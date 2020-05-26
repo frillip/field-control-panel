@@ -2,7 +2,6 @@ import requests
 import xmltodict
 from time import sleep
 import global_vars
-import global_vars
 from yaml_config import config
 import logging
 import colorlog
@@ -117,8 +116,6 @@ def send_reset_stats():
         logger.error("Traffic stats reset request failed: " + str(e))
 
 
-
-
 def get_modem_data():
 
     get_dev_info_api_url="http://" + config['huawei']['dongle_ip'] + "/api/device/information"
@@ -203,17 +200,40 @@ def get_modem_data():
         if "CurrentConnectTime" in mon_traf_resp.text:
             mon_traf = xmltodict.parse(mon_traf_resp.content)['response']
 
-            global_vars.modem_data["data_usage"]["data_up"] = int(mon_traf["CurrentUpload"])
-            global_vars.modem_data["data_usage"]["data_down"] = int(mon_traf["CurrentDownload"])
-            global_vars.modem_data["data_usage"]["data_rate_up"] = int(mon_traf["CurrentUploadRate"])
-            global_vars.modem_data["data_usage"]["data_rate_down"] = int(mon_traf["CurrentDownloadRate"])
-            global_vars.modem_data["data_usage"]["data_total_up"] = int(mon_traf["TotalUpload"])
-            global_vars.modem_data["data_usage"]["data_total_down"] = int(mon_traf["TotalDownload"])
+            global_vars.modem_data["data_usage"]["current"]["up"] = int(mon_traf["CurrentUpload"])
+            global_vars.modem_data["data_usage"]["current"]["down"] = int(mon_traf["CurrentDownload"])
+            global_vars.modem_data["data_usage"]["current"]["rate_up"] = int(mon_traf["CurrentUploadRate"])
+            global_vars.modem_data["data_usage"]["current"]["rate_down"] = int(mon_traf["CurrentDownloadRate"])
+            global_vars.modem_data["data_usage"]["current"]["connected_time"] = int(mon_traf["CurrentConnectTime"])
 
-            global_vars.modem_data["connected_time"] = int(mon_traf["CurrentConnectTime"])
-            global_vars.modem_data["connected_total_time"] = int(mon_traf["TotalConnectTime"])
+            global_vars.modem_data["data_usage"]["total"]["data_total_up"] = int(mon_traf["TotalUpload"])
+            global_vars.modem_data["data_usage"]["total"]["data_total_down"] = int(mon_traf["TotalDownload"])
+            global_vars.modem_data["data_usage"]["total"]["connected_time"] = int(mon_traf["TotalConnectTime"])
+
         else:
             logger.error("Modem task failed: could not retrieve " + get_mon_traf_api_url)
+
+        mon_data_plan_resp = requests.get(get_mon_data_plan_api_url, headers=headers)
+        if "MonthDuration" in mon_data_plan_resp.text:
+            mon_data_plan = xmltodict.parse(mon_data_plan_resp.content)['response']
+
+            global_vars.modem_data["data_usage"]["month"]["up"] = int(mon_data_plan["CurrentMonthUpload"])
+            global_vars.modem_data["data_usage"]["month"]["down"] = int(mon_data_plan["CurrentMonthDownload"])
+            global_vars.modem_data["data_usage"]["month"]["connected_time"] = int(mon_data_plan["MonthDuration"])
+
+        else:
+            logger.error("Modem task failed: could not retrieve " + get_mon_data_plan_api_url)
+
+        mon_data_stats_resp = requests.get(get_mon_data_stats_api_url, headers=headers)
+        if "StartDay" in mon_data_stats_resp.text:
+            mon_data_stats = xmltodict.parse(mon_data_stats_resp.content)['response']
+
+            global_vars.modem_data["data_usage"]["month"]["start_day"] = int(mon_data_stats["StartDay"])
+            global_vars.modem_data["data_usage"]["month"]["limit"] = int(mon_data_stats["trafficmaxlimit"])
+
+        else:
+            logger.error("Modem task failed: could not retrieve " + get_mon_data_stats_api_url)
+
 
     except Exception as e:
         logger.error("Modem task failed: " + str(e))
@@ -252,7 +272,7 @@ def send_sms(dest,message):
 
 def net_connected():
     try:
-        if global_vars.modem_data["connected"] and global_vars.modem_data["connected_time"]:
+        if global_vars.modem_data["connected"] and global_vars.modem_data["current"]["connected_time"]:
            return True
         else:
            return False

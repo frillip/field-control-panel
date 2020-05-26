@@ -37,4 +37,7 @@ bmv_data["stats"] = {}
 
 modem_data = {}
 modem_data["data_usage"] = {}
+modem_data["data_usage"]["current"] = {}
+modem_data["data_usage"]["month"] = {}
+modem_data["data_usage"]["total"] = {}
 
