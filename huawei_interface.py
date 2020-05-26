@@ -213,26 +213,26 @@ def get_modem_data():
         else:
             logger.error("Modem task failed: could not retrieve " + get_mon_traf_api_url)
 
-        mon_data_plan_resp = requests.get(get_mon_data_plan_api_url, headers=headers)
-        if "MonthDuration" in mon_data_plan_resp.text:
-            mon_data_plan = xmltodict.parse(mon_data_plan_resp.content)['response']
-
-            global_vars.modem_data["data_usage"]["month"]["up"] = int(mon_data_plan["CurrentMonthUpload"])
-            global_vars.modem_data["data_usage"]["month"]["down"] = int(mon_data_plan["CurrentMonthDownload"])
-            global_vars.modem_data["data_usage"]["month"]["connected_time"] = int(mon_data_plan["MonthDuration"])
-
-        else:
-            logger.error("Modem task failed: could not retrieve " + get_mon_data_plan_api_url)
-
         mon_data_stats_resp = requests.get(get_mon_data_stats_api_url, headers=headers)
-        if "StartDay" in mon_data_stats_resp.text:
+        if "MonthDuration" in mon_data_stats_resp.text:
             mon_data_stats = xmltodict.parse(mon_data_stats_resp.content)['response']
 
-            global_vars.modem_data["data_usage"]["month"]["start_day"] = int(mon_data_stats["StartDay"])
-            global_vars.modem_data["data_usage"]["month"]["limit"] = int(mon_data_stats["trafficmaxlimit"])
+            global_vars.modem_data["data_usage"]["month"]["up"] = int(mon_data_stats["CurrentMonthUpload"])
+            global_vars.modem_data["data_usage"]["month"]["down"] = int(mon_data_stats["CurrentMonthDownload"])
+            global_vars.modem_data["data_usage"]["month"]["connected_time"] = int(mon_data_stats["MonthDuration"])
 
         else:
             logger.error("Modem task failed: could not retrieve " + get_mon_data_stats_api_url)
+
+        mon_data_plan_resp = requests.get(get_mon_data_plan_api_url, headers=headers)
+        if "StartDay" in mon_data_plan_resp.text:
+            mon_data_plan = xmltodict.parse(mon_data_plan_resp.content)['response']
+
+            global_vars.modem_data["data_usage"]["month"]["start_day"] = int(mon_data_plan["StartDay"])
+            global_vars.modem_data["data_usage"]["month"]["limit"] = int(mon_data_plan["trafficmaxlimit"])
+
+        else:
+            logger.error("Modem task failed: could not retrieve " + get_mon_data_plan_api_url)
 
 
     except Exception as e:
@@ -272,7 +272,7 @@ def send_sms(dest,message):
 
 def net_connected():
     try:
-        if global_vars.modem_data["connected"] and global_vars.modem_data["current"]["connected_time"]:
+        if global_vars.modem_data["connected"] and global_vars.modem_data["data_usage"]["current"]["connected_time"]:
            return True
         else:
            return False
