@@ -14,12 +14,13 @@ import logging
 import colorlog
 import RPi.GPIO as GPIO
 
-handler = colorlog.StreamHandler()
-handler.setFormatter(global_vars.log_format)
 logger = colorlog.getLogger("main")
+logger.addHandler(global_vars.file_handler)
+logger.addHandler(global_vars.handler)
 logger.setLevel(global_vars.log_level)
-logger.addHandler(handler)
 
+# Rotate the log file
+global_vars.file_handler.doRollover()
 
 def main():
     print("*******************************************************************************************\n\n\n")

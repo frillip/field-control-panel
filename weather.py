@@ -6,10 +6,9 @@ import global_vars
 import logging
 import colorlog
 
-handler = colorlog.StreamHandler()
-handler.setFormatter(global_vars.log_format)
 logger = colorlog.getLogger(__name__)
-logger.addHandler(handler)
+logger.addHandler(global_vars.file_handler)
+logger.addHandler(global_vars.handler)
 logger.setLevel(global_vars.log_level)
 
 weather_data = {}

@@ -6,10 +6,9 @@ from yaml_config import config
 from datetime import datetime
 from sms_sender import send_sms
 
-handler = colorlog.StreamHandler()
-handler.setFormatter(global_vars.log_format)
 logger = colorlog.getLogger(__name__)
-logger.addHandler(handler)
+logger.addHandler(global_vars.file_handler)
+logger.addHandler(global_vars.handler)
 logger.setLevel(global_vars.log_level)
 
 batt_warning_stage_text = {
@@ -197,3 +196,24 @@ def check_load_state():
 
     except Exception as e:
         logger.error("MPPT load state check failed: " + str(e))
+
+
+def get_log_tail(max_lines=50):
+    log_data = []
+    try:
+        with open(global_vars.log_file) as f:
+            log_lines = f.readlines()
+
+        if max_lines > len(log_lines):
+            max_lines = len(log_lines)
+
+        index = 0
+        for i in range(max_lines):
+            index -= 1
+            log_data.append(log_lines[index].strip())
+
+    except:
+        logger.warning("Failed to return log tail")
+        log_data.append('LOG READ FAILURE')
+
+    return log_data

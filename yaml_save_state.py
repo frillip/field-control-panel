@@ -10,10 +10,9 @@ import system_status
 import logging
 import colorlog
 
-handler = colorlog.StreamHandler()
-handler.setFormatter(global_vars.log_format)
 logger = colorlog.getLogger(__name__)
-logger.addHandler(handler)
+logger.addHandler(global_vars.file_handler)
+logger.addHandler(global_vars.handler)
 logger.setLevel(global_vars.log_level)
 
 now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()

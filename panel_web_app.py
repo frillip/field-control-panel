@@ -3,7 +3,7 @@ from time import sleep
 from aiohttp import web
 import json
 from relays import relay_handle_request,generate_relay_json
-from system_status import maintenance_handle_request,system_state
+from system_status import maintenance_handle_request,system_state,get_log_tail
 import global_vars
 from sensors import bme280_data,tsl2561_data,lis3dh_data,gps_data
 from environment_agency import river_data
@@ -14,10 +14,9 @@ from yaml_config import config
 import logging
 import colorlog
 
-handler = colorlog.StreamHandler()
-handler.setFormatter(global_vars.log_format)
 logger = colorlog.getLogger(__name__)
-logger.addHandler(handler)
+logger.addHandler(global_vars.file_handler)
+logger.addHandler(global_vars.handler)
 logger.setLevel(global_vars.log_level)
 
 run_webapp_server = True
@@ -136,6 +135,11 @@ def run_web_app():
     async def river_json(request):
         return web.json_response(river_data)
 
+    async def log_json(request):
+        # log = {}
+        log  = get_log_tail(50)
+        return web.json_response(log)
+
     async def system_json(request):
         return web.json_response(system_state)
 
@@ -169,6 +173,7 @@ def run_web_app():
                     web.get('/river.json', river_json),
                     web.get('/sun.json', sun_json),
                     web.get('/system.json', system_json),
+                    web.get('/log.json', log_json),
                     web.get('/ups.json', ups_json),
                     web.get('/weather.json', weather_json)])
     runner = web.AppRunner(app, access_log=None)

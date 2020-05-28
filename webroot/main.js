@@ -584,6 +584,25 @@ function get_system_data() {
     });
 }
 
+function get_log_entries() {
+  fetch("log.json")
+    .then(response => response.json())
+    .then(data => {
+      var log_block = document.getElementById("log-contents");
+      log_block.innerHTML = "";
+      data.forEach(function(log_text, index) {
+        var log_entry = document.createElement("div");
+        log_entry.id = "log-entry-" + index
+        log_entry.className = "log-entry"
+        log_entry.innerHTML = log_text
+        log_block.appendChild(log_entry)
+      });
+    }).catch(error => {
+      console.log(error);
+      // on error, stop execution
+    });
+}
+
 function toggle_maintenance_mode(elem) {
   var data = {};
   if (elem.checked) {
