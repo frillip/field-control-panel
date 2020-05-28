@@ -14,6 +14,8 @@ var g_time_local = 0
 var g_timezone = null
 var g_timezone_diff = 0
 
+var g_activetab = null
+
 function create_switches() {
   fetch("relay.json")
     .then(response => response.json())
@@ -640,12 +642,12 @@ function disable_maintenance_mode() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  get_weather_data();
-  get_v_data();
-  get_ups_data();
   create_switches();
   get_modem_data();
   get_river_data();
+  get_weather_data();
+  get_v_data();
+  get_ups_data();
   get_sun_data();
   get_sensor_data();
   get_system_data();
@@ -656,17 +658,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var counter = 0;
   var i = setInterval(function() {
-    get_relay_data();
     update_sun_timer();
     update_conn_time();
     update_gps_time();
+    if (g_activetab = "relaytab") {
+      get_relay_data();
+    }
     counter++;
     if (counter % 3 == 0) {
-      get_v_data();
-      get_ups_data();
       get_modem_data();
-      get_sensor_data();
-      get_system_data();
+      if (g_activetab = "sensortab") {
+        get_sensor_data();
+      }
+      if (g_activetab = "statustab") {
+        get_v_data();
+        get_ups_data();
+        get_sun_data();
+        get_system_data();
+      }
     }
     if (counter == 300) {
       counter = 0;
@@ -688,8 +697,9 @@ window.onfocus = function() {
   get_system_data();
 }
 
-function openPage(tabname, elmnt) {
+function opentab(tabname, elmnt) {
   var i, tabcontent, tablinks;
+  g_activetab = tabname
   tabcontent = document.getElementsByClassName("tabcontent");
   for (i = 0; i < tabcontent.length; i++) {
     tabcontent[i].style.display = "none";
@@ -701,16 +711,17 @@ function openPage(tabname, elmnt) {
   document.getElementById(tabname).style.display = "block";
   elmnt.classList.add("activetab");
 
-  if (tabname == "relays") {
+  if (tabname == "relaytab") {
     refresh_relay_data();
-  } else if (tabname == "status") {
+  } else if (tabname == "weathertab") {
+    get_weather_data();
+  } else if (tabname == "statustab") {
     get_v_data();
     get_ups_data();
     get_sun_data();
-    get_weather_data();
-  } else if (tabname == "sensors") {
-    get_sensor_data();
     get_system_data();
+  } else if (tabname == "sensortab") {
+    get_sensor_data();
   }
 }
 
