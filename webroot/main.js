@@ -219,15 +219,12 @@ function get_modem_data() {
   fetch("modem.json")
     .then(response => response.json())
     .then(data => {
-      var lte_ssi = document.createElement("img");
-      lte_ssi.id = "lte-ssi"
+      var lte_ssi = document.getElementById("lte-ssi");
       lte_ssi.className = "icon-large-left"
-      lte_ssi.src = "/icon/signal_" + data.signal_strength + ".png";
-      var lte_net_type = document.createTextNode(data.network_name + " - " + data.network_type);
+      var ssi_class_name = "signal-" + data.signal_strength
+      lte_ssi.classList.add(ssi_class_name)
       var lte_title = document.getElementById("lte-net-type");
-      lte_title.innerHTML = "";
-      lte_title.appendChild(lte_ssi);
-      lte_title.appendChild(lte_net_type);
+      lte_title.innerHTML = data.network_name + " - " + data.network_type;
       g_up_mb = (data.data_usage.current.up / (1024 * 1024)).toFixed(2);
       g_down_mb = (data.data_usage.current.down / (1024 * 1024)).toFixed(2);
       var rate_up_kb = (data.data_usage.current.rate_up / 1024).toFixed(2);
@@ -418,14 +415,9 @@ function get_river_data() {
   fetch("river.json")
     .then(response => response.json())
     .then(data => {
-      var river_icon = document.createElement("img");
-      river_icon.id = "river-icon"
-      river_icon.className = "icon-large-left"
-      river_icon.src = "/icon/river.png";
       var river_name = document.createTextNode(data.name);
       var river_title = document.querySelector("#river-name")
       river_title.innerHTML = "";
-      river_title.appendChild(river_icon);
       river_title.appendChild(river_name);
       var river_warning = document.createElement("img");
       river_warning.id = "river-warning"
