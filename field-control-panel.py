@@ -9,7 +9,7 @@ import panel_web_app
 import vedirect_interface
 import yaml_save_state
 import yaml_config
-from relays import generate_relay_map
+from relays import generate_relay_map,generate_relay_reminders
 import logging
 import colorlog
 import RPi.GPIO as GPIO
@@ -42,6 +42,7 @@ def main():
         logger.error("Config not loaded! Exiting...")
         sys.exit(1)
     generate_relay_map()
+    generate_relay_reminders()
     yaml_save_state.load_last_saved_state()
     logger.info("Connecting to LTE")
     get_modem_data()

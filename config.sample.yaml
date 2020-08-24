@@ -8,6 +8,10 @@ relay:
     enabled: true
     invert: true
     name: fence
+    reminder_off: 14400
+    reminder_off_sms_text: 'You left the electric fence off again'
+    reminder_sms_list:
+    - '+447xxxxxxxxx'
   2:
     auto_off: 300
     auto_on: 0

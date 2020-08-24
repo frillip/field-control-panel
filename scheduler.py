@@ -1,7 +1,7 @@
 import time
 import schedule
 from vedirect_interface import check_load_state,check_batt_voltage
-from relays import relay_auto_timeout,get_relay_data
+from relays import relay_auto_timeout,relay_reminder_timeout,get_relay_data
 from huawei_interface import get_modem_data,connection_checker
 from sensors import init_sensors,get_sensor_data # ,get_bm280_data,get_tsl2561_data,get_lis3dh_data,get_gps_data
 from environment_agency import init_river,check_river
@@ -40,6 +40,8 @@ def setup_scheduler():
     schedule.every().second.do(get_relay_data)
     logger.info("Starting relay auto timeout task")
     schedule.every().second.do(relay_auto_timeout)
+    logger.info("Starting relay reminder timeout task")
+    schedule.every().second.do(relay_reminder_timeout)
     logger.info("Starting connection checker task")
     schedule.every(5).seconds.do(connection_checker)
     logger.info("Starting battery voltage checker task")

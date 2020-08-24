@@ -27,6 +27,8 @@ last_state_loaded = False
 relay_save_list = {
 'last_state_change': now_iso_stamp,
 'state_change_timestamp': unix_time_int,
+'reminder_sent': False,
+'reminder_time': 0,
 }
 
 river_save_list = {

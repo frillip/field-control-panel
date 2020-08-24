@@ -34,6 +34,11 @@ relay = {
 'invert': False,
 'auto_off': 0,
 'auto_on': 0,
+'reminder_on': 0,
+'reminder_on_sms_text': '',
+'reminder_off': 0,
+'reminder_off_sms_text': '',
+'reminder_sms_list': [],
 },
 'enum': {
 }}

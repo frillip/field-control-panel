@@ -3,6 +3,7 @@ from datetime import datetime
 import time
 import global_vars
 from yaml_config import config
+from sms_sender import send_sms
 import logging
 import colorlog
 
@@ -68,7 +69,7 @@ def relay_handle_request(request):
                     # If it's neither, log an error, and return some text saying so
                     logger.error("Garbled relay request, no valid state: "+str(request))
                     return "Ah-ah-ah! You didn't say the magic word!"
-                    
+
             else:
                 # If it's a not a valid relay name, log an error, and return some text saying so
                 logger.error("Garbled relay request, no valid relay: "+str(request))
@@ -86,6 +87,7 @@ def relay_handle_request(request):
 def relay_auto_timeout():
     # Get current unix timestamp
     unix_time_int = int(time.time())
+    human_datetime = datetime.now().strftime("%d/%m/%Y %H:%M")
     # For every relay in the timestamp dict
     for relay_id in relay_state:
         try:
@@ -94,18 +96,69 @@ def relay_auto_timeout():
                 # Check if the timeout has expired
                 if ( unix_time_int >= relay_state[relay_id]['state_change_timestamp'] + config['relay'][relay_id]['auto_off'] ):
                     logger.warning("Auto " + config['relay'][relay_id]['name'] + " off")
-                    set_relay_state(relay_id,False)
+                    # If we've reminded via SMS, warn via SMS AFTER we change the relay
+                    if relay_state[relay_id]['reminder_sent'] and config['relay'][relay_id]['reminder_on']:
+                        set_relay_state(relay_id,False)
+                        sms_text = human_datetime + ": " + config['relay'][relay_id]['name'].capitalize() + ' has now been automatically turned off'
+                        send_sms(config['relay'][relay_id]['reminder_sms_list'],sms_text)
+                    # Otherwise, just change the state of the relay
+                    else:
+                        set_relay_state(relay_id,False)
 
             # If auto_on is set and the relay is off
             if config['relay'][relay_id]['auto_on'] and not relay_state[relay_id]['state']:
                 # If check if the timeout has expired
                 if ( unix_time_int >= relay_state[relay_id]['state_change_timestamp'] + config['relay'][relay_id]['auto_on'] ):
                     logger.warning(": Auto " + config['relay'][relay_id]['name'] + " on")
-                    set_relay_state(relay_id,True)
+                    # If we've reminded via SMS, warn via SMS AFTER we change the relay
+                    if relay_state[relay_id]['reminder_sent'] and config['relay'][relay_id]['reminder_off']:
+                        set_relay_state(relay_id,True)
+                        sms_text = human_datetime + ": " + config['relay'][relay_id]['name'].capitalize() + ' has now been automatically turned on'
+                        send_sms(config['relay'][relay_id]['reminder_sms_list'],sms_text)
+                    # Otherwise, just change the state of the relay
+                    else:
+                        set_relay_state(relay_id,True)
 
         except Exception as e:
             # Log an error if one has occurred
-            logger.error("Failed to auto switch " + config['relay'][relay_id]['name'] + "relay: " + str(e))
+            logger.error("Failed to auto switch " + config['relay'][relay_id]['name'] + " relay: " + str(e))
+
+
+def relay_reminder_timeout():
+    # Get current ISO timestamp for JSON and unix timestamp for timeout
+    human_datetime = datetime.now().strftime("%d/%m/%Y %H:%M")
+    unix_time_int = int(time.time())
+    now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
+    # For every relay in the timestamp dict
+    for relay_id in relay_state:
+        try:
+            # If reminder_on is set and the relay is on
+            if config['relay'][relay_id]['reminder_on'] and relay_state[relay_id]['state']:
+                # Check if we've already sent a reminder
+                if not relay_state[relay_id]['reminder_active']:
+                    # Check if the timeout has expired
+                    if ( unix_time_int >= relay_state[relay_id]['state_change_timestamp'] + config['relay'][relay_id]['reminder_on'] ):
+                        logger.warning("Sending SMS reminder to turn " + config['relay'][relay_id]['name'] + " off")
+                        sms_text = human_datetime + ": " + config['relay'][relay_id]['reminder_on_sms_text']
+                        send_sms(config['relay'][relay_id]['reminder_sms_list'],sms_text)
+                        relay_state[relay_id]['reminder_sent'] = True
+                        relay_state[relay_id]['reminder_time'] = now_iso_stamp
+
+            # If reminder_off is set and the relay is off
+            if config['relay'][relay_id]['reminder_off'] and not relay_state[relay_id]['state']:
+                # Check if we've already sent a reminder
+                if not relay_state[relay_id]['reminder_sent']:
+                    # Check if the timeout has expired
+                    if ( unix_time_int >= relay_state[relay_id]['state_change_timestamp'] + config['relay'][relay_id]['reminder_off'] ):
+                        logger.warning("Sending SMS reminder to turn " + config['relay'][relay_id]['name'] + " on")
+                        sms_text = human_datetime + ": " + config['relay'][relay_id]['reminder_off_sms_text']
+                        send_sms(config['relay'][relay_id]['reminder_sms_list'],sms_text)
+                        relay_state[relay_id]['reminder_sent'] = True
+                        relay_state[relay_id]['reminder_time'] = now_iso_stamp
+
+        except Exception as e:
+            # Log an error if one has occurred
+            logger.error("Failed to check reminder status for " + config['relay'][relay_id]['name'] + "relay: " + str(e))
 
 
 def set_relay_state(relay_id, new_state):
@@ -125,6 +178,7 @@ def set_relay_state(relay_id, new_state):
         relay_state[relay_id]['raw_state'] = new_raw_state
         relay_state[relay_id]['last_state_change'] = now_iso_stamp
         relay_state[relay_id]['state_change_timestamp'] = unix_time_int
+        relay_state[relay_id]['reminder_sent'] = False
         if new_state:
             logger.warning(config['relay'][relay_id]['name']+' now on')
         else:
@@ -133,6 +187,7 @@ def set_relay_state(relay_id, new_state):
     except Exception as e:
         # Log an error if one has occurred
         logger.error("Error setting relay state: " + str(e))
+
 
 def generate_relay_map():
     try:
@@ -146,6 +201,24 @@ def generate_relay_map():
     except Exception as e:
         # Error has occurred, log it
         logger.error('Failed to generate relay mapping: ' + str(e))
+
+
+def generate_relay_reminders():
+    try:
+        logger.info('Generating relay SMS reminders as necessary')
+        for relay_id in config['relay']:
+            if config['relay'][relay_id]['enabled']:
+                if config['relay'][relay_id]['reminder_on'] and not config['relay'][relay_id]['reminder_on_sms_text']:
+                    config['relay'][relay_id]['reminder_on_sms_text'] = config['relay'][relay_id]['name'].capitalize() + " has been left on."
+                    logger.warning("No reminder on SMS text for relay " + str(relay_id) + ", using: " + config['relay'][relay_id]['reminder_on_sms_text'])
+                if config['relay'][relay_id]['reminder_off'] and not config['relay'][relay_id]['reminder_off_sms_text']:
+                    config['relay'][relay_id]['reminder_off_sms_text'] = config['relay'][relay_id]['name'].capitalize() + " has been left off."
+                    logger.warning("No reminder on SMS text for relay " + str(relay_id) + ", using: " + config['relay'][relay_id]['reminder_off_sms_text'])
+
+    except Exception as e:
+        # Error has occurred, log it
+        logger.error('Failed to generate relay SMS reminders: ' + str(e))
+
 
 def generate_relay_json():
     relay_data = config['relay']
