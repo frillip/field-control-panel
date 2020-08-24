@@ -3,23 +3,20 @@ megaio:
 
 relay:
   1:
-    auto_off: false
-    auto_on: false
-    auto_timeout: 0
+    auto_off: 0
+    auto_on: 0
     enabled: true
     invert: true
     name: fence
   2:
-    auto_off: true
-    auto_on: false
-    auto_timeout: 300
+    auto_off: 300
+    auto_on: 0
     enabled: true
     invert: false
     name: cameras
   3:
-    auto_off: false
-    auto_on: false
-    auto_timeout: 0
+    auto_off: 0
+    auto_on: 0
     enabled: true
     invert: false
     name: lighting

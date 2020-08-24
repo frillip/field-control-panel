@@ -32,9 +32,8 @@ relay = {
 'req': ['enabled', 'name'],
 'opt': {
 'invert': False,
-'auto_off': False,
-'auto_on': False,
-'auto_timeout': 0,
+'auto_off': 0,
+'auto_on': 0,
 },
 'enum': {
 }}

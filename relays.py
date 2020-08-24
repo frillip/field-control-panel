@@ -89,17 +89,18 @@ def relay_auto_timeout():
     # For every relay in the timestamp dict
     for relay_id in relay_state:
         try:
-            # Check if the timeout has expired
-            if ( unix_time_int >= relay_state[relay_id]['state_change_timestamp'] + config['relay'][relay_id]['auto_timeout'] ):
-
-                # If auto_off is set, turn relay off if it is on
-                if config['relay'][relay_id]['auto_off'] and relay_state[relay_id]['state']:
+            # If auto_off is set and the relay is on
+            if config['relay'][relay_id]['auto_off'] and relay_state[relay_id]['state']:
+                # Check if the timeout has expired
+                if ( unix_time_int >= relay_state[relay_id]['state_change_timestamp'] + config['relay'][relay_id]['auto_off'] ):
                     logger.warning("Auto " + config['relay'][relay_id]['name'] + " off")
                     set_relay_state(relay_id,False)
 
-                # If auto_on is set, turn relay on if it is off
-                if config['relay'][relay_id]['auto_on'] and not relay_state[relay_id]['state']:
-                    logger.waning(": Auto " + config['relay'][relay_id]['name'] + " on")
+            # If auto_on is set and the relay is off
+            if config['relay'][relay_id]['auto_on'] and not relay_state[relay_id]['state']:
+                # If check if the timeout has expired
+                if ( unix_time_int >= relay_state[relay_id]['state_change_timestamp'] + config['relay'][relay_id]['auto_on'] ):
+                    logger.warning(": Auto " + config['relay'][relay_id]['name'] + " on")
                     set_relay_state(relay_id,True)
 
         except Exception as e:
