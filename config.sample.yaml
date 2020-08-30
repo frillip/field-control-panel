@@ -58,6 +58,8 @@ sensors:
   lis3dh_sms_list:
     - '+447xxxxxxxxx'
     - '+447xxxxxxxxx'
+  ina260_enable: False
+  ina260_address: 0x40
   gps_enable: True
 
 mppt:

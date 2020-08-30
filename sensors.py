@@ -5,6 +5,7 @@ from timezonefinder import TimezoneFinder
 from tsl2561 import TSL2561
 import RPi.GPIO as GPIO
 import LIS3DH
+from ina260.controller import Controller
 from datetime import datetime
 import time
 from sms_sender import send_sms
@@ -17,6 +18,7 @@ import colorlog
 i2c_bus = None
 tsl = None
 accel = None
+ina = None
 
 logger = colorlog.getLogger(__name__)
 logger.addHandler(global_vars.file_handler)
@@ -26,6 +28,7 @@ logger.setLevel(global_vars.log_level)
 bme280_data = {}
 tsl2561_data = {}
 lis3dh_data = {}
+ina260_data = {}
 gps_data = {}
 
 gps_mode_text = {
@@ -40,6 +43,7 @@ def init_sensors():
     global i2c_bus
     global tsl
     global accel
+    global ina
 
     try:
         # Init the i2c bus
@@ -116,9 +120,19 @@ def init_sensors():
                 info.warn('No interrput pin specified for accelerometer! Sensor will be polled but may miss events!')
 
             get_lis3dh_data()
-
         else:
             lis3dh_data['enabled'] = False
+
+        if config['sensors']['ina260_enable']:
+            ina260_data['enabled'] = True
+            # Load some data into the BME280
+            logger.info('Starting INA260 sensor')
+            ina = Controller(address=config['sensors']['ina260_address'],channel=i2c_bus)
+
+            # Populate some data
+            get_ina260_data()
+        else:
+            ina260_data['enabled'] = False
 
         if config['sensors']['gps_enable']:
             gps_data['enabled'] = True
@@ -261,6 +275,22 @@ def accel_isr(channel):
         logger.error("LIS3DH interrupt triggered but ISR failed: " + str(e))
 
 
+def get_ina260_data():
+
+    if config['sensors']['ina260_enable']:
+        try:
+            # Read some data and deposit it into the dict
+            ina260_data['v'] = round(ina.voltage(),2)
+            ina260_data['i'] = round(ina.current(),2)
+            ina260_data['p'] = round(ina.power(),2)
+
+        except Exception as e:
+            # Error has occurred, log it
+            logger.error("Failed to get data from INA260: " + str(e))
+    else:
+        logger.warn('Request to read INA260 data, but not enabled in config')
+
+
 def get_gps_data():
 
     if config['sensors']['gps_enable']:
@@ -318,5 +348,7 @@ def get_sensor_data():
         get_tsl2561_data()
     if config['sensors']['lis3dh_enable']:
         get_lis3dh_data()
+    if config['sensors']['ina260_enable']:
+        get_ina260_data()
     if config['sensors']['gps_enable']:
         get_gps_data()

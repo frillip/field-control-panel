@@ -5,7 +5,7 @@ import json
 from relays import relay_handle_request,generate_relay_json
 from system_status import maintenance_handle_request,system_state,get_log_tail
 import global_vars
-from sensors import bme280_data,tsl2561_data,lis3dh_data,gps_data
+from sensors import bme280_data,tsl2561_data,lis3dh_data,ina260,gps_data
 from environment_agency import river_data
 from weather import weather_data
 from sun import sun_data
@@ -88,6 +88,7 @@ def run_web_app():
         sensors_data['bme280'] = bme280_data
         sensors_data['tsl2561'] = tsl2561_data
         sensors_data['lis3dh'] = lis3dh_data
+        sensors_data['ina260'] = ina260_data
         sensors_data['gps'] = gps_data
         status_data['sensors'] = sensors_data
         status_data['mppt'] = global_vars.mppt_data
@@ -112,6 +113,9 @@ def run_web_app():
     async def lis3dh_json(request):
         return web.json_response(lis3dh_data)
 
+    async def ina260_json(request):
+        return web.json_response(ina260_data)
+
     async def gps_json(request):
         return web.json_response(gps_data)
 
@@ -120,6 +124,7 @@ def run_web_app():
         sensors_data['bme280'] = bme280_data
         sensors_data['tsl2561'] = tsl2561_data
         sensors_data['lis3dh'] = lis3dh_data
+        sensors_data['ina260'] = ina260_data
         sensors_data['gps'] = gps_data
         return web.json_response(sensors_data)
 
@@ -136,7 +141,6 @@ def run_web_app():
         return web.json_response(river_data)
 
     async def log_json(request):
-        # log = {}
         log  = get_log_tail(50)
         return web.json_response(log)
 
@@ -165,6 +169,7 @@ def run_web_app():
                     web.get('/bme280.json', bme280_json),
                     web.get('/tsl2561.json', tsl2561_json),
                     web.get('/lis3dh.json', lis3dh_json),
+                    web.get('/ina260.json', ina260_json),
                     web.get('/gps.json', gps_json),
                     web.get('/sensors.json', sensors_json),
                     web.get('/mppt.json', mppt_json),
