@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 import serial
 import global_vars
 from yaml_config import config
@@ -275,12 +276,22 @@ def mppt_loop():
             # Discard any garbage
             ser.flushInput()
             logger.info("MPPT VE.Direct data loop started")
-            
+
             while ser.isOpen():
                 field = {}
+                unix_time_int = int(time.time())
+                now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
+                global_vars.mppt_data['last_recieved'] = now_iso_stamp
+                global_vars.mppt_data['last_recieved_timestamp'] = unix_time_int
                 ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
                 while not '\t' in ve_string:
                     ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
+                    if int(time.time()) > global_vars.mppt_data['last_recieved_timestamp'] + 30:
+                        raise serial.SerialException('VE.Direct data timeout')
+                unix_time_int = int(time.time())
+                now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
+                global_vars.mppt_data['last_recieved'] = now_iso_stamp
+                global_vars.mppt_data['last_recieved_timestamp'] = unix_time_int
                 process_mppt_data_string(ve_string)
 
         except Exception as e:
@@ -316,12 +327,22 @@ def bmv_loop():
             # Discard any garbage
             ser.flushInput()
             logger.info("BMV VE.Direct data loop started")
-            
+
             while ser.isOpen():
                 field = {}
+                unix_time_int = int(time.time())
+                now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
+                global_vars.bmv_data['last_recieved'] = now_iso_stamp
+                global_vars.bmv_data['last_recieved_timestamp'] = unix_time_int
                 ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
                 while not '\t' in ve_string:
                     ve_string = str(ser.readline(),'utf-8', errors='ignore').rstrip("\r\n")
+                    if int(time.time()) > global_vars.bmv_data['last_recieved_timestamp'] + 30:
+                        raise serial.SerialException('VE.Direct data timeout')
+                unix_time_int = int(time.time())
+                now_iso_stamp = datetime.now().replace(microsecond=0).isoformat()
+                global_vars.bmv_data['last_recieved'] = now_iso_stamp
+                global_vars.bmv_data['last_recieved_timestamp'] = unix_time_int
                 process_bmv_data_string(ve_string)
 
         except Exception as e:
