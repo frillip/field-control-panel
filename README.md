@@ -4,6 +4,8 @@ Based on a Raspberry Pi 4 B, with a MegaIO hat. Goal is to have a web based inte
 
 Currently the control panel page is a ~~static set of buttons~~ a fancy auto-updating readout of everything that is happening at the field, most useful data can be obtained programmatically via JSON if required.
 
+![panel_screencap](https://raw.githubusercontent.com/frillip/field-control-panel/master/etc/screencap.png)
+
 ## Scheduler
 
 Most tasks are run off a scheduler, exceptions being the VE.Direct interface tasks as these are synchronous serial tasks, and the aiohttp web server.
@@ -46,11 +48,11 @@ There is a river level monitoring station on the river in the field, data from t
 
 Weather data used to be obtained from the met office, but their API proved to be unreliable with poor library support. Data is now obtained from darksky.net. This is based off the co-ordinates specified in the YAML, however they may be automatically obtained via GPS instead in the future.
 
-## static/index.html
+## webroot/index.html
 
 Now has fancy toggle switches that reflect the current state of relays. Also shows PV/Battery/Environment data. Updates by pulling JSON every 1s for relays, 5s for PV/Battery, and only on load for temperature/weather.
 
-## static/style.css
+## webroot/style.css
 
 Where the terrible CSS lives!
 
