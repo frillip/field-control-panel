@@ -5,7 +5,7 @@ import json
 from relays import relay_handle_request,generate_relay_json
 from system_status import maintenance_handle_request,system_state,get_log_tail
 import global_vars
-from sensors import bme280_data,tsl2561_data,lis3dh_data,ina260,gps_data
+from sensors import bme280_data,tsl2561_data,lis3dh_data,ina260_data,gps_data
 from environment_agency import river_data
 from weather import weather_data
 from sun import sun_data
