@@ -374,6 +374,8 @@ function get_weather_data() {
       var weather_alert_title = document.getElementById("weather-alert-title");
       var weather_alert_text = document.getElementById("weather-alert-text");
       if (data.alert.severity) {
+        var weather_warning_icon = document.createElement("img");
+        weather_warning_icon.className = "icon-medium-left"
         weather_alert_title.innerHTML = data.alert.title;
         weather_alert_text.innerHTML = data.alert.description
         weather_alert_text.style.display = "none";
@@ -389,7 +391,7 @@ function get_weather_data() {
           weather_warning_icon.src = "/icon/information.png";
           weather_alert_banner.className = "weather-warning-other";
         }
-        weather_title.appendChild(weather_warning_icon);
+        weather_alert_title.insertBefore(weather_warning_icon, weather_alert_title.childNodes[0]);
       } else {
         weather_alert_banner.className = "weather-warning-none";
         weather_alert_title.innerHTML = "";

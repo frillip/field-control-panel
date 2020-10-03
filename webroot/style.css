@@ -194,19 +194,21 @@ input:checked+.slider:before {
 
 /* Style the links inside the navigation bar */
 #maintenance-banner {
-  width: 100%;
-  float: left;
+  left: 0;
+  right: 0;
   background-color: lemonchiffon;
   color: black;
   text-align: center;
   padding: 14px 0px;
   text-decoration: none;
   font-size: 13px;
+  border-style: solid;
+  border-width: 1px;
 }
 
 #weather-alert-banner {
-  width: 100%;
-  float: left;
+  left: 0;
+  right: 0;
   color: black;
   text-align: center;
   padding: 14px 0px;
