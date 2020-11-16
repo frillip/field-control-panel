@@ -52,6 +52,7 @@ system_save_list = {
 'batt_warning_sent': False,
 'batt_warning_sent_time': 0,
 'batt_warning_stage': 0,
+'maintenance_mode': False,
 }
 
 save_state_structure = {
