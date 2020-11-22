@@ -524,6 +524,11 @@ function get_sensor_data() {
       document.querySelector("#last-interrupt").innerHTML = "Last interrupt: " + data.lis3dh.last_interrupt
       document.querySelector("#last-interrupt-count").innerHTML = data.lis3dh.interrupt_count + " events"
 
+      // INA260 data
+      document.querySelector("#ina-voltage").innerHTML = data.ina260.v + "V"
+      document.querySelector("#ina-current").innerHTML = data.ina260.i + "A"
+      document.querySelector("#ina-power").innerHTML = data.ina260.p + "W"
+
       // GPS data
       document.querySelector("#gps-fix").innerHTML = data.gps.mode_text
       document.querySelector("#lat-long").innerHTML = data.gps.latitude + ", " + data.gps.longitude

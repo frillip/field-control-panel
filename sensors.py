@@ -127,7 +127,7 @@ def init_sensors():
             ina260_data['enabled'] = True
             # Load some data into the BME280
             logger.info('Starting INA260 sensor')
-            ina = Controller(address=config['sensors']['ina260_address'],channel=i2c_bus)
+            ina = Controller(address=config['sensors']['ina260_address'],channel=config['sensors']['i2c_port'])
 
             # Populate some data
             get_ina260_data()
