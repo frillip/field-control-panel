@@ -29,6 +29,8 @@ relay_save_list = {
 'state_change_timestamp': unix_time_int,
 'reminder_sent': False,
 'reminder_time': 0,
+'auto_off_sent': False,
+'auto_on_sent': False,
 }
 
 river_save_list = {

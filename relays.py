@@ -97,10 +97,11 @@ def relay_auto_timeout():
                 if ( unix_time_int >= relay_state[relay_id]['state_change_timestamp'] + config['relay'][relay_id]['auto_off'] ):
                     logger.warning("Auto " + config['relay'][relay_id]['name'] + " off")
                     # If we've reminded via SMS, warn via SMS AFTER we change the relay
-                    if relay_state[relay_id]['reminder_sent'] and config['relay'][relay_id]['reminder_on']:
+                    if relay_state[relay_id]['reminder_sent'] and config['relay'][relay_id]['reminder_on'] and not relay_state[relay_id]['auto_off_sent']:
                         set_relay_state(relay_id,False)
                         sms_text = human_datetime + ": " + config['relay'][relay_id]['name'].capitalize() + ' has now been automatically turned off'
                         send_sms(config['relay'][relay_id]['reminder_sms_list'],sms_text)
+                        relay_state[relay_id]['auto_off_sent'] = True
                     # Otherwise, just change the state of the relay
                     else:
                         set_relay_state(relay_id,False)
@@ -111,10 +112,11 @@ def relay_auto_timeout():
                 if ( unix_time_int >= relay_state[relay_id]['state_change_timestamp'] + config['relay'][relay_id]['auto_on'] ):
                     logger.warning(": Auto " + config['relay'][relay_id]['name'] + " on")
                     # If we've reminded via SMS, warn via SMS AFTER we change the relay
-                    if relay_state[relay_id]['reminder_sent'] and config['relay'][relay_id]['reminder_off']:
+                    if relay_state[relay_id]['reminder_sent'] and config['relay'][relay_id]['reminder_off'] and not relay_state[relay_id]['auto_on_sent']:
                         set_relay_state(relay_id,True)
                         sms_text = human_datetime + ": " + config['relay'][relay_id]['name'].capitalize() + ' has now been automatically turned on'
                         send_sms(config['relay'][relay_id]['reminder_sms_list'],sms_text)
+                        relay_state[relay_id]['auto_on_sent'] = True
                     # Otherwise, just change the state of the relay
                     else:
                         set_relay_state(relay_id,True)
@@ -179,6 +181,8 @@ def set_relay_state(relay_id, new_state):
         relay_state[relay_id]['last_state_change'] = now_iso_stamp
         relay_state[relay_id]['state_change_timestamp'] = unix_time_int
         relay_state[relay_id]['reminder_sent'] = False
+        relay_state[relay_id]['auto_off_sent'] = False
+        relay_state[relay_id]['auto_on_sent'] = False
         if new_state:
             logger.warning(config['relay'][relay_id]['name']+' now on')
         else:
